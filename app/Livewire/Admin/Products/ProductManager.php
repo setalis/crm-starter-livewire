@@ -5,28 +5,31 @@ namespace App\Livewire\Admin\Products;
 use App\Models\Element;
 use App\Models\Product;
 use App\Models\Unit;
+use Illuminate\Support\Facades\Session;
 use Livewire\Component;
-use Livewire\WithPagination;
 use Livewire\WithFileUploads;
-use Livewire\Attributes\Session;
 
 class ProductManager extends Component
 {
-    use WithPagination, WithFileUploads;
+    use WithFileUploads;
 
-    #[Session]
-    public ?string $name = null;
-    #[Session]
-    public string $type = 'simple';
-    #[Session]
-    public ?int $unit_id = null;
-    #[Session]
-    public ?float $purchase_price = null;
-    #[Session]
-    public ?float $selling_price = null;
-    #[Session]
-    public ?float $clogging = 0;
+    public $products;
+    public $elements;
+    public $units;
+    public $isModal = false;
+    public $product_id;
+    public $name;
+    public $type = 'simple';
+    public $unit_id;
+    public $purchase_price;
+    public $selling_price;
+    public $clogging;
+    public $photo;
     public $image;
+    public $element_id_to_add;
+    public $element_percentage_to_add;
+    public $stock;
+
     #[Session]
     public bool $is_published = false;
     #[Session]
@@ -34,29 +37,19 @@ class ProductManager extends Component
     #[Session]
     public array $selectedElements = [];
 
-    #[Session]
-    public ?int $element_id_to_add = null;
-
-    #[Session]
-    public ?int $product_id = null;
-    #[Session]
-    public bool $isModal = false;
-    public $photo;
-
+    public function mount()
+    {
+        $this->units = Unit::all();
+        $this->elements = Element::all();
+    }
 
     public function render()
     {
-        $products = Product::with('unit')->orderBy('position')->paginate(10);
-        $units = Unit::all();
-        $elements = Element::all();
-        return view('livewire.admin.products.product-manager', [
-            'products' => $products,
-            'units' => $units,
-            'elements' => $elements,
-        ]);
+        $this->products = Product::with('unit', 'elements')->get();
+        return view('livewire.admin.products.product-manager');
     }
 
-    public function create()
+    public function openModal()
     {
         $this->isModal = true;
     }
@@ -69,32 +62,54 @@ class ProductManager extends Component
 
     private function resetInputFields()
     {
+        $this->product_id = null;
         $this->name = null;
         $this->type = 'simple';
         $this->unit_id = null;
         $this->purchase_price = null;
         $this->selling_price = null;
-        $this->clogging = 0;
-        $this->image = null;
+        $this->clogging = null;
         $this->photo = null;
+        $this->image = null;
         $this->is_published = false;
         $this->priceScales = [];
         $this->selectedElements = [];
         $this->element_id_to_add = null;
-        $this->product_id = null;
+        $this->element_percentage_to_add = null;
+        $this->stock = null;
     }
 
     public function addElement()
     {
-        if ($this->element_id_to_add && !in_array($this->element_id_to_add, $this->selectedElements)) {
-            $this->selectedElements[] = $this->element_id_to_add;
+        $this->validate([
+            'element_id_to_add' => ['required', 'integer', 'exists:elements,id'],
+            'element_percentage_to_add' => ['required', 'numeric', 'min:0', 'max:100'],
+        ]);
+
+        if (isset($this->selectedElements[$this->element_id_to_add])) {
+             throw \Illuminate\Validation\ValidationException::withMessages([
+                'element_id_to_add' => 'Этот элемент уже добавлен.',
+            ]);
         }
+
+        $futureSelectedElements = $this->selectedElements;
+        $futureSelectedElements[$this->element_id_to_add] = ['percentage' => $this->element_percentage_to_add];
+
+        if (array_sum(array_column($futureSelectedElements, 'percentage')) > 100) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'element_percentage_to_add' => 'Сумма процентов не может быть больше 100.',
+            ]);
+        }
+
+        $this->selectedElements = $futureSelectedElements;
+
         $this->element_id_to_add = null;
+        $this->element_percentage_to_add = null;
     }
 
     public function removeElement($elementId)
     {
-        $this->selectedElements = array_filter($this->selectedElements, fn ($id) => $id != $elementId);
+        unset($this->selectedElements[$elementId]);
     }
 
     public function addPriceScale()
@@ -108,38 +123,40 @@ class ProductManager extends Component
         $this->priceScales = array_values($this->priceScales);
     }
 
-    public function updateProductOrder($items)
-    {
-        foreach ($items as $item) {
-            Product::find($item['value'])->update(['position' => $item['order']]);
-        }
-    }
-
     public function store()
     {
         $rules = [
-            'name' => 'required',
+            'name' => 'required|string|max:255',
             'type' => 'required|in:simple,composite',
             'unit_id' => 'required|exists:units,id',
-            'purchase_price' => 'required|numeric',
+            'purchase_price' => 'nullable|numeric',
             'selling_price' => 'required|numeric',
             'clogging' => 'nullable|numeric',
             'photo' => 'nullable|image|max:1024',
             'is_published' => 'boolean',
             'priceScales.*.threshold_kg' => 'required|numeric',
             'priceScales.*.price' => 'required|numeric',
+            'stock' => 'required|numeric|min:0',
         ];
 
         if ($this->type === 'composite') {
             $rules['selectedElements'] = 'required|array|min:1';
-        }
+            $rules['selectedElements.*.percentage'] = 'required|numeric|min:0|max:100';
 
+            if (array_sum(array_column($this->selectedElements, 'percentage')) > 100) {
+                 throw \Illuminate\Validation\ValidationException::withMessages([
+                    'selectedElements' => 'Сумма процентов не может быть больше 100.',
+                ]);
+            }
+        } 
+        
         $this->validate($rules);
-
 
         $imagePath = null;
         if ($this->photo) {
             $imagePath = $this->photo->store('products', 'public');
+        } elseif ($this->image) {
+            $imagePath = $this->image;
         }
 
         $data = [
@@ -149,13 +166,10 @@ class ProductManager extends Component
             'purchase_price' => $this->purchase_price,
             'selling_price' => $this->selling_price,
             'clogging' => $this->clogging,
-            'image' => $imagePath ?? $this->image,
+            'image' => $imagePath,
             'is_published' => $this->is_published,
+            'stock' => $this->stock,
         ];
-        
-        if ($this->product_id === null) {
-            $data['position'] = Product::max('position') + 1;
-        }
 
         $product = Product::updateOrCreate(['id' => $this->product_id], $data);
 
@@ -171,7 +185,7 @@ class ProductManager extends Component
         }
 
         $this->closeModal();
-        $this->resetInputFields();
+        session()->flash('message', 'Продукт успешно сохранен.');
     }
 
     public function edit($id)
@@ -186,14 +200,18 @@ class ProductManager extends Component
         $this->clogging = $product->clogging;
         $this->image = $product->image;
         $this->is_published = $product->is_published;
+        $this->stock = $product->stock;
         $this->priceScales = $product->priceScales->toArray();
-        $this->selectedElements = $product->elements->pluck('id')->toArray();
+        $this->selectedElements = $product->elements->mapWithKeys(function ($element) {
+            return [$element->id => ['percentage' => $element->pivot->percentage]];
+        })->toArray();
 
-        $this->isModal = true;
+        $this->openModal();
     }
 
     public function delete($id)
     {
         Product::find($id)->delete();
+        session()->flash('message', 'Продукт удален.');
     }
 }

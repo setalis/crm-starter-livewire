@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('element_id')->constrained()->onDelete('cascade');
             $table->foreignId('product_id')->constrained()->onDelete('cascade');
+            $table->decimal('percentage', 5, 2)->comment('процент содержания');
             $table->timestamps();
         });
     }

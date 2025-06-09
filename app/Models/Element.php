@@ -14,6 +14,7 @@ class Element extends Model
         'name',
         'unit_id',
         'price',
+        'stock',
     ];
 
     public function unit(): BelongsTo
@@ -23,6 +24,6 @@ class Element extends Model
 
     public function products()
     {
-        return $this->belongsToMany(Product::class);
+        return $this->belongsToMany(Product::class)->withPivot('percentage');
     }
 }

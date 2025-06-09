@@ -268,6 +268,38 @@ class OperationManager extends Component
                     'clogging' => $cartItem['clogging'],
                     'price' => $cartItem['price'],
                 ]);
+                
+                // === STOCK MANAGEMENT LOGIC START ===
+                $product = Product::with('unit')->find($cartItem['product_id']);
+                if (!$product) continue;
+
+                $weight = (float)$cartItem['weight'];
+                $multiplier = $operation->type === 'purchase' ? 1 : -1;
+
+                // Validate and update product stock for BOTH simple and composite
+                if ($operation->type === 'sale' && $product->stock < $weight) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'cart' => "Недостаточно товара '{$product->name}' на складе. В наличии: {$product->stock} {$product->unit->short_name}.",
+                    ]);
+                }
+                $product->increment('stock', $weight * $multiplier);
+
+                // If composite, ALSO validate and update element stocks
+                if ($product->type === 'composite' && !empty($cartItem['elements'])) {
+                    foreach ($cartItem['elements'] as $elementData) {
+                        $element = Element::with('unit')->find($elementData['element_id']);
+                        if ($element && isset($elementData['percentage']) && $elementData['percentage'] > 0) {
+                            $elementWeight = $weight * ((float)$elementData['percentage'] / 100);
+                            if ($operation->type === 'sale' && $element->stock < $elementWeight) {
+                                throw \Illuminate\Validation\ValidationException::withMessages([
+                                    'cart' => "Недостаточно элемента '{$element->name}' для '{$product->name}'. В наличии: {$element->stock} {$element->unit->name}.",
+                                ]);
+                            }
+                            $element->increment('stock', $elementWeight * $multiplier);
+                        }
+                    }
+                }
+                // === STOCK MANAGEMENT LOGIC END ===
 
                 if ($cartItem['type'] === 'composite' && !empty($cartItem['elements'])) {
                     foreach ($cartItem['elements'] as $element) {
@@ -327,7 +359,46 @@ class OperationManager extends Component
 
     public function delete($id)
     {
-        Operation::find($id)->delete();
+        $operation = Operation::with('items.product', 'items.elements')->find($id);
+
+        if (!$operation) {
+            session()->flash('error', 'Operation not found.');
+            return;
+        }
+
+        DB::transaction(function () use ($operation) {
+            $multiplier = $operation->type === 'purchase' ? -1 : 1; // Reverse the operation
+
+            foreach ($operation->items as $item) {
+                $product = $item->product;
+                if (!$product) continue;
+
+                $weight = (float)$item->weight;
+
+                // Revert product stock for BOTH simple and composite
+                $product->increment('stock', $weight * $multiplier);
+
+                // If composite, ALSO revert element stocks
+                if ($product->type === 'composite') {
+                    foreach ($item->elements as $operationItemElement) {
+                        $element = Element::find($operationItemElement->element_id);
+                        if ($element) {
+                            $elementWeight = $weight * ((float)$operationItemElement->percentage / 100);
+                            $element->increment('stock', $elementWeight * $multiplier);
+                        }
+                    }
+                }
+            }
+            
+            // Manually delete related items to be safe
+            foreach($operation->items as $item) {
+                $item->elements()->delete();
+            }
+            $operation->items()->delete();
+            $operation->delete();
+        });
+
+        session()->flash('message', 'Операция ' . $operation->operation_number . ' успешно удалена, остатки на складе восстановлены.');
     }
 
     public function clearAllOperations()

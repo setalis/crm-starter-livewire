@@ -3,12 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Product extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'name',
         'type',
@@ -19,6 +16,7 @@ class Product extends Model
         'image',
         'is_published',
         'position',
+        'stock'
     ];
 
     public function unit()
@@ -33,6 +31,6 @@ class Product extends Model
 
     public function elements()
     {
-        return $this->belongsToMany(Element::class);
+        return $this->belongsToMany(Element::class)->withPivot('percentage');
     }
 }

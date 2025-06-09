@@ -19,6 +19,7 @@ return new class extends Migration
                 ->constrained()
                 ->cascadeOnDelete();
             $table->decimal('price', 15, 2)->comment('Стоимость');
+            $table->decimal('stock', 10, 3)->default(0);
             $table->timestamps();
         });
     }

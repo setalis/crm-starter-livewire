@@ -21,6 +21,7 @@ return new class extends Migration
             $table->float('clogging')->default(0);
             $table->string('image')->nullable();
             $table->boolean('is_published')->default(false);
+            $table->decimal('stock', 10, 3)->default(0);
             $table->timestamps();
         });
     }
