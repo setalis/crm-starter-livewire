@@ -14,6 +14,11 @@ class Operation extends Model
         'user_id',
         'type',
         'total_amount',
+        'cash_register_id',
+    ];
+
+    protected $casts = [
+        'total_amount' => 'decimal:2',
     ];
 
     public function items()
@@ -24,5 +29,15 @@ class Operation extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function cashRegister()
+    {
+        return $this->belongsTo(CashRegister::class);
+    }
+
+    public function transactions()
+    {
+        return $this->hasMany(CashTransaction::class);
     }
 }

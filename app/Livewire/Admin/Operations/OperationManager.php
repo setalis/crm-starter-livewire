@@ -6,6 +6,7 @@ use App\Models\Element;
 use App\Models\Operation;
 use App\Models\Product;
 use App\Models\User;
+use App\Models\CashRegister;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -24,6 +25,14 @@ class OperationManager extends Component
 
     public bool $isModal = false;
     public ?string $notification = null;
+    
+    // Product selection modal
+    public bool $showProductModal = false;
+    public string $productSearch = '';
+    
+    // Operation details modal
+    public bool $showOperationDetailsModal = false;
+    public ?Operation $selectedOperation = null;
     
     // Product selection
     public ?int $product_to_add = null;
@@ -86,7 +95,19 @@ class OperationManager extends Component
     public function render()
     {
         $allOperations = Operation::with(['user', 'items.product'])->latest()->paginate(10);
-        $products = Product::where('is_published', true)->orderBy('name')->get();
+        
+        // Filter products for the modal
+        $allProducts = Product::where('is_published', true)->orderBy('name')->get();
+        
+        if (!empty($this->productSearch)) {
+            $searchTerm = mb_strtolower(trim($this->productSearch), 'UTF-8');
+            $products = $allProducts->filter(function ($product) use ($searchTerm) {
+                return mb_strpos(mb_strtolower($product->name, 'UTF-8'), $searchTerm, 0, 'UTF-8') !== false;
+            });
+        } else {
+            $products = $allProducts;
+        }
+        
         $users = User::all();
 
         return view('livewire.admin.operations.operation-manager', [
@@ -250,16 +271,50 @@ class OperationManager extends Component
         $this->calculateTotals(); // Recalculate just in case
         
         $operation = DB::transaction(function () use ($activeOp) {
+            // Получаем активную кассу
+            $cashRegister = CashRegister::where('is_active', true)->first();
+            if (!$cashRegister) {
+                throw new \Exception('Активная касса не найдена');
+            }
+
             $operation = Operation::create([
                 'user_id' => $activeOp['user_id'],
                 'type' => $activeOp['type'],
                 'total_amount' => $this->operations[$this->activeOperationId]['totalAmount'],
+                'cash_register_id' => $cashRegister->id,
             ]);
 
             // Generate and save the human-readable operation number
             $prefix = $operation->type === 'purchase' ? 'PUR' : 'SAL';
             $operation->operation_number = sprintf('%s-%06d', $prefix, $operation->id);
             $operation->save();
+
+            // Создаем транзакцию в кассе
+            $transactionDescription = $operation->type === 'purchase' 
+                ? "Покупка металла (операция {$operation->operation_number})" 
+                : "Продажа металла (операция {$operation->operation_number})";
+
+            $transaction = null;
+            if ($operation->type === 'purchase') {
+                // При покупке - снимаем деньги из кассы
+                $transaction = $cashRegister->withdrawMoney(
+                    $operation->total_amount,
+                    $transactionDescription,
+                    $operation->user_id
+                );
+            } else {
+                // При продаже - добавляем деньги в кассу
+                $transaction = $cashRegister->addMoney(
+                    $operation->total_amount,
+                    $transactionDescription,
+                    $operation->user_id
+                );
+            }
+
+            // Привязываем транзакцию к операции
+            if ($transaction) {
+                $transaction->update(['operation_id' => $operation->id]);
+            }
 
             foreach ($activeOp['cartItems'] as $cartItem) {
                 $operationItem = $operation->items()->create([
@@ -359,10 +414,10 @@ class OperationManager extends Component
 
     public function delete($id)
     {
-        $operation = Operation::with('items.product', 'items.elements')->find($id);
+        $operation = Operation::with('items.product', 'items.elements', 'cashRegister', 'transactions')->find($id);
 
         if (!$operation) {
-            session()->flash('error', 'Operation not found.');
+            session()->flash('error', 'Операция не найдена.');
             return;
         }
 
@@ -389,16 +444,48 @@ class OperationManager extends Component
                     }
                 }
             }
+
+            // Возвращаем деньги в кассу (делаем обратную операцию)
+            if ($operation->cashRegister) {
+                $reverseDescription = $operation->type === 'purchase' 
+                    ? "Возврат средств при отмене покупки (операция {$operation->operation_number})" 
+                    : "Списание средств при отмене продажи (операция {$operation->operation_number})";
+
+                if ($operation->type === 'purchase') {
+                    // При отмене покупки - возвращаем деньги в кассу
+                    $operation->cashRegister->addMoney(
+                        $operation->total_amount,
+                        $reverseDescription,
+                        auth()->id()
+                    );
+                } else {
+                    // При отмене продажи - снимаем деньги из кассы
+                    try {
+                        $operation->cashRegister->withdrawMoney(
+                            $operation->total_amount,
+                            $reverseDescription,
+                            auth()->id()
+                        );
+                    } catch (\Exception $e) {
+                        // Если недостаточно денег в кассе, все равно удаляем операцию но уведомляем
+                        session()->flash('warning', 'Недостаточно средств в кассе для полного возврата. Операция удалена, но остаток кассы может быть отрицательным.');
+                    }
+                }
+            }
             
             // Manually delete related items to be safe
             foreach($operation->items as $item) {
                 $item->elements()->delete();
             }
             $operation->items()->delete();
+            
+            // Удаляем связанные транзакции кассы
+            $operation->transactions()->delete();
+            
             $operation->delete();
         });
 
-        session()->flash('message', 'Операция ' . $operation->operation_number . ' успешно удалена, остатки на складе восстановлены.');
+        session()->flash('message', 'Операция ' . $operation->operation_number . ' успешно удалена, остатки на складе и кассе восстановлены.');
     }
 
     public function clearAllOperations()
@@ -407,5 +494,35 @@ class OperationManager extends Component
         $this->activeOperationId = null;
         $this->isModal = false;
         return $this->redirect(route('admin.operations.index'), navigate: true);
+    }
+
+    public function openProductModal()
+    {
+        $this->showProductModal = true;
+        $this->productSearch = '';
+    }
+
+    public function closeProductModal()
+    {
+        $this->showProductModal = false;
+        $this->productSearch = '';
+    }
+
+    public function selectProductFromCard($productId)
+    {
+        $this->addProductToCart($productId);
+        $this->closeProductModal();
+    }
+
+    public function showOperationDetails($operationId)
+    {
+        $this->selectedOperation = Operation::with(['user', 'items.product.unit', 'items.elements.element.unit'])->find($operationId);
+        $this->showOperationDetailsModal = true;
+    }
+
+    public function closeOperationDetailsModal()
+    {
+        $this->showOperationDetailsModal = false;
+        $this->selectedOperation = null;
     }
 }

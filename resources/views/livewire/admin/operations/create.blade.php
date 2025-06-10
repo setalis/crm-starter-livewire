@@ -61,21 +61,17 @@
                                     </div>
                                 </div>
 
-                                <div class="mt-4 border-t pt-4" x-data="{ product_id: @entangle('product_to_add').live }">
-                                    <div class="flex items-end gap-2">
-                                        <div class="flex-grow">
-                                            <label for="product_to_add" class="block text-gray-700 text-sm font-bold mb-2">Add Product:</label>
-                                            <select x-model="product_id" id="product_to_add" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                                                <option value="">Select a product</option>
-                                                @foreach($products as $product)
-                                                <option value="{{ $product->id }}">{{ $product->name }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                        <button @click.prevent="$wire.addProductToCart(product_id)" type="button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Add</button>
-                                    </div>
-                                    @error('product_to_add') <span class="text-red-500 text-xs">{{ $message }}</span>@enderror
-                                </div>
+                                                <div class="mt-4 border-t pt-4">
+                    <div class="flex items-end gap-2">
+                        <div class="flex-grow">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Add Product:</label>
+                            <button wire:click="openProductModal" type="button" class="w-full bg-white border border-gray-300 rounded py-2 px-3 text-left text-gray-700 hover:bg-gray-50 focus:outline-none focus:shadow-outline">
+                                Выбрать товар из каталога...
+                            </button>
+                        </div>
+                    </div>
+                    @error('product_to_add') <span class="text-red-500 text-xs">{{ $message }}</span>@enderror
+                </div>
 
                                 <div class="mt-4">
                                     <h4 class="font-bold">Cart Items</h4>
@@ -176,4 +172,118 @@
             </form>
         </div>
     </div>
+
+    <!-- Product Selection Modal -->
+    @if($showProductModal)
+    <div class="fixed z-20 inset-0 overflow-y-auto ease-out duration-400">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity">
+                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen"></span>​
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-6xl sm:w-full">
+                
+                <div class="absolute top-0 right-0 pt-4 pr-4">
+                    <button wire:click="closeProductModal" type="button" class="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                        <span class="sr-only">Close</span>
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+                        Выберите товар
+                    </h3>
+                    
+                    <!-- Search -->
+                    <div class="mb-4">
+                        <input wire:model.live.debounce.300ms="productSearch" 
+                               type="text" 
+                               placeholder="Поиск товаров..." 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+
+                    <!-- Products Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3 max-h-96 overflow-y-auto">
+                        @forelse($products as $product)
+                        <div wire:click="selectProductFromCard({{ $product->id }})" 
+                             class="border border-gray-200 rounded-lg p-3 hover:border-blue-500 hover:shadow-md cursor-pointer transition-all duration-200">
+                            
+                            <!-- Product Image -->
+                            <div class="h-16 bg-gray-100 rounded-md mb-2 flex items-center justify-center overflow-hidden">
+                                @if($product->image)
+                                    <img src="{{ asset('storage/' . $product->image) }}" 
+                                         alt="{{ $product->name }}" 
+                                         class="w-full h-full object-cover">
+                                @else
+                                    <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                                    </svg>
+                                @endif
+                            </div>
+
+                            <!-- Product Info -->
+                            <div>
+                                <h4 class="font-medium text-gray-900 mb-1 text-sm">{{ $product->name }}</h4>
+                                <p class="text-xs text-gray-600 mb-1">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium 
+                                        {{ $product->type === 'simple' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800' }}">
+                                        {{ $product->type === 'simple' ? 'Простой' : 'Составной' }}
+                                    </span>
+                                </p>
+                                
+                                <div class="text-xs text-gray-600 space-y-0.5">
+                                    @if($operations[$activeOperationId]['type'] === 'purchase')
+                                        <p><span class="font-medium">Цена:</span> {{ number_format($product->purchase_price, 2) }}</p>
+                                    @else
+                                        <p><span class="font-medium">Цена:</span> {{ number_format($product->selling_price, 2) }}</p>
+                                    @endif
+                                    
+                                    <p><span class="font-medium">Склад:</span> {{ number_format($product->stock, 2) }} {{ $product->unit->short_name }}</p>
+                                    
+                                    @if($product->clogging)
+                                        <p><span class="font-medium">Засор:</span> {{ $product->clogging }}%</p>
+                                    @endif
+                                </div>
+
+                                @if($product->type === 'composite' && $product->elements->count() > 0)
+                                    <div class="mt-1 pt-1 border-t border-gray-100">
+                                        <p class="text-xs text-gray-500 mb-0.5">Состав:</p>
+                                        <div class="flex flex-wrap gap-0.5">
+                                            @foreach($product->elements->take(2) as $element)
+                                                <span class="inline-flex items-center px-1 py-0.5 rounded text-xs bg-gray-100 text-gray-700">
+                                                    {{ $element->name }} {{ $element->pivot->percentage }}%
+                                                </span>
+                                            @endforeach
+                                            @if($product->elements->count() > 2)
+                                                <span class="text-xs text-gray-500">+{{ $product->elements->count() - 2 }}</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                        @empty
+                        <div class="col-span-full text-center py-8 text-gray-500">
+                            @if($productSearch)
+                                Товары не найдены по запросу "{{ $productSearch }}"
+                            @else
+                                Нет доступных товаров
+                            @endif
+                        </div>
+                        @endforelse
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button wire:click="closeProductModal" type="button" class="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm">
+                        Отмена
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 </div> 

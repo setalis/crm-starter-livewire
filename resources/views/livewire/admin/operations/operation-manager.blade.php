@@ -48,7 +48,11 @@
                                 <td data-label="Number" class="flex items-center justify-between md:table-cell p-2 md:px-4 md:py-2 md:border md:text-center">{{ $operation->operation_number }}</td>
                                 <td data-label="Type" class="flex items-center justify-between md:table-cell p-2 md:px-4 md:py-2 md:border md:text-center">{{ ucfirst($operation->type) }}</td>
                                 <td data-label="User" class="flex items-center justify-between md:table-cell p-2 md:px-4 md:py-2 md:border md:text-center">{{ $operation->user->name }}</td>
-                                <td data-label="Items" class="flex items-center justify-between md:table-cell p-2 md:px-4 md:py-2 md:border md:text-center">{{ $operation->items->count() }}</td>
+                                <td data-label="Items" class="flex items-center justify-between md:table-cell p-2 md:px-4 md:py-2 md:border md:text-center">
+                                    <button wire:click="showOperationDetails({{ $operation->id }})" class="border border-blue-600 w-7 h-7 rounded-md flex items-center justify-center hover:bg-blue-100 cursor-pointer text-blue-600 hover:text-blue-800 underline font-medium mx-auto">
+                                        {{ $operation->items->count() }}
+                                    </button>
+                                </td>
                                 <td data-label="Total Amount" class="flex items-center justify-between md:table-cell p-2 md:px-4 md:py-2 md:border md:text-right">{{ number_format($operation->total_amount, 2) }}</td>
                                 <td data-label="Action" class="flex items-center justify-between md:table-cell p-2 md:px-4 md:py-2 md:border md:text-center">
                                     <div class="inline-block">
@@ -67,4 +71,128 @@
             </div>
         </div>
     </div>
+
+    <!-- Operation Details Modal -->
+    @if($showOperationDetailsModal && $selectedOperation)
+    <div class="fixed z-30 inset-0 overflow-y-auto ease-out duration-400">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity">
+                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen"></span>​
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+                
+                <div class="absolute top-0 right-0 pt-4 pr-4">
+                    <button wire:click="closeOperationDetailsModal" type="button" class="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                        <span class="sr-only">Close</span>
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+                        Детали операции {{ $selectedOperation->operation_number }}
+                    </h3>
+                    
+                    <!-- Operation Info -->
+                    <div class="mb-6 bg-gray-50 p-4 rounded-lg">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div>
+                                <label class="text-sm font-medium text-gray-500">Дата</label>
+                                <p class="text-sm text-gray-900">{{ $selectedOperation->created_at->format('d.m.Y H:i') }}</p>
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium text-gray-500">Тип</label>
+                                <p class="text-sm text-gray-900">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium 
+                                        {{ $selectedOperation->type === 'purchase' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800' }}">
+                                        {{ $selectedOperation->type === 'purchase' ? 'Покупка' : 'Продажа' }}
+                                    </span>
+                                </p>
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium text-gray-500">Пользователь</label>
+                                <p class="text-sm text-gray-900">{{ $selectedOperation->user->name }}</p>
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium text-gray-500">Общая сумма</label>
+                                <p class="text-sm font-semibold text-gray-900">{{ number_format($selectedOperation->total_amount, 2) }} ₴</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Items List -->
+                    <h4 class="text-md font-medium text-gray-900 mb-3">Товары в операции</h4>
+                    <div class="space-y-4 max-h-96 overflow-y-auto">
+                        @foreach($selectedOperation->items as $item)
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <h5 class="font-semibold text-gray-900">{{ $item->product->name }}</h5>
+                                    <p class="text-sm text-gray-600">
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium 
+                                            {{ $item->product->type === 'simple' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800' }}">
+                                            {{ $item->product->type === 'simple' ? 'Простой' : 'Составной' }}
+                                        </span>
+                                    </p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-semibold text-lg">{{ number_format($item->price, 2) }} ₴</p>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
+                                <div>
+                                    <label class="text-xs text-gray-500">Вес</label>
+                                    <p class="text-sm text-gray-900">{{ number_format($item->weight, 2) }} {{ $item->product->unit->short_name }}</p>
+                                </div>
+                                @if($item->clogging)
+                                <div>
+                                    <label class="text-xs text-gray-500">Засор</label>
+                                    <p class="text-sm text-gray-900">{{ $item->clogging }}%</p>
+                                </div>
+                                @endif
+                                <div>
+                                    <label class="text-xs text-gray-500">Цена за единицу</label>
+                                    <p class="text-sm text-gray-900">{{ number_format($item->price / $item->weight, 2) }} ₴/{{ $item->product->unit->short_name }}</p>
+                                </div>
+                            </div>
+
+                            @if($item->product->type === 'composite' && $item->elements->count() > 0)
+                            <div class="border-t border-gray-100 pt-3">
+                                <h6 class="text-sm font-medium text-gray-700 mb-2">Элементы состава:</h6>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    @foreach($item->elements as $itemElement)
+                                    <div class="bg-gray-50 p-3 rounded">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm font-medium">{{ $itemElement->element->name }}</span>
+                                            <span class="text-sm text-gray-600">{{ $itemElement->percentage }}%</span>
+                                        </div>
+                                        <div class="text-xs text-gray-500 mt-1">
+                                            @php
+                                                $elementWeight = $item->weight * ($itemElement->percentage / 100);
+                                            @endphp
+                                            Вес: {{ number_format($elementWeight, 4) }} {{ $itemElement->element->unit->short_name }}
+                                        </div>
+                                    </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                            @endif
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button wire:click="closeOperationDetailsModal" type="button" class="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm">
+                        Закрыть
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 </div>

@@ -8,6 +8,7 @@ use App\Livewire\Admin\Units\Index as Units;
 use App\Livewire\Admin\ElementManager;
 use App\Livewire\Admin\Products\ProductManager;
 use App\Livewire\Admin\Operations\OperationManager;
+use App\Livewire\Admin\CashRegisterManager;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Passwords\Confirm;
 use Illuminate\Support\Facades\Route;
@@ -28,6 +29,7 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::get('operations/{type}', OperationManager::class)
         ->whereIn('type', ['purchase', 'sale'])
         ->name('operations.create');
+    Route::get('cash-register', CashRegisterManager::class)->name('cash-register.index');
 });
 
 Route::middleware(['auth'])->group(function () {

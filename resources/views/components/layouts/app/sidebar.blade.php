@@ -39,6 +39,12 @@
                         {{ __('Продажа') }}
                     </flux:navlist.item>
                 </flux:navlist.group>
+
+                <flux:navlist.group heading="Финансы" expandable :expanded="request()->routeIs('admin.cash-register.*')">
+                    <flux:navlist.item :href="route('admin.cash-register.index')" :current="request()->routeIs('admin.cash-register.index')" wire:navigate>
+                        {{ __('Касса') }}
+                    </flux:navlist.item>
+                </flux:navlist.group>
             </flux:navlist>
 
             <flux:spacer />
