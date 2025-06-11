@@ -8,7 +8,7 @@
             role="dialog" aria-modal="true" aria-labelledby="modal-headline"
             @focus-on-weight-input.window="setTimeout(() => document.getElementById('cart-item-weight-' + $event.detail.index)?.focus(), 50)">
             
-            <div class="absolute top-0 right-0 hidden pt-4 pr-4 sm:block">
+            <div class="absolute top-0 right-0 pt-4 pr-4">
                 <button wire:click="closeModal()" type="button" class="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                     <span class="sr-only">Close</span>
                     <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -28,11 +28,27 @@
                         <!-- Operation Tabs -->
                         <div class="flex border-b mb-4">
                             @foreach($operations as $opId => $operation)
-                                <button type="button" wire:click="switchOperation('{{ $opId }}')"
-                                    class="py-2 px-4 -mb-px border-b-2 font-medium text-sm leading-5 focus:outline-none 
-                                    {{ $activeOperationId === $opId ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
-                                    {{ explode('-', $opId)[0] . '-' . substr(explode('-', $opId)[2], -4) }}
-                                </button>
+                                <div class="relative flex items-center {{ $activeOperationId === $opId ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }} py-2 px-4 -mb-px border-b-2 font-medium text-sm leading-5 group">
+                                    <button type="button" wire:click="switchOperation('{{ $opId }}')"
+                                        class="flex items-center gap-1 focus:outline-none">
+                                        <span>{{ explode('-', $opId)[0] . '-' . substr(explode('-', $opId)[2], -4) }}</span>
+                                        @if(isset($operation['is_editing']) && $operation['is_editing'])
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                EDIT
+                                            </span>
+                                        @endif
+                                    </button>
+                                    @if(count($operations) > 1)
+                                        <button type="button"
+                                                onclick="event.stopPropagation(); if(confirm('Вы уверены, что хотите закрыть эту операцию?')) { @this.call('removeOperationTab', '{{ $opId }}') }"
+                                                class="ml-2 text-gray-400 hover:text-red-500 focus:outline-none"
+                                                title="Закрыть операцию">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                        </button>
+                                    @endif
+                                </div>
                             @endforeach
                             <button type="button" wire:click="addNewOperation"
                                 class="py-2 px-4 text-gray-500 hover:text-gray-700 font-medium text-sm leading-5 focus:outline-none">
@@ -42,6 +58,17 @@
 
                         @if(isset($operations[$activeOperationId]))
                             <div>
+                                @if(isset($operations[$activeOperationId]['is_editing']) && $operations[$activeOperationId]['is_editing'])
+                                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+                                        <div class="flex items-center">
+                                            <svg class="w-5 h-5 text-yellow-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                            </svg>
+                                            <span class="text-yellow-800 font-medium">Режим редактирования операции</span>
+                                        </div>
+                                        <p class="text-sm text-yellow-700 mt-1">Вы редактируете существующую операцию. Изменения будут сохранены в оригинальной операции.</p>
+                                    </div>
+                                @endif
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label for="type" class="block text-gray-700 text-sm font-bold mb-2">Type:</label>
@@ -141,7 +168,11 @@
                          <span class="flex w-full rounded-md shadow-sm sm:w-auto">
                             <button wire:click.prevent="startNewOperation()" type="button"
                                 class="inline-flex justify-center w-full rounded-md border border-transparent px-4 py-2 bg-blue-600 text-base leading-6 font-medium text-white shadow-sm hover:bg-blue-500 focus:outline-none focus:border-blue-700 focus:shadow-outline-blue transition ease-in-out duration-150 sm:text-sm sm:leading-5">
-                                Start New Operation
+                                @if(!empty($operations))
+                                    Продолжить работу
+                                @else
+                                    Перейти к операциям
+                                @endif
                             </button>
                         </span>
                     @else
@@ -159,7 +190,13 @@
                                 </button>
                             </span>
                         </div>
-                        <div>
+                        <div class="flex gap-2">
+                            <span class="mt-3 flex w-full rounded-md shadow-sm sm:mt-0 sm:w-auto">
+                                <button wire:click="closeCurrentOperation" wire:confirm="Вы уверены, что хотите закрыть текущую операцию?" type="button"
+                                    class="inline-flex justify-center w-full rounded-md border border-gray-300 px-4 py-2 bg-gray-100 text-base leading-6 font-medium text-gray-700 shadow-sm hover:bg-gray-200 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue transition ease-in-out duration-150 sm:text-sm sm:leading-5">
+                                    Закрыть операцию
+                                </button>
+                            </span>
                             <span class="mt-3 flex w-full rounded-md shadow-sm sm:mt-0 sm:w-auto">
                                 <button wire:click="clearAllOperations" wire:confirm="Are you sure you want to delete ALL operation tabs?" type="button"
                                     class="inline-flex justify-center w-full rounded-md border border-gray-300 px-4 py-2 bg-white text-base leading-6 font-medium text-gray-700 shadow-sm hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue transition ease-in-out duration-150 sm:text-sm sm:leading-5">

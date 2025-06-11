@@ -18,12 +18,14 @@ class CashRegisterManager extends Component
     public $showAddMoneyModal = false;
     public $showWithdrawMoneyModal = false;
     public $showCreateRegisterModal = false;
+    public $showDeleteRegisterModal = false;
     
     // Form fields
     public $amount;
     public $description;
     public $registerName;
     public $registerDescription;
+    public $registerToDelete;
 
     public function mount()
     {
@@ -62,11 +64,18 @@ class CashRegisterManager extends Component
         $this->showCreateRegisterModal = true;
     }
 
+    public function showDeleteRegisterModalAction($registerId)
+    {
+        $this->registerToDelete = CashRegister::find($registerId);
+        $this->showDeleteRegisterModal = true;
+    }
+
     public function closeModals()
     {
         $this->showAddMoneyModal = false;
         $this->showWithdrawMoneyModal = false;
         $this->showCreateRegisterModal = false;
+        $this->showDeleteRegisterModal = false;
         $this->resetFields();
     }
 
@@ -76,6 +85,7 @@ class CashRegisterManager extends Component
         $this->description = null;
         $this->registerName = null;
         $this->registerDescription = null;
+        $this->registerToDelete = null;
     }
 
     public function addMoney()
@@ -143,7 +153,43 @@ class CashRegisterManager extends Component
         $this->loadCashRegisters();
     }
 
+    public function deleteRegister()
+    {
+        if (!$this->registerToDelete) {
+            session()->flash('error', 'Касса для удаления не найдена');
+            return;
+        }
 
+        try {
+            // Проверяем, есть ли транзакции в кассе
+            $transactionsCount = CashTransaction::where('cash_register_id', $this->registerToDelete->id)->count();
+            
+            if ($transactionsCount > 0) {
+                // Если есть транзакции, помечаем кассу как неактивную вместо удаления
+                $this->registerToDelete->update(['is_active' => false]);
+                $message = 'Касса была деактивирована, так как в ней есть транзакции';
+            } else {
+                // Если транзакций нет, можно удалить полностью
+                $this->registerToDelete->delete();
+                $message = 'Касса успешно удалена';
+            }
+
+            // Если удаляемая касса была выбрана, выбираем другую или сбрасываем выбор
+            if ($this->selectedRegister && $this->selectedRegister->id === $this->registerToDelete->id) {
+                $this->loadCashRegisters();
+                $this->selectedRegister = $this->cashRegisters && $this->cashRegisters->count() > 0 
+                    ? $this->cashRegisters->first() 
+                    : null;
+            } else {
+                $this->loadCashRegisters();
+            }
+
+            session()->flash('message', $message);
+            $this->closeModals();
+        } catch (\Exception $e) {
+            session()->flash('error', 'Ошибка при удалении кассы: ' . $e->getMessage());
+        }
+    }
 
     public function getTransactionsProperty()
     {

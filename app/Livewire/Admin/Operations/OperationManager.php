@@ -124,28 +124,87 @@ class OperationManager extends Component
 
     public function closeModal()
     {
-        $this->isModal = false;
-        // Данные сессии не трогаем, чтобы можно было вернуться к работе
+        // Проверяем, есть ли другие операции в сессии
+        if (!empty($this->operations)) {
+            // Если есть операции, остаемся в модальном окне и переключаемся на первую доступную
+            $this->activeOperationId = array_key_first($this->operations);
+        } else {
+            // Если операций нет, закрываем модальное окно и переходим к списку
+            $this->isModal = false;
+            return $this->redirect(route('admin.operations.index'), navigate: true);
+        }
+    }
+
+    public function closeCurrentOperation()
+    {
+        if (!$this->activeOperationId) return;
+        
+        // Удаляем текущую активную операцию
+        $currentOperationId = $this->activeOperationId;
+        unset($this->operations[$currentOperationId]);
+        
+        // Проверяем, есть ли другие операции в сессии
+        if (!empty($this->operations)) {
+            // Если есть операции, переключаемся на первую доступную
+            $this->activeOperationId = array_key_first($this->operations);
+        } else {
+            // Если операций нет, закрываем модальное окно и переходим к списку
+            $this->activeOperationId = null;
+            $this->isModal = false;
+            return $this->redirect(route('admin.operations.index'), navigate: true);
+        }
     }
 
     public function removeOperation($operationId)
     {
-        if (isset($this->operations[$operationId])) {
-            unset($this->operations[$operationId]);
+        if (!isset($this->operations[$operationId])) {
+            return; // Операция не найдена, ничего не делаем
+        }
+        
+        // Удаляем операцию
+        unset($this->operations[$operationId]);
 
-            // Если удалили активную вкладку, нужно переключиться на другую
-            if ($this->activeOperationId === $operationId) {
-                if (!empty($this->operations)) {
-                    // Переключаемся на первую доступную вкладку
-                    $this->activeOperationId = array_key_first($this->operations);
-                } else {
-                    // Если вкладок не осталось, закрываем модальное окно и перенаправляем
-                    $this->activeOperationId = null;
-                    $this->isModal = false;
-                    return $this->redirect(route('admin.operations.index'), navigate: true);
-                }
+        // Если удалили активную вкладку, нужно переключиться на другую
+        if ($this->activeOperationId === $operationId) {
+            if (!empty($this->operations)) {
+                // Переключаемся на первую доступную вкладку
+                $this->activeOperationId = array_key_first($this->operations);
+            } else {
+                // Если вкладок не осталось, закрываем модальное окно и перенаправляем
+                $this->activeOperationId = null;
+                $this->isModal = false;
+                return $this->redirect(route('admin.operations.index'), navigate: true);
             }
         }
+        // Если удалили НЕ активную вкладку, то activeOperationId остается прежним
+        // и ничего дополнительно делать не нужно
+    }
+
+    public function removeOperationTab($operationId)
+    {
+        // Специальный метод для крестиков на вкладках
+        if (!isset($this->operations[$operationId])) {
+            return;
+        }
+        
+        $isRemovingActive = ($this->activeOperationId === $operationId);
+        
+        // Удаляем операцию
+        unset($this->operations[$operationId]);
+        
+        // Если удаляли активную операцию И остались еще операции
+        if ($isRemovingActive && !empty($this->operations)) {
+            $this->activeOperationId = array_key_first($this->operations);
+        }
+        
+        // Если удаляли активную операцию И это была последняя операция
+        if ($isRemovingActive && empty($this->operations)) {
+            $this->activeOperationId = null;
+            $this->isModal = false;
+            return $this->redirect(route('admin.operations.index'), navigate: true);
+        }
+        
+        // Если удаляли НЕ активную операцию - ничего дополнительно не делаем
     }
 
     public function addProductToCart($productId = null)
@@ -270,29 +329,66 @@ class OperationManager extends Component
 
         $this->calculateTotals(); // Recalculate just in case
         
-        $operation = DB::transaction(function () use ($activeOp) {
+        // Проверяем, это редактирование или создание новой операции
+        $isEditing = isset($activeOp['is_editing']) && $activeOp['is_editing'] === true;
+        
+        $operation = DB::transaction(function () use ($activeOp, $isEditing) {
             // Получаем активную кассу
             $cashRegister = CashRegister::where('is_active', true)->first();
             if (!$cashRegister) {
                 throw new \Exception('Активная касса не найдена');
             }
 
-            $operation = Operation::create([
-                'user_id' => $activeOp['user_id'],
-                'type' => $activeOp['type'],
-                'total_amount' => $this->operations[$this->activeOperationId]['totalAmount'],
-                'cash_register_id' => $cashRegister->id,
-            ]);
+            if ($isEditing) {
+                // Редактирование существующей операции
+                $operation = Operation::with(['items.product', 'items.elements'])->find($activeOp['original_operation_id']);
+                if (!$operation) {
+                    throw new \Exception('Оригинальная операция не найдена');
+                }
 
-            // Generate and save the human-readable operation number
-            $prefix = $operation->type === 'purchase' ? 'PUR' : 'SAL';
-            $operation->operation_number = sprintf('%s-%06d', $prefix, $operation->id);
-            $operation->save();
+                // Возвращаем товары на склад (обратная операция)
+                $this->revertStockChanges($operation);
+
+                // Возвращаем деньги в кассу (обратная операция)
+                $this->revertCashChanges($operation);
+
+                // Удаляем старые элементы операции
+                foreach($operation->items as $item) {
+                    $item->elements()->delete();
+                }
+                $operation->items()->delete();
+
+                // Обновляем основные данные операции
+                $operation->update([
+                    'user_id' => $activeOp['user_id'],
+                    'type' => $activeOp['type'],
+                    'total_amount' => $this->operations[$this->activeOperationId]['totalAmount'],
+                ]);
+            } else {
+                // Создание новой операции
+                $operation = Operation::create([
+                    'user_id' => $activeOp['user_id'],
+                    'type' => $activeOp['type'],
+                    'total_amount' => $this->operations[$this->activeOperationId]['totalAmount'],
+                    'cash_register_id' => $cashRegister->id,
+                ]);
+
+                // Generate and save the human-readable operation number
+                $prefix = $operation->type === 'purchase' ? 'PUR' : 'SAL';
+                $operation->operation_number = sprintf('%s-%06d', $prefix, $operation->id);
+                $operation->save();
+            }
 
             // Создаем транзакцию в кассе
             $transactionDescription = $operation->type === 'purchase' 
                 ? "Покупка металла (операция {$operation->operation_number})" 
                 : "Продажа металла (операция {$operation->operation_number})";
+
+            if ($isEditing) {
+                $transactionDescription = $operation->type === 'purchase' 
+                    ? "Редактирование покупки металла (операция {$operation->operation_number})" 
+                    : "Редактирование продажи металла (операция {$operation->operation_number})";
+            }
 
             $transaction = null;
             if ($operation->type === 'purchase') {
@@ -371,11 +467,25 @@ class OperationManager extends Component
             return $operation;
         });
         
-        $this->notification = 'Операция ' . $operation->operation_number . ' успешно сохранена!';
+        $this->notification = $isEditing 
+            ? 'Операция ' . $operation->operation_number . ' успешно обновлена!' 
+            : 'Операция ' . $operation->operation_number . ' успешно сохранена!';
         
-        // Clear the cart for the current operation tab
-        $this->operations[$this->activeOperationId]['cartItems'] = [];
-        $this->operations[$this->activeOperationId]['totalAmount'] = 0;
+        // Удаляем текущую операцию из сессии после сохранения
+        $currentOperationId = $this->activeOperationId;
+        unset($this->operations[$currentOperationId]);
+        
+        // Проверяем, есть ли другие операции в сессии
+        if (!empty($this->operations)) {
+            // Если есть операции, переключаемся на первую доступную
+            $this->activeOperationId = array_key_first($this->operations);
+        } else {
+            // Если операций нет, закрываем модальное окно и переходим к списку
+            $this->activeOperationId = null;
+            $this->isModal = false;
+            $this->dispatch('operation-saved');
+            return $this->redirect(route('admin.operations.index'), navigate: true);
+        }
         
         $this->dispatch('operation-saved');
     }
@@ -383,6 +493,15 @@ class OperationManager extends Component
     public function startNewOperation()
     {
         $this->notification = null;
+        
+        // Проверяем, есть ли существующие операции в сессии
+        if (!empty($this->operations)) {
+            // Если есть операции, переключаемся на первую доступную
+            $this->activeOperationId = array_key_first($this->operations);
+        } else {
+            // Если операций нет, создаем новую
+            $this->addNewOperation('purchase');
+        }
     }
 
     // Helper methods (convertToGrams, convertPriceToPerGram) remain the same
@@ -404,12 +523,140 @@ class OperationManager extends Component
         return $price;
     }
 
-    // Delete and Edit need to be refactored to work with the new structure
-    // For now, these are placeholders or might need to be removed from the view
+    /**
+     * Восстанавливает изменения в остатках товаров на складе
+     */
+    private function revertStockChanges(Operation $operation)
+    {
+        $multiplier = $operation->type === 'purchase' ? -1 : 1; // Reverse the operation
+
+        foreach ($operation->items as $item) {
+            $product = $item->product;
+            if (!$product) continue;
+
+            $weight = (float)$item->weight;
+
+            // Revert product stock for BOTH simple and composite
+            $product->increment('stock', $weight * $multiplier);
+
+            // If composite, ALSO revert element stocks
+            if ($product->type === 'composite') {
+                foreach ($item->elements as $operationItemElement) {
+                    $element = Element::find($operationItemElement->element_id);
+                    if ($element) {
+                        $elementWeight = $weight * ((float)$operationItemElement->percentage / 100);
+                        $element->increment('stock', $elementWeight * $multiplier);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Восстанавливает изменения в кассе
+     */
+    private function revertCashChanges(Operation $operation)
+    {
+        if (!$operation->cashRegister) return;
+
+        $reverseDescription = $operation->type === 'purchase' 
+            ? "Возврат средств при редактировании покупки (операция {$operation->operation_number})" 
+            : "Списание средств при редактировании продажи (операция {$operation->operation_number})";
+
+        if ($operation->type === 'purchase') {
+            // При отмене покупки - возвращаем деньги в кассу
+            $operation->cashRegister->addMoney(
+                $operation->total_amount,
+                $reverseDescription,
+                auth()->id()
+            );
+        } else {
+            // При отмене продажи - снимаем деньги из кассы
+            try {
+                $operation->cashRegister->withdrawMoney(
+                    $operation->total_amount,
+                    $reverseDescription,
+                    auth()->id()
+                );
+            } catch (\Exception $e) {
+                // Если недостаточно денег в кассе, все равно продолжаем редактирование
+                // но можно добавить предупреждение
+            }
+        }
+
+        // Удаляем старые транзакции, связанные с этой операцией
+        $operation->transactions()->delete();
+    }
+
     public function edit($id)
     {
-        // This needs a complete rethink. How do you edit a saved operation
-        // in this new multi-tab interface? Does it create a new tab?
+        $operation = Operation::with(['items.product.unit', 'items.elements.element.unit'])->find($id);
+        
+        if (!$operation) {
+            session()->flash('error', 'Операция не найдена.');
+            return;
+        }
+
+        // Создаем новую вкладку для редактирования на основе существующей операции
+        $editId = $this->generateOperationId($operation->type) . '-EDIT';
+        
+        // Преобразуем существующую операцию в формат корзины
+        $cartItems = [];
+        foreach ($operation->items as $item) {
+            $cartItem = [
+                'product_id' => $item->product_id,
+                'name' => $item->product->name,
+                'type' => $item->product->type,
+                'unit' => $item->product->unit->short_name,
+                'weight' => $item->weight,
+                'clogging' => $item->clogging,
+                'price_per_unit' => $item->product->type === 'simple' 
+                    ? ($operation->type === 'purchase' ? $item->product->purchase_price : $item->product->selling_price)
+                    : 0,
+                'price' => $item->price,
+                'elements' => [],
+            ];
+
+            // Для составных продуктов добавляем элементы
+            if ($item->product->type === 'composite') {
+                foreach ($item->product->elements as $productElement) {
+                    $elementPercentage = 0;
+                    
+                    // Ищем процент для этого элемента в сохраненной операции
+                    $savedElement = $item->elements->firstWhere('element_id', $productElement->id);
+                    if ($savedElement) {
+                        $elementPercentage = $savedElement->percentage;
+                    }
+                    
+                    $cartItem['elements'][] = [
+                        'element_id' => $productElement->id,
+                        'name' => $productElement->name,
+                        'price' => $productElement->price,
+                        'unit' => $productElement->unit->short_name,
+                        'percentage' => $elementPercentage,
+                    ];
+                }
+            }
+            
+            $cartItems[] = $cartItem;
+        }
+
+        // Создаем новую операцию для редактирования
+        $this->operations[$editId] = [
+            'id' => $editId,
+            'type' => $operation->type,
+            'user_id' => $operation->user_id,
+            'cartItems' => $cartItems,
+            'totalAmount' => $operation->total_amount,
+            'original_operation_id' => $operation->id, // Сохраняем ID оригинальной операции
+            'is_editing' => true,
+        ];
+        
+        $this->activeOperationId = $editId;
+        $this->isModal = true;
+        
+        // Пересчитываем итоги для корректности
+        $this->calculateTotals();
     }
 
     public function delete($id)
