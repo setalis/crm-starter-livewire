@@ -9,8 +9,10 @@ use App\Livewire\Admin\ElementManager;
 use App\Livewire\Admin\Products\ProductManager;
 use App\Livewire\Admin\Operations\OperationManager;
 use App\Livewire\Admin\CashRegisterManager;
+use App\Livewire\Admin\Warehouse\StockManager;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Passwords\Confirm;
+use App\Livewire\Admin\Shipments\ShipmentManager;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -30,6 +32,8 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
         ->whereIn('type', ['purchase', 'sale'])
         ->name('operations.create');
     Route::get('cash-register', CashRegisterManager::class)->name('cash-register.index');
+    Route::get('warehouse/stock', StockManager::class)->name('warehouse.stock.index');
+    Route::get('shipments', ShipmentManager::class)->name('shipments.index');
 });
 
 Route::middleware(['auth'])->group(function () {

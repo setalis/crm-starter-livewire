@@ -1,0 +1,441 @@
+<div class="space-y-6 p-6">
+    <flux:header class="flex-wrap justify-between gap-4 mb-4">
+        <flux:breadcrumbs>
+            <flux:breadcrumbs.item :href="route('dashboard')">Главная</flux:breadcrumbs.item>
+            <flux:breadcrumbs.item :href="route('admin.warehouse.stock.index')">Склад</flux:breadcrumbs.item>
+            <flux:breadcrumbs.item>Отгрузки</flux:breadcrumbs.item>
+        </flux:breadcrumbs>
+        <div class="flex justify-end w-full mt-4 gap-2">
+            <div class="relative inline-block text-left" x-data="{ open: false }">
+                <button type="button" @click="open = !open" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm leading-5 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <svg class="-ml-1 mr-2 h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                    Экспорт
+                    <svg class="ml-2 -mr-1 h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                </button>
+                <div x-show="open" @click.away="open = false" x-transition class="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                    <div class="py-1">
+                        <button type="button" wire:click="exportShipments" @click="open = false" class="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100">
+                            <div class="flex items-center">
+                                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                <div>
+                                    <div class="font-medium">Сводный отчет (CSV)</div>
+                                    <div class="text-xs text-gray-500">По отгрузкам</div>
+                                </div>
+                            </div>
+                        </button>
+                        <button type="button" wire:click="exportShipmentsExcel" @click="open = false" class="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100">
+                            <div class="flex items-center">
+                                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                <div>
+                                    <div class="font-medium">Сводный отчет (Excel)</div>
+                                    <div class="text-xs text-gray-500">По отгрузкам</div>
+                                </div>
+                            </div>
+                        </button>
+                        <hr class="my-1">
+                        <button type="button" wire:click="exportShipmentsDetailed" @click="open = false" class="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100">
+                            <div class="flex items-center">
+                                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
+                                <div>
+                                    <div class="font-medium">Детальный отчет</div>
+                                    <div class="text-xs text-gray-500">По каждой позиции</div>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <button type="button" wire:click="openModal" class="inline-flex items-center px-6 py-2 border border-transparent text-base leading-6 font-semibold rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+                Создать отгрузку
+            </button>
+        </div>
+    </flux:header>
+
+    <!-- Фильтры -->
+    <div class="flex flex-wrap gap-4 mb-4">
+        <div>
+            <label class="block text-xs font-medium text-gray-500 dark:text-gray-300 mb-1">Статус</label>
+            <select wire:model="filterStatus" class="rounded-md border-zinc-300 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 focus:border-blue-500 focus:ring focus:ring-blue-200/50 dark:focus:border-blue-400 dark:focus:ring-blue-900/40">
+                <option value="">Все</option>
+                <option value="draft">Черновик</option>
+                <option value="confirmed">Подтверждено</option>
+            </select>
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-gray-500 dark:text-gray-300 mb-1">Предприятие</label>
+            <input type="text" wire:model="filterCompany" placeholder="Поиск по предприятию" class="rounded-md border-zinc-300 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 focus:border-blue-500 focus:ring focus:ring-blue-200/50 dark:focus:border-blue-400 dark:focus:ring-blue-900/40">
+        </div>
+    </div>
+
+    <!-- Таблица отгрузок -->
+    <div class="overflow-x-auto rounded-lg border border-zinc-200 bg-white shadow-sm dark:border-zinc-700 dark:bg-zinc-800">
+        <table class="min-w-full table-auto">
+            <thead class="bg-zinc-50 dark:bg-zinc-800">
+                <tr>
+                    <th class="px-3.5 py-2.5 text-left text-sm font-semibold">ID</th>
+                    <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Дата</th>
+                    <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Предприятие</th>
+                    <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Позиции</th>
+                    <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Прибыль</th>
+                    <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Статус</th>
+                    <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Действия</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-zinc-200 dark:divide-zinc-700">
+                @forelse($shipments as $shipment)
+                    <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800">
+                        <td class="whitespace-nowrap px-3.5 py-2.5 text-sm font-medium">#{{ $shipment->id }}</td>
+                        <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">
+                            <div>{{ $shipment->created_at->format('d.m.Y') }}</div>
+                            <div class="text-xs text-gray-500">{{ $shipment->created_at->format('H:i') }}</div>
+                        </td>
+                        <td class="px-3.5 py-2.5 text-sm">
+                            <div class="font-medium">{{ $shipment->company ?: 'Не указано' }}</div>
+                            @if($shipment->car_number)
+                                <div class="text-xs text-gray-500">{{ $shipment->car_number }}</div>
+                            @endif
+                        </td>
+                        <td class="px-3.5 py-2.5 text-sm">
+                            <div class="flex flex-wrap gap-1">
+                                @foreach($shipment->items as $item)
+                                    <span class="inline-block bg-blue-100 text-blue-800 rounded px-2 py-0.5 text-xs">
+                                        {{ $products->find($item->product_id)->name ?? '' }} ({{ $item->weight }} кг)
+                                    </span>
+                                @endforeach
+                            </div>
+                        </td>
+                        <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">
+                            @if($shipment->stage === 'confirmed')
+                                @php $profit = $this->getShipmentProfit($shipment); @endphp
+                                <span class="font-semibold {{ $profit >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                                    {{ number_format($profit, 2) }} ₽
+                                </span>
+                            @else
+                                <span class="text-gray-400">—</span>
+                            @endif
+                        </td>
+                        <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">
+                            <div class="flex flex-col gap-1">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $shipment->stage === 'draft' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800' }}">
+                                    {{ $shipment->stage === 'draft' ? 'Черновик' : 'Подтверждено' }}
+                                </span>
+                                @if($shipment->stage === 'draft')
+                                    <button type="button" wire:click="openConfirmModal({{ $shipment->id }})" class="inline-flex items-center px-2 py-1 border border-transparent text-xs leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                        <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                        Внести факт
+                                    </button>
+                                @endif
+                            </div>
+                        </td>
+                        <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">
+                            <div class="flex flex-col gap-1">
+                                <button type="button" wire:click="openDetailsModal({{ $shipment->id }})" class="inline-flex items-center px-2 py-1 border border-transparent text-xs leading-4 font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                    Подробнее
+                                </button>
+                                <button type="button" wire:click="openModal({{ $shipment->id }})" class="inline-flex items-center px-2 py-1 border border-transparent text-xs leading-4 font-medium rounded-md text-yellow-700 bg-yellow-100 hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
+                                    <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                    Редактировать
+                                </button>
+                                @if($shipment->stage === 'confirmed')
+                                    <button type="button" wire:click="openConfirmModal({{ $shipment->id }})" class="inline-flex items-center px-2 py-1 border border-transparent text-xs leading-4 font-medium rounded-md text-green-700 bg-green-100 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                        <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                        Редактировать факт
+                                    </button>
+                                @endif
+                            </div>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="7" class="py-8 text-center text-zinc-400 dark:text-zinc-500">
+                            <div class="flex flex-col items-center">
+                                <svg class="h-12 w-12 text-zinc-300 mb-2" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                                </svg>
+                                <p>Нет отгрузок</p>
+                                <p class="text-xs">Создайте первую отгрузку</p>
+                            </div>
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Модальное окно создания отгрузки -->
+    @if($isModal)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+            <div class="bg-white dark:bg-zinc-800 rounded-lg shadow-xl w-full max-w-3xl p-6 relative">
+                <button type="button" wire:click="closeModal" class="absolute top-4 right-4 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+                <h3 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Создание отгрузки</h3>
+                <form wire:submit.prevent="saveShipment" class="space-y-6">
+                    <div class="border-b border-zinc-200 dark:border-zinc-700 pb-4 mb-4">
+                        <h4 class="text-lg font-semibold mb-2 text-gray-900 dark:text-white">Позиции отгрузки</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-5 gap-2 mb-2">
+                            <select wire:model="product_id" class="col-span-2 rounded-md border-zinc-300 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 focus:border-blue-500 focus:ring focus:ring-blue-200/50 dark:focus:border-blue-400 dark:focus:ring-blue-900/40">
+                                <option value="">Выберите металл</option>
+                                @foreach($products as $product)
+                                    <option value="{{ $product->id }}">
+                                        {{ $product->name }} (остаток: {{ $product->stock }} кг)
+                                    </option>
+                                @endforeach
+                            </select>
+                            <div class="relative">
+                                <input type="number" step="0.01" min="0" wire:model="weight" placeholder="Вес, кг" class="w-full rounded-md border-zinc-300 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 focus:border-blue-500 focus:ring focus:ring-blue-200/50 dark:focus:border-blue-400 dark:focus:ring-blue-900/40">
+                                @if($product_id && $weight)
+                                    @php
+                                        $selectedProduct = $products->find($product_id);
+                                        $available = $selectedProduct ? $selectedProduct->stock : 0;
+                                    @endphp
+                                    @if($weight > $available)
+                                        <div class="absolute -bottom-5 left-0 text-xs text-red-600">
+                                            Недостаточно на складе ({{ $available }} кг)
+                                        </div>
+                                    @endif
+                                @endif
+                            </div>
+                            <select wire:model="writeoff_type" class="rounded-md border-zinc-300 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 focus:border-blue-500 focus:ring focus:ring-blue-200/50 dark:focus:border-blue-400 dark:focus:ring-blue-900/40">
+                                <option value="partial">С остатком</option>
+                                <option value="full">В ноль</option>
+                            </select>
+                            <input type="number" step="0.01" min="0" wire:model="stock_after" placeholder="Остаток на складе" class="rounded-md border-zinc-300 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 focus:border-blue-500 focus:ring focus:ring-blue-200/50 dark:focus:border-blue-400 dark:focus:ring-blue-900/40">
+                            <button type="button" wire:click="addShipmentItem" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                <svg class="-ml-0.5 mr-2 h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+                                Добавить
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto mt-4">
+                            <table class="min-w-full table-auto rounded-lg overflow-hidden">
+                                <thead class="bg-zinc-50 dark:bg-zinc-800">
+                                    <tr>
+                                        <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Металл</th>
+                                        <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Вес, кг</th>
+                                        <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Тип списания</th>
+                                        <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Остаток на складе</th>
+                                        <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Предв. затраты</th>
+                                        <th class="px-3.5 py-2.5"></th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-zinc-200 dark:divide-zinc-700">
+                                    @php $totalCost = 0; @endphp
+                                    @forelse($shipmentItems as $index => $item)
+                                        @php
+                                            $product = $products->find($item['product_id']);
+                                            $purchase = $product?->average_purchase_price ?? 0;
+                                            $clogging = $product?->clogging ?? 0;
+                                            
+                                            if ($clogging >= 100) {
+                                                $cost = $item['weight'] * $purchase * 10;
+                                            } else {
+                                                $cost = $item['weight'] * ($purchase / (1 - ($clogging / 100)));
+                                            }
+                                            $totalCost += $cost;
+                                        @endphp
+                                        <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800">
+                                            <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">
+                                                <div class="font-medium">{{ $products->find($item['product_id'])->name ?? '' }}</div>
+                                                <div class="text-xs text-gray-500">
+                                                    Ср. цена: {{ number_format($purchase, 2) }} ₽/кг
+                                                    @if($clogging > 0)
+                                                        | Засор: {{ $clogging }}%
+                                                    @endif
+                                                </div>
+                                            </td>
+                                            <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">{{ $item['weight'] }}</td>
+                                            <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $item['writeoff_type'] == 'full' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800' }}">
+                                                    {{ $item['writeoff_type'] == 'full' ? 'В ноль' : 'С остатком' }}
+                                                </span>
+                                            </td>
+                                            <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">{{ $item['stock_after'] ?? '—' }}</td>
+                                            <td class="whitespace-nowrap px-3.5 py-2.5 text-sm font-medium">{{ number_format($cost, 2) }} ₽</td>
+                                            <td class="whitespace-nowrap px-3.5 py-2.5 text-right">
+                                                <button type="button" wire:click="removeShipmentItem({{ $index }})" class="inline-flex items-center px-2 py-1 border border-transparent text-xs leading-4 font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                                                    <span class="ml-1">Удалить</span>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="6" class="py-8 text-center text-zinc-400 dark:text-zinc-500">Нет добавленных позиций</td>
+                                        </tr>
+                                    @endforelse
+                                    @if(count($shipmentItems) > 0)
+                                        <tr class="bg-zinc-50 dark:bg-zinc-800 font-semibold">
+                                            <td colspan="4" class="px-3.5 py-2.5 text-right">Общие предварительные затраты:</td>
+                                            <td class="px-3.5 py-2.5">{{ number_format($totalCost, 2) }} ₽</td>
+                                            <td></td>
+                                        </tr>
+                                    @endif
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Номер автомобиля</label>
+                            <input type="text" wire:model="car_number" class="w-full rounded-md border-zinc-300 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 focus:border-blue-500 focus:ring focus:ring-blue-200/50 dark:focus:border-blue-400 dark:focus:ring-blue-900/40">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">ФИО водителя</label>
+                            <input type="text" wire:model="driver_name" class="w-full rounded-md border-zinc-300 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 focus:border-blue-500 focus:ring focus:ring-blue-200/50 dark:focus:border-blue-400 dark:focus:ring-blue-900/40">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Предприятие</label>
+                            <input type="text" wire:model="company" class="w-full rounded-md border-zinc-300 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 focus:border-blue-500 focus:ring focus:ring-blue-200/50 dark:focus:border-blue-400 dark:focus:ring-blue-900/40">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Затраты на отгрузку</label>
+                            <input type="number" step="0.01" min="0" wire:model="shipping_cost" class="w-full rounded-md border-zinc-300 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 focus:border-blue-500 focus:ring focus:ring-blue-200/50 dark:focus:border-blue-400 dark:focus:ring-blue-900/40">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Комментарий</label>
+                            <textarea wire:model="comment" rows="2" class="w-full rounded-md border-zinc-300 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 focus:border-blue-500 focus:ring focus:ring-blue-200/50 dark:focus:border-blue-400 dark:focus:ring-blue-900/40"></textarea>
+                        </div>
+                    </div>
+                    <div class="pt-6 flex justify-end">
+                        <button type="submit" class="inline-flex items-center px-6 py-2 border border-transparent text-base leading-6 font-semibold rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            Сохранить отгрузку
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    @endif
+
+    @if($isConfirmModal)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+            <div class="bg-white dark:bg-zinc-800 rounded-lg shadow-xl w-full max-w-3xl p-6 relative">
+                <button type="button" wire:click="closeConfirmModal" class="absolute top-4 right-4 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+                <h3 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Внесение фактических данных</h3>
+                <form wire:submit.prevent="saveConfirmation" class="space-y-6">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full table-auto rounded-lg overflow-hidden">
+                            <thead class="bg-zinc-50 dark:bg-zinc-800">
+                                <tr>
+                                    <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Металл</th>
+                                    <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Вес (заявл.)</th>
+                                    <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Факт. вес</th>
+                                    <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Цена на заводе</th>
+                                    <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Засор</th>
+                                    <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Затраты</th>
+                                    <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Прибыль</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-zinc-200 dark:divide-zinc-700">
+                                @php $totalProfit = 0; @endphp
+                                @foreach($confirmItems as $index => $item)
+                                    @php
+                                        $product = $products->find($item['product_id']);
+                                        $purchase = $product?->average_purchase_price ?? 0;
+                                        $clogging = $product?->clogging ?? 0;
+                                        
+                                        // Правильный расчет затрат с учетом засора
+                                        if ($clogging >= 100) {
+                                            $cost = $item['weight'] * $purchase * 10;
+                                        } else {
+                                            $cost = $item['weight'] * ($purchase / (1 - ($clogging / 100)));
+                                        }
+                                        
+                                        $income = ($item['actual_weight'] ?? 0) * ($item['actual_price'] ?? 0);
+                                        $profit = $income - $cost;
+                                        $totalProfit += $profit;
+                                    @endphp
+                                    <tr>
+                                        <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">{{ $products->find($item['product_id'])->name ?? '' }}</td>
+                                        <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">{{ $item['weight'] }}</td>
+                                        <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">
+                                            <input type="number" step="0.01" min="0" wire:model.defer="confirmItems.{{ $index }}.actual_weight" class="w-24 rounded-md border-zinc-300 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 focus:border-blue-500 focus:ring focus:ring-blue-200/50 dark:focus:border-blue-400 dark:focus:ring-blue-900/40">
+                                        </td>
+                                        <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">
+                                            <input type="number" step="0.01" min="0" wire:model.defer="confirmItems.{{ $index }}.actual_price" class="w-24 rounded-md border-zinc-300 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 focus:border-blue-500 focus:ring focus:ring-blue-200/50 dark:focus:border-blue-400 dark:focus:ring-blue-900/40">
+                                        </td>
+                                        <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">
+                                            <input type="number" step="0.01" min="0" wire:model.defer="confirmItems.{{ $index }}.actual_clogging" class="w-20 rounded-md border-zinc-300 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 focus:border-blue-500 focus:ring focus:ring-blue-200/50 dark:focus:border-blue-400 dark:focus:ring-blue-900/40">
+                                        </td>
+                                        <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">
+                                            {{ number_format($cost, 2) }}
+                                        </td>
+                                        <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">
+                                            <span class="font-semibold {{ $profit >= 0 ? 'text-green-600' : 'text-red-600' }}">{{ number_format($profit, 2) }}</span>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                            <tfoot class="bg-zinc-50 dark:bg-zinc-800">
+                                <tr>
+                                    <td colspan="6" class="px-3.5 py-2.5 text-right font-semibold">Общая прибыль:</td>
+                                    <td class="px-3.5 py-2.5 font-bold">
+                                        <span class="{{ $totalProfit >= 0 ? 'text-green-600' : 'text-red-600' }}">{{ number_format($totalProfit, 2) }}</span>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    <div class="pt-6 flex justify-end">
+                        <button type="submit" class="inline-flex items-center px-6 py-2 border border-transparent text-base leading-6 font-semibold rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                            <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            Подтвердить отгрузку
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    @endif
+
+    <!-- Модальное окно подробностей -->
+    @if($isDetailsModal && $detailsShipment)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+            <div class="bg-white dark:bg-zinc-800 rounded-lg shadow-xl w-full max-w-2xl p-6 relative">
+                <button type="button" wire:click="closeDetailsModal" class="absolute top-4 right-4 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+                <h3 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Подробности отгрузки #{{ $detailsShipment->id }}</h3>
+                <div class="mb-2 text-sm text-gray-700 dark:text-gray-200">
+                    <div><b>Дата:</b> {{ $detailsShipment->created_at->format('d.m.Y H:i') }}</div>
+                    <div><b>Статус:</b> {{ $detailsShipment->stage === 'draft' ? 'Черновик' : 'Подтверждено' }}</div>
+                    <div><b>Предприятие:</b> {{ $detailsShipment->company }}</div>
+                    <div><b>Номер авто:</b> {{ $detailsShipment->car_number }}</div>
+                    <div><b>Водитель:</b> {{ $detailsShipment->driver_name }}</div>
+                    <div><b>Комментарий:</b> {{ $detailsShipment->comment }}</div>
+                    <div><b>Затраты на отгрузку:</b> {{ number_format($detailsShipment->shipping_cost, 2) }}</div>
+                    <div class="mt-2"><b>Общая прибыль:</b> <span class="font-semibold {{ $this->getShipmentProfit($detailsShipment) >= 0 ? 'text-green-600' : 'text-red-600' }}">{{ number_format($this->getShipmentProfit($detailsShipment), 2) }}</span></div>
+                </div>
+                <div class="overflow-x-auto mt-4">
+                    <table class="min-w-full table-auto rounded-lg overflow-hidden">
+                        <thead class="bg-zinc-50 dark:bg-zinc-800">
+                            <tr>
+                                <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Металл</th>
+                                <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Вес (заявл.)</th>
+                                <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Факт. вес</th>
+                                <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Цена на заводе</th>
+                                <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Засор</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-zinc-200 dark:divide-zinc-700">
+                            @foreach($detailsShipment->items as $item)
+                                <tr>
+                                    <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">{{ $products->find($item->product_id)->name ?? '' }}</td>
+                                    <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">{{ $item->weight }}</td>
+                                    <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">{{ $item->actual_weight }}</td>
+                                    <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">{{ $item->actual_price }}</td>
+                                    <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">{{ $item->actual_clogging }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    @endif
+</div>

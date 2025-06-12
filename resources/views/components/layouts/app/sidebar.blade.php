@@ -40,6 +40,15 @@
                     </flux:navlist.item>
                 </flux:navlist.group>
 
+                <flux:navlist.group heading="Склад" expandable :expanded="request()->routeIs('admin.warehouse.*')">
+                    <flux:navlist.item :href="route('admin.warehouse.stock.index')" :current="request()->routeIs('admin.warehouse.stock.index')" wire:navigate>
+                        {{ __('Остатки') }}
+                    </flux:navlist.item>
+                    <flux:navlist.item :href="route('admin.shipments.index')" :current="request()->routeIs('admin.shipments.*')" wire:navigate>
+                        {{ __('Отгрузки') }}
+                    </flux:navlist.item>
+                </flux:navlist.group>
+
                 <flux:navlist.group heading="Финансы" expandable :expanded="request()->routeIs('admin.cash-register.*')">
                     <flux:navlist.item :href="route('admin.cash-register.index')" :current="request()->routeIs('admin.cash-register.index')" wire:navigate>
                         {{ __('Касса') }}
