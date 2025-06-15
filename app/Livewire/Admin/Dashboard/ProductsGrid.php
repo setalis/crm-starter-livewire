@@ -25,13 +25,16 @@ class ProductsGrid extends Component
 
     public function loadProducts()
     {
-        $query = Product::with('unit')->where('is_published', true);
+        $allProducts = Product::with('unit')->where('is_published', true)->orderBy('name')->get();
         
         if (!empty($this->searchTerm)) {
-            $query->where('name', 'like', '%' . $this->searchTerm . '%');
+            $searchTerm = mb_strtolower(trim($this->searchTerm), 'UTF-8');
+            $this->products = $allProducts->filter(function ($product) use ($searchTerm) {
+                return mb_strpos(mb_strtolower($product->name, 'UTF-8'), $searchTerm, 0, 'UTF-8') !== false;
+            });
+        } else {
+            $this->products = $allProducts;
         }
-        
-        $this->products = $query->orderBy('name')->get();
     }
 
     public function updatedSearchTerm()

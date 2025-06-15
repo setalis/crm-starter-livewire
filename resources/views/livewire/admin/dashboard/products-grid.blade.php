@@ -24,42 +24,42 @@
     <!-- Сетка товаров -->
     <div class="flex-1 overflow-y-auto p-4">
         @if($products->count() > 0)
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-2">
                 @foreach($products as $product)
-                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 hover:shadow-md transition-all duration-200 overflow-hidden" wire:key="product-{{ $product->id }}">
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-md border border-gray-200 dark:border-gray-600 hover:shadow-md transition-all duration-200 overflow-hidden text-xs" wire:key="product-{{ $product->id }}">
                     <!-- Изображение товара -->
-                    <div class="h-32 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-800 dark:to-blue-900 flex items-center justify-center cursor-pointer" 
+                    <div class="h-16 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-800 dark:to-blue-900 flex items-center justify-center cursor-pointer" 
                          wire:click="goToPurchase({{ $product->id }})"
                          title="Нажмите для быстрой покупки">
                         @if($product->image)
                             <img src="{{ asset('storage/' . $product->image) }}" 
                                  alt="{{ $product->name }}" 
-                                 class="w-full h-full object-cover">
+                                 class="w-full h-full object-contain">
                         @else
                             <div class="text-center">
-                                <i class="bi bi-box text-3xl text-blue-600 dark:text-blue-300 mb-2"></i>
-                                <div class="text-xs text-blue-600 dark:text-blue-300">Быстрая покупка</div>
+                                <i class="bi bi-box text-lg text-blue-600 dark:text-blue-300"></i>
                             </div>
                         @endif
                     </div>
 
                     <!-- Информация о товаре -->
-                    <div class="p-3">
+                    <div class="p-2">
                         <!-- Название и тип -->
-                        <div class="mb-2">
-                            <h4 class="font-medium text-gray-900 dark:text-white text-sm truncate" title="{{ $product->name }}">
+                        <div class="mb-1">
+                            <h4 class="font-medium text-gray-900 dark:text-white text-xs truncate" title="{{ $product->name }}">
                                 {{ $product->name }}
                             </h4>
-                            <div class="flex items-center justify-between mt-1">
+                            <div class="flex items-center justify-between mt-0.5">
                                 <span @class([
-                                    'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium',
-                                    'bg-green-100 text-green-800' => $product->type === 'simple',
-                                    'bg-blue-100 text-blue-800' => $product->type === 'composite',
+                                    'inline-flex items-center px-1 py-0.5 rounded text-xs font-medium',
+                                    'bg-green-100 text-green-700' => $product->type === 'simple',
+                                    'bg-blue-100 text-blue-700' => $product->type === 'composite',
                                 ])>
-                                    {{ $product->type === 'simple' ? 'Простой' : 'Составной' }}
+                                    {{ $product->type === 'simple' ? 'Простой' : 'Сложный' }}
                                 </span>
-                                <span class="text-xs text-gray-500 dark:text-gray-400">
-                                    {{ number_format($product->stock, 2) }} {{ $product->unit->short_name }}
+                                <span class="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                    {{ number_format($product->stock, 1) }}
+                                    {{ $product->unit->short_name }}
                                 </span>
                             </div>
                         </div>
@@ -67,74 +67,70 @@
                         <!-- Цены -->
                         @if($editingProduct === $product->id)
                             <!-- Режим редактирования -->
-                            <div class="space-y-2">
-                                <div>
-                                    <label class="text-xs text-gray-500 dark:text-gray-400">Цена покупки</label>
-                                    <input 
-                                        type="number" 
-                                        step="0.01" 
-                                        wire:model="editingPurchasePrice"
-                                        wire:keydown.enter="savePrices"
-                                        wire:keydown.escape="cancelEditing"
-                                        class="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
-                                        autofocus
-                                    >
-                                </div>
-                                <div>
-                                    <label class="text-xs text-gray-500 dark:text-gray-400">Цена продажи</label>
-                                    <input 
-                                        type="number" 
-                                        step="0.01" 
-                                        wire:model="editingSellingPrice"
-                                        wire:keydown.enter="savePrices"
-                                        wire:keydown.escape="cancelEditing"
-                                        class="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
-                                    >
-                                </div>
-                                <div class="flex space-x-2">
+                            <div class="space-y-1">
+                                <input 
+                                    type="number" 
+                                    step="0.01" 
+                                    wire:model="editingPurchasePrice"
+                                    wire:keydown.enter="savePrices"
+                                    wire:keydown.escape="cancelEditing"
+                                    placeholder="Покупка"
+                                    class="w-full px-1 py-0.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                                    autofocus
+                                >
+                                <input 
+                                    type="number" 
+                                    step="0.01" 
+                                    wire:model="editingSellingPrice"
+                                    wire:keydown.enter="savePrices"
+                                    wire:keydown.escape="cancelEditing"
+                                    placeholder="Продажа"
+                                    class="w-full px-1 py-0.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                                >
+                                <div class="flex space-x-1">
                                     <button 
                                         wire:click="savePrices"
-                                        class="flex-1 px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700"
+                                        class="flex-1 px-1 py-0.5 text-xs bg-green-600 text-white rounded hover:bg-green-700"
                                     >
-                                        <i class="bi bi-check"></i> Сохранить
+                                        <i class="bi bi-check"></i>
                                     </button>
                                     <button 
                                         wire:click="cancelEditing"
-                                        class="flex-1 px-2 py-1 text-xs bg-gray-600 text-white rounded hover:bg-gray-700"
+                                        class="flex-1 px-1 py-0.5 text-xs bg-gray-600 text-white rounded hover:bg-gray-700"
                                     >
-                                        <i class="bi bi-x"></i> Отмена
+                                        <i class="bi bi-x"></i>
                                     </button>
                                 </div>
                             </div>
                         @else
                             <!-- Обычный режим -->
-                            <div class="space-y-1">
+                            <div class="space-y-0.5">
                                 <div class="flex justify-between items-center">
                                     <span class="text-xs text-gray-500 dark:text-gray-400">Покупка:</span>
-                                    <span class="text-sm font-medium text-green-600 dark:text-green-400">
-                                        {{ number_format($product->purchase_price, 2) }} ₴
+                                    <span class="text-xs font-medium text-green-600 dark:text-green-400">
+                                        {{ number_format($product->purchase_price, 0) }}₴
                                     </span>
                                 </div>
                                 <div class="flex justify-between items-center">
                                     <span class="text-xs text-gray-500 dark:text-gray-400">Продажа:</span>
-                                    <span class="text-sm font-medium text-blue-600 dark:text-blue-400">
-                                        {{ number_format($product->selling_price, 2) }} ₴
+                                    <span class="text-xs font-medium text-blue-600 dark:text-blue-400">
+                                        {{ number_format($product->selling_price, 0) }}₴
                                     </span>
                                 </div>
-                                <div class="flex justify-between items-center pt-1">
+                                <div class="flex justify-between items-center pt-0.5">
                                     <button 
                                         wire:click="startEditing({{ $product->id }})"
                                         class="text-xs text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
                                         title="Редактировать цены"
                                     >
-                                        <i class="bi bi-pencil"></i> Изменить
+                                        <i class="bi bi-pencil"></i>
                                     </button>
                                     <button 
                                         wire:click="goToPurchase({{ $product->id }})"
-                                        class="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700"
+                                        class="text-xs bg-blue-600 text-white px-1 py-0.5 rounded hover:bg-blue-700"
                                         title="Быстрая покупка"
                                     >
-                                        <i class="bi bi-plus"></i> Купить
+                                        <i class="bi bi-plus">Покупка</i>
                                     </button>
                                 </div>
                             </div>
