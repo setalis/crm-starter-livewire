@@ -22,7 +22,7 @@
                             </th>
                             <th scope="col" class="px-3.5 py-2.5 text-left text-sm font-semibold rtl:text-right">{{ __('Наименование') }}</th>
                             <th scope="col" class="px-3.5 py-2.5 text-left text-sm font-semibold rtl:text-right">{{ __('Единица измерения') }}</th>
-                            <th scope="col" class="px-3.5 py-2.5 text-left text-sm font-semibold rtl:text-right">{{ __('Стоимость') }}</th>
+                            <th scope="col" class="px-3.5 py-2.5 text-left text-sm font-semibold rtl:text-right">{{ __('Стоимость за 1%') }}</th>
                             <th scope="col" class="px-3.5 py-2.5 text-left text-sm font-semibold rtl:text-right">{{ __('Остаток') }}</th>
                             <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
                                 <span class="sr-only">{{ __('Actions') }}</span>
@@ -85,7 +85,7 @@
                     </div>
                     <div class="mt-2 space-y-1 text-sm text-zinc-700 dark:text-zinc-300">
                         <p><strong>{{ __('Единица измерения') }}:</strong> {{ $element->unit->name }}</p>
-                        <p><strong>{{ __('Стоимость') }}:</strong> {{ $element->price }}</p>
+                        <p><strong>{{ __('Стоимость за 1%') }}:</strong> {{ $element->price }}</p>
                         <p><strong>{{ __('Остаток') }}:</strong> {{ $element->stock }}</p>
                     </div>
                 </div>
@@ -114,7 +114,7 @@
                             <flux:select.option value="{{ $unit->id }}">{{ $unit->name }}</flux:select.option>
                         @endforeach
                     </flux:select>
-                    <flux:input :label="__('Стоимость')" wire:model="price" />
+                    <flux:input :label="__('Стоимость за 1% содержания')" wire:model="price" type="number" step="0.01" />
                     <flux:input :label="__('Начальный остаток')" wire:model="stock" type="number" step="0.001" />
                 </div>
             </div>

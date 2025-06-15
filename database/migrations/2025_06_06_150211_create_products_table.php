@@ -16,9 +16,9 @@ return new class extends Migration
             $table->string('name');
             $table->enum('type', ['simple', 'composite'])->default('simple');
             $table->foreignId('unit_id')->constrained()->onDelete('cascade');
-            $table->decimal('purchase_price', 8, 2);
+            $table->decimal('purchase_price', 8, 2)->nullable();
             $table->decimal('selling_price', 8, 2);
-            $table->float('clogging')->default(0);
+            $table->float('clogging')->nullable();
             $table->string('image')->nullable();
             $table->boolean('is_published')->default(false);
             $table->decimal('stock', 10, 3)->default(0);

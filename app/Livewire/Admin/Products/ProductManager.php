@@ -129,15 +129,18 @@ class ProductManager extends Component
             'name' => 'required|string|max:255',
             'type' => 'required|in:simple,composite',
             'unit_id' => 'required|exists:units,id',
-            'purchase_price' => 'nullable|numeric',
             'selling_price' => 'required|numeric',
-            'clogging' => 'nullable|numeric',
             'photo' => 'nullable|image|max:1024',
             'is_published' => 'boolean',
             'priceScales.*.threshold_kg' => 'required|numeric',
             'priceScales.*.price' => 'required|numeric',
             'stock' => 'required|numeric|min:0',
         ];
+
+        if ($this->type === 'simple') {
+            $rules['purchase_price'] = 'required|numeric';
+            $rules['clogging'] = 'nullable|numeric|min:0|max:100';
+        }
 
         if ($this->type === 'composite') {
             $rules['selectedElements'] = 'required|array|min:1';
@@ -213,5 +216,36 @@ class ProductManager extends Component
     {
         Product::find($id)->delete();
         session()->flash('message', 'Продукт удален.');
+    }
+
+    /**
+     * Рассчитывает стоимость составного продукта за 1 кг на основе выбранных элементов
+     */
+    public function getCalculatedCompositePrice()
+    {
+        if ($this->type !== 'composite' || empty($this->selectedElements)) {
+            return 0;
+        }
+
+        $totalPrice = 0;
+        
+        foreach ($this->selectedElements as $elementId => $data) {
+            $element = $this->elements->find($elementId);
+            if ($element) {
+                // Стоимость элемента = цена за 1% * процентное содержание
+                $elementPrice = $element->price * $data['percentage'];
+                $totalPrice += $elementPrice;
+            }
+        }
+
+        return round($totalPrice, 2);
+    }
+
+    /**
+     * Получает общий процент содержания элементов
+     */
+    public function getTotalElementsPercentage()
+    {
+        return array_sum(array_column($this->selectedElements, 'percentage'));
     }
 }

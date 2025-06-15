@@ -19,6 +19,7 @@
                         <tr>
                             <th class="px-3.5 py-2.5 text-left text-sm font-semibold rtl:text-right">{{ __('Наименование') }}</th>
                             <th class="px-3.5 py-2.5 text-left text-sm font-semibold rtl:text-right">{{ __('Тип') }}</th>
+                            <th class="px-3.5 py-2.5 text-left text-sm font-semibold rtl:text-right">{{ __('Стоимость') }}</th>
                             <th class="px-3.5 py-2.5 text-left text-sm font-semibold rtl:text-right">{{ __('Остаток') }}</th>
                             <th class="px-3.5 py-2.5 text-left text-sm font-semibold rtl:text-right">{{ __('Единица измерения') }}</th>
                             <th class="px-3.5 py-2.5 text-left text-sm font-semibold rtl:text-right">{{ __('Опубликован') }}</th>
@@ -40,6 +41,15 @@
                                     {{ $product->type === 'simple' ? 'Простой' : 'Составной' }}
                                 </span>
                             </td>
+                            <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">
+                                @if($product->type === 'simple')
+                                    <div class="font-medium">{{ $product->purchase_price }} грн</div>
+                                    <div class="text-xs text-gray-500">закупка</div>
+                                @else
+                                    <div class="font-medium text-blue-600">{{ $product->getCompositeProductPricePerKg() }} грн/кг</div>
+                                    <div class="text-xs text-gray-500">{{ $product->elements->count() }} элементов</div>
+                                @endif
+                            </td>
                             <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">{{ $product->stock }}</td>
                             <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">{{ $product->unit->name }}</td>
                             <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">{{ $product->is_published ? 'Да' : 'Нет' }}</td>
@@ -56,7 +66,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="5" class="py-12 text-center">
+                            <td colspan="6" class="py-12 text-center">
                                 <div class="space-y-4">
                                     <div class="flex justify-center text-zinc-400 dark:text-zinc-500">
                                         <i class="bi bi-search text-5xl"></i>
@@ -89,10 +99,12 @@
                         <flux:select.option value="{{ $unit->id }}">{{ $unit->name }}</flux:select.option>
                     @endforeach
                 </flux:select>
-                <flux:input :label="__('Закупочная стоимость')" wire:model="purchase_price" />
-                <flux:input :label="__('Стоимость продажи')" wire:model="selling_price" />
-                <flux:input :label="__('Засор, %')" wire:model="clogging" />
-                <flux:input :label="__('Начальный остаток')" wire:model="stock" type="number" step="0.001" />
+                                 @if($type === 'simple')
+                     <flux:input :label="__('Закупочная стоимость')" wire:model="purchase_price" type="number" step="0.01" />
+                     <flux:input :label="__('Засор, %')" wire:model="clogging" type="number" step="0.01" />
+                 @endif
+                 <flux:input :label="__('Стоимость продажи')" wire:model="selling_price" type="number" step="0.01" />
+                 <flux:input :label="__('Начальный остаток')" wire:model="stock" type="number" step="0.001" />
                 <div class="sm:col-span-2">
                     <flux:switch :label="__('Опубликован')" wire:model="is_published" />
                 </div>
@@ -106,25 +118,58 @@
                     @endif
                 </div>
 
-                @if ($type === 'composite')
-                    <div class="sm:col-span-2">
-                        <h3 class="text-lg font-medium leading-6 text-gray-900">Элементы</h3>
-                        <div class="mt-4 space-y-4">
-                            @foreach($selectedElements as $elementId => $data)
-                                <div class="flex items-center space-x-2" wire:key="element-{{ $elementId }}">
-                                    <div class="flex-1">
-                                        {{ $elements->find($elementId)->name }}
-                                    </div>
-                                    <div class="w-1/4">
-                                        <flux:input type="number" wire:model.live="selectedElements.{{ $elementId }}.percentage" placeholder="%" />
-                                    </div>
-                                    <flux:button flat color="danger" wire:click="removeElement({{ $elementId }})">
-                                        <i class="bi bi-trash-fill"></i>
-                                    </flux:button>
-                                </div>
-                            @endforeach
-                        </div>
-                        @error('selectedElements') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                 @if ($type === 'composite')
+                     <div class="sm:col-span-2">
+                         <h3 class="text-lg font-medium leading-6 text-gray-900">Элементы</h3>
+                         <div class="mt-4 space-y-4">
+                             @foreach($selectedElements as $elementId => $data)
+                                 <div class="flex items-center space-x-2" wire:key="element-{{ $elementId }}">
+                                     <div class="flex-1">
+                                         <div class="font-medium">{{ $elements->find($elementId)->name }}</div>
+                                         <div class="text-sm text-gray-500">
+                                             {{ $elements->find($elementId)->price }} грн за 1% 
+                                             ({{ $elements->find($elementId)->unit->name }})
+                                         </div>
+                                     </div>
+                                     <div class="w-1/4">
+                                         <flux:input type="number" wire:model.live="selectedElements.{{ $elementId }}.percentage" placeholder="%" step="0.01" />
+                                     </div>
+                                     <div class="w-1/4 text-sm text-gray-600">
+                                         = {{ round($elements->find($elementId)->price * $data['percentage'], 2) }} грн/кг
+                                     </div>
+                                     <flux:button flat color="danger" wire:click="removeElement({{ $elementId }})">
+                                         <i class="bi bi-trash-fill"></i>
+                                     </flux:button>
+                                 </div>
+                             @endforeach
+                         </div>
+                         
+                         @if(!empty($selectedElements))
+                             <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+                                 <div class="flex justify-between items-center">
+                                     <span class="font-medium">Общий процент содержания:</span>
+                                     <span class="font-bold {{ $this->getTotalElementsPercentage() > 100 ? 'text-red-600' : 'text-green-600' }}">
+                                         {{ $this->getTotalElementsPercentage() }}%
+                                     </span>
+                                 </div>
+                                 <div class="flex justify-between items-center mt-2">
+                                     <span class="font-medium">Расчетная стоимость за 1 кг:</span>
+                                     <span class="font-bold text-blue-600">{{ $this->getCalculatedCompositePrice() }} грн</span>
+                                 </div>
+                                 
+                                 @if($this->getCalculatedCompositePrice() > 0)
+                                     <div class="mt-3 p-3 bg-blue-50 rounded border-l-4 border-blue-400">
+                                         <h4 class="font-medium text-blue-800 mb-2">Пример расчета для заказа:</h4>
+                                         <div class="text-sm text-blue-700 space-y-1">
+                                             <div>• При весе 5 кг: {{ $this->getCalculatedCompositePrice() }} × 5 = <strong>{{ $this->getCalculatedCompositePrice() * 5 }} грн</strong></div>
+                                             <div>• При весе 10 кг: {{ $this->getCalculatedCompositePrice() }} × 10 = <strong>{{ $this->getCalculatedCompositePrice() * 10 }} грн</strong></div>
+                                         </div>
+                                     </div>
+                                 @endif
+                             </div>
+                         @endif
+                         
+                         @error('selectedElements') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
 
                         <div class="mt-4 flex items-center space-x-2">
                             <div class="flex-1">

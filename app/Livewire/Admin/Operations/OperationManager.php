@@ -220,7 +220,7 @@ class OperationManager extends Component
             'type' => $product->type,
             'unit' => $product->unit->short_name,
             'weight' => 1,
-            'clogging' => $product->clogging,
+            'clogging' => $product->type === 'simple' ? ($product->clogging ?? 0) : 0,
             'price_per_unit' => $this->activeOperation['type'] === 'purchase' ? $product->purchase_price : $product->selling_price,
             'price' => 0,
             'elements' => [],
@@ -299,13 +299,12 @@ class OperationManager extends Component
             } else { // Composite product
                 $itemPrice = 0;
                 if (is_array($item['elements'])) {
-                    $product_weight_in_grams = $this->convertToGrams($weight, $item['unit']);
-                    
                     foreach ($item['elements'] as $element) {
                         $percentage = (float)($element['percentage'] ?? 0);
-                        $element_weight_in_grams = $product_weight_in_grams * ($percentage / 100);
-                        $element_price_per_gram = $this->convertPriceToPerGram((float)($element['price'] ?? 0), $element['unit']);
-                        $itemPrice += $element_weight_in_grams * $element_price_per_gram;
+                        $elementPricePerPercent = (float)($element['price'] ?? 0);
+                        // Стоимость элемента = цена за 1% * процентное содержание * вес продукта
+                        $elementPrice = $elementPricePerPercent * $percentage * $weight;
+                        $itemPrice += $elementPrice;
                     }
                 }
                 $item['price'] = $itemPrice;
@@ -609,7 +608,7 @@ class OperationManager extends Component
                 'type' => $item->product->type,
                 'unit' => $item->product->unit->short_name,
                 'weight' => $item->weight,
-                'clogging' => $item->clogging,
+                'clogging' => $item->product->type === 'simple' ? ($item->clogging ?? 0) : 0,
                 'price_per_unit' => $item->product->type === 'simple' 
                     ? ($operation->type === 'purchase' ? $item->product->purchase_price : $item->product->selling_price)
                     : 0,

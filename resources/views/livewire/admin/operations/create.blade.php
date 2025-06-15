@@ -135,15 +135,44 @@
                                             
                                             @if($item['type'] === 'composite' && !empty($item['elements']))
                                             <div class="mt-4 border-t pt-2">
-                                                <p class="text-sm font-semibold">Elements:</p>
-                                                <div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2">
+                                                <p class="text-sm font-semibold">Элементы состава:</p>
+                                                <div class="mt-2 space-y-2">
                                                     @foreach($item['elements'] as $el_index => $element)
-                                                    <div class="grid grid-cols-3 gap-2 items-center" wire:key="element-{{ $activeOperationId }}-{{ $index }}-{{ $el_index }}">
-                                                        <label class="text-sm flex-1 col-span-1">{{ $element['name'] }}</label>
-                                                        <input type="number" step="0.01" placeholder="price/{{$element['unit']}}" wire:model.live.debounce.300ms="operations.{{ $activeOperationId }}.cartItems.{{ $index }}.elements.{{ $el_index }}.price" class="col-span-1 shadow-sm appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                                    <div class="grid grid-cols-4 gap-2 items-center p-2 bg-gray-50 rounded" wire:key="element-{{ $activeOperationId }}-{{ $index }}-{{ $el_index }}">
+                                                        <label class="text-sm flex-1 col-span-1 font-medium">{{ $element['name'] }}</label>
+                                                        <div class="col-span-1 text-xs text-gray-600">
+                                                            {{ $element['price'] }} грн/1%
+                                                        </div>
                                                         <input type="number" step="0.0001" placeholder="%" wire:model.live.debounce.300ms="operations.{{ $activeOperationId }}.cartItems.{{ $index }}.elements.{{ $el_index }}.percentage" class="col-span-1 shadow-sm appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                                        <div class="col-span-1 text-xs text-gray-600 font-medium">
+                                                            = {{ number_format(($element['price'] ?? 0) * ($element['percentage'] ?? 0), 2) }} грн/кг
+                                                        </div>
                                                     </div>
                                                     @endforeach
+                                                </div>
+                                                
+                                                @php
+                                                    $totalPercentage = collect($item['elements'])->sum('percentage');
+                                                    $pricePerKg = collect($item['elements'])->sum(function($el) {
+                                                        return ($el['price'] ?? 0) * ($el['percentage'] ?? 0);
+                                                    });
+                                                @endphp
+                                                
+                                                <div class="mt-3 p-3 bg-blue-50 rounded border-l-4 border-blue-400">
+                                                    <div class="flex justify-between items-center">
+                                                        <span class="text-sm font-medium">Общий процент:</span>
+                                                        <span class="text-sm font-bold {{ $totalPercentage > 100 ? 'text-red-600' : 'text-green-600' }}">
+                                                            {{ number_format($totalPercentage, 2) }}%
+                                                        </span>
+                                                    </div>
+                                                    <div class="flex justify-between items-center mt-1">
+                                                        <span class="text-sm font-medium">Стоимость за 1 кг:</span>
+                                                        <span class="text-sm font-bold text-blue-600">{{ number_format($pricePerKg, 2) }} грн</span>
+                                                    </div>
+                                                    <div class="flex justify-between items-center mt-1">
+                                                        <span class="text-sm font-medium">Общая стоимость ({{ $item['weight'] }} кг):</span>
+                                                        <span class="text-sm font-bold text-green-600">{{ number_format($pricePerKg * ($item['weight'] ?? 0), 2) }} грн</span>
+                                                    </div>
                                                 </div>
                                             </div>
                                             @endif

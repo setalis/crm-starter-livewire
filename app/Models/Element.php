@@ -46,17 +46,20 @@ class Element extends Model
         }
 
         $totalAmount = 0;
-        $totalWeight = 0;
+        $totalPercentage = 0;
 
         foreach ($purchaseElements as $operationElement) {
             $item = $operationElement->item;
-            $elementWeight = $item->weight * ($operationElement->percentage / 100);
-            $elementPrice = $item->price * ($operationElement->percentage / 100);
+            // Цена за единицу веса с учетом процентного содержания элемента
+            $pricePerKg = $item->price * ($operationElement->percentage / 100);
+            // Общая стоимость элемента в этой операции
+            $elementTotalPrice = $pricePerKg * $item->weight;
             
-            $totalAmount += $elementPrice * $elementWeight;
-            $totalWeight += $elementWeight;
+            $totalAmount += $elementTotalPrice;
+            $totalPercentage += $operationElement->percentage * $item->weight;
         }
 
-        return $totalWeight > 0 ? $totalAmount / $totalWeight : $this->price ?? 0;
+        // Возвращаем среднюю стоимость за 1% содержания
+        return $totalPercentage > 0 ? $totalAmount / $totalPercentage : $this->price ?? 0;
     }
 }
