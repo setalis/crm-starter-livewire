@@ -42,6 +42,12 @@ class OperationManager extends Component
         if ($type) {
             // This is for /operations/create/{type} routes
             $this->addNewOperation($type);
+            
+            // Check if product_id is provided in the request
+            $productId = request()->get('product_id');
+            if ($productId && $this->activeOperationId) {
+                $this->addProductToCart($productId);
+            }
         } else {
             // This is for /operations index route
             $this->isModal = false;
