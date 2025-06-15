@@ -25,6 +25,8 @@ class ElementManager extends Component
 
     public ?string $price = null;
 
+    public ?string $unit_price = null;
+
     public ?string $stock = null;
 
     public function mount(): void
@@ -58,6 +60,7 @@ class ElementManager extends Component
         $this->name = $element->name;
         $this->unit_id = $element->unit_id;
         $this->price = $element->price;
+        $this->unit_price = $element->unit_price;
         $this->stock = $element->stock ?? 0;
         $this->isModal = true;
     }
@@ -68,6 +71,7 @@ class ElementManager extends Component
             'name' => ['required', 'string', 'max:255'],
             'unit_id' => ['required', 'integer', 'exists:units,id'],
             'price' => ['required', 'numeric', 'min:0'],
+            'unit_price' => ['required', 'numeric', 'min:0'],
             'stock' => ['required', 'numeric', 'min:0'],
         ]);
 

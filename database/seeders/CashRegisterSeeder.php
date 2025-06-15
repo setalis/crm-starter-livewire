@@ -21,6 +21,6 @@ class CashRegisterSeeder extends Seeder
         ]);
 
         // Добавляем начальную сумму в кассу
-        $cashRegister->addMoney(100000, 'Начальный капитал', 1);
+        $cashRegister->addMoney(0, 'Начальный капитал', 1);
     }
 }

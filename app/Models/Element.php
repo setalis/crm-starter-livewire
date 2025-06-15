@@ -14,6 +14,7 @@ class Element extends Model
         'name',
         'unit_id',
         'price',
+        'unit_price',
         'stock',
     ];
 

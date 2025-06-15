@@ -19,6 +19,7 @@ return new class extends Migration
                 ->constrained()
                 ->cascadeOnDelete();
             $table->decimal('price', 15, 2)->comment('Стоимость за 1% содержания элемента в продукте');
+            $table->decimal('unit_price', 15, 2)->default(0)->comment('Стоимость за 1 единицу измерения (для подсчета стоимости запасов)');
             $table->decimal('stock', 10, 3)->default(0);
             $table->timestamps();
         });
