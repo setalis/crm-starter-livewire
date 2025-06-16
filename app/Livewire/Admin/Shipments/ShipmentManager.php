@@ -32,6 +32,7 @@ class ShipmentManager extends Component
     public $editMode = false;
     public $editShipmentId;
     public $shipping_cost = 0;
+    public $editingItemIndex = null;
 
     public function mount()
     {
@@ -47,22 +48,72 @@ class ShipmentManager extends Component
             'writeoff_type' => 'required|in:partial,full',
             'stock_after' => 'nullable|numeric|min:0',
         ]);
+        
         $this->shipmentItems[] = [
             'product_id' => $this->product_id,
             'weight' => $this->weight,
             'writeoff_type' => $this->writeoff_type,
             'stock_after' => $this->stock_after,
         ];
-        $this->product_id = null;
-        $this->weight = null;
-        $this->writeoff_type = 'partial';
-        $this->stock_after = null;
+        
+        // Сбрасываем форму и режим редактирования
+        $this->cancelEditItem();
     }
 
     public function removeShipmentItem($index)
     {
         unset($this->shipmentItems[$index]);
         $this->shipmentItems = array_values($this->shipmentItems);
+    }
+
+    public function editShipmentItem($index)
+    {
+        // Сбрасываем все поля перед заполнением
+        $this->cancelEditItem();
+        
+        $this->editingItemIndex = $index;
+        $item = $this->shipmentItems[$index];
+        
+        $this->product_id = $item['product_id'];
+        $this->weight = $item['weight'];
+        $this->writeoff_type = $item['writeoff_type'];
+        $this->stock_after = $item['stock_after'];
+        
+        // Принудительно обновляем компонент
+        $this->dispatch('refresh');
+    }
+
+    public function updateShipmentItem()
+    {
+        $this->validate([
+            'product_id' => 'required|exists:products,id',
+            'weight' => 'required|numeric|min:0.01',
+            'writeoff_type' => 'required|in:partial,full',
+            'stock_after' => 'nullable|numeric|min:0',
+        ]);
+
+        if ($this->editingItemIndex !== null) {
+            $this->shipmentItems[$this->editingItemIndex] = [
+                'id' => $this->shipmentItems[$this->editingItemIndex]['id'] ?? null,
+                'product_id' => $this->product_id,
+                'weight' => $this->weight,
+                'writeoff_type' => $this->writeoff_type,
+                'stock_after' => $this->stock_after,
+                'expected_stock_before' => $this->shipmentItems[$this->editingItemIndex]['expected_stock_before'] ?? null,
+                'actual_stock_before' => $this->shipmentItems[$this->editingItemIndex]['actual_stock_before'] ?? null,
+                'stock_discrepancy' => $this->shipmentItems[$this->editingItemIndex]['stock_discrepancy'] ?? null,
+            ];
+            $this->cancelEditItem();
+        }
+    }
+
+    public function cancelEditItem()
+    {
+        $this->editingItemIndex = null;
+        $this->product_id = null;
+        $this->weight = null;
+        $this->writeoff_type = 'partial';
+        $this->stock_after = null;
     }
 
     public function openModal($shipmentId = null)
@@ -116,25 +167,33 @@ class ShipmentManager extends Component
             'shipping_cost' => 'nullable|numeric|min:0',
         ]);
 
-        // Проверяем остатки на складе
-        foreach ($this->shipmentItems as $item) {
-            $product = Product::find($item['product_id']);
-            if ($product && $product->stock < $item['weight']) {
-                throw \Illuminate\Validation\ValidationException::withMessages([
-                    'shipmentItems' => "Недостаточно товара '{$product->name}' на складе. Доступно: {$product->stock} кг, запрошено: {$item['weight']} кг",
-                ]);
-            }
-        }
-
         if ($this->editMode && $this->editShipmentId) {
             $shipment = Shipment::findOrFail($this->editShipmentId);
             
-            // Возвращаем товары на склад от предыдущих позиций
+            // ВАЖНО: Сначала возвращаем товары на склад от предыдущих позиций
             foreach ($shipment->items as $oldItem) {
                 $product = Product::find($oldItem->product_id);
                 if ($product) {
+                    // Возвращаем вес товара обратно на склад
                     $product->stock += $oldItem->weight;
+                    // Восстанавливаем склад до того состояния, которое было до предыдущего списания
+                    $expectedBefore = $oldItem->expected_stock_before ?? 0;
+                    $actualBefore = $oldItem->actual_stock_before ?? 0;
+                    $discrepancy = $oldItem->stock_discrepancy ?? 0;
+                    
+                    // Восстанавливаем к исходному состоянию
+                    $product->stock = $expectedBefore;
                     $product->save();
+                }
+            }
+            
+            // Теперь проверяем остатки на складе для новых позиций
+            foreach ($this->shipmentItems as $item) {
+                $product = Product::find($item['product_id']);
+                if ($product && $product->stock < $item['weight']) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'shipmentItems' => "Недостаточно товара '{$product->name}' на складе. Доступно: {$product->stock} кг, запрошено: {$item['weight']} кг",
+                    ]);
                 }
             }
             
@@ -174,6 +233,16 @@ class ShipmentManager extends Component
                 $shipment->items()->create($item);
             }
         } else {
+            // Для новой отгрузки проверяем остатки на складе
+            foreach ($this->shipmentItems as $item) {
+                $product = Product::find($item['product_id']);
+                if ($product && $product->stock < $item['weight']) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'shipmentItems' => "Недостаточно товара '{$product->name}' на складе. Доступно: {$product->stock} кг, запрошено: {$item['weight']} кг",
+                    ]);
+                }
+            }
+            
             $shipment = Shipment::create([
                 'car_number' => $this->car_number,
                 'driver_name' => $this->driver_name,
@@ -227,6 +296,9 @@ class ShipmentManager extends Component
         $this->writeoff_type = 'partial';
         $this->stock_after = null;
         $this->shipping_cost = 0;
+        $this->editingItemIndex = null;
+        $this->editMode = false;
+        $this->editShipmentId = null;
     }
 
     public function openConfirmModal($shipmentId)
@@ -308,25 +380,45 @@ class ShipmentManager extends Component
         $this->detailsShipment = null;
     }
 
+    public function getShipmentRevenue($shipment)
+    {
+        $revenue = 0;
+        foreach ($shipment->items as $item) {
+            $actualWeight = $item->actual_weight ?? 0;
+            $actualPrice = $item->actual_price ?? 0;
+            $actualClogging = $item->actual_clogging ?? 0;
+            
+            // Вычисляем чистый вес без засора
+            $cleanWeight = $actualWeight * (1 - ($actualClogging / 100));
+            
+            $revenue += $cleanWeight * $actualPrice;
+        }
+        return $revenue;
+    }
+
     public function getShipmentProfit($shipment)
     {
-        $profit = 0;
+        // Валовая выручка
+        $revenue = $this->getShipmentRevenue($shipment);
+        
+        // Расчетные затраты на товары
+        $costs = 0;
         foreach ($shipment->items as $item) {
             $purchase = $item->product->average_purchase_price ?? 0;
             $clogging = $item->product->clogging ?? 0;
             
-            // Защита от деления на ноль при 100% засоре
-            if ($clogging >= 100) {
-                $cost = $item->weight * $purchase * 10; // Условно высокая стоимость при 100% засоре
-            } else {
-                $cost = $item->weight * ($purchase / (1 - ($clogging / 100)));
-            }
+            // Правильная формула: Чистый вес × Средняя цена
+            $cleanWeight = $item->weight * (1 - ($clogging / 100));
+            $cost = $cleanWeight * $purchase;
             
-            $income = ($item->actual_weight ?? 0) * ($item->actual_price ?? 0);
-            
-            $profit += $income - $cost;
+            $costs += $cost;
         }
-        return $profit;
+        
+        // Затраты на отгрузку
+        $shippingCost = $shipment->shipping_cost ?? 0;
+        
+        // Чистая прибыль = Валовая выручка - Затраты на товары - Затраты на отгрузку
+        return $revenue - $costs - $shippingCost;
     }
 
     public function getItemProfit($item)
@@ -334,13 +426,18 @@ class ShipmentManager extends Component
         $purchase = $item->product->average_purchase_price ?? 0;
         $clogging = $item->product->clogging ?? 0;
         
-        if ($clogging >= 100) {
-            $cost = $item->weight * $purchase * 10;
-        } else {
-            $cost = $item->weight * ($purchase / (1 - ($clogging / 100)));
-        }
+        // Правильный расчет затрат: Чистый вес × Средняя цена
+        $cleanWeight = $item->weight * (1 - ($clogging / 100));
+        $cost = $cleanWeight * $purchase;
         
-        $income = ($item->actual_weight ?? 0) * ($item->actual_price ?? 0);
+        // Правильный расчет дохода с учетом фактического засора
+        $actualWeight = $item->actual_weight ?? 0;
+        $actualPrice = $item->actual_price ?? 0;
+        $actualClogging = $item->actual_clogging ?? 0;
+        
+        // Чистый вес = фактический вес × (1 - засор%)
+        $actualCleanWeight = $actualWeight * (1 - ($actualClogging / 100));
+        $income = $actualCleanWeight * $actualPrice;
         
         return $income - $cost;
     }
@@ -361,7 +458,7 @@ class ShipmentManager extends Component
             'Заявленный вес (кг)',
             'Фактический вес (кг)',
             'Расчетные затраты',
-            'Фактический доход',
+            'Валовая выручка',
             'Затраты на отгрузку',
             'Чистая прибыль',
             'Рентабельность (%)',
@@ -372,7 +469,7 @@ class ShipmentManager extends Component
         foreach ($shipments as $shipment) {
             $metals = [];
             $declaredWeight = 0;
-            $actualWeight = 0;
+            $totalActualWeight = 0;
             $calculatedCosts = 0;
             $actualIncome = 0;
             $totalDiscrepancy = 0;
@@ -382,18 +479,20 @@ class ShipmentManager extends Component
                 $purchase = $product?->average_purchase_price ?? 0;
                 $clogging = $product?->clogging ?? 0;
                 
-                // Расчет затрат с учетом засора
-                if ($clogging >= 100) {
-                    $itemCost = $item->weight * $purchase * 10;
-                } else {
-                    $itemCost = $item->weight * ($purchase / (1 - ($clogging / 100)));
-                }
+                // Правильная формула затрат: Чистый вес × Средняя цена
+                $cleanWeightCost = $item->weight * (1 - ($clogging / 100));
+                $itemCost = $cleanWeightCost * $purchase;
                 
-                $itemIncome = ($item->actual_weight ?? 0) * ($item->actual_price ?? 0);
+                // Вычисляем валовую выручку с учетом засора
+                $itemActualWeight = $item->actual_weight ?? 0;
+                $actualPrice = $item->actual_price ?? 0;
+                $actualClogging = $item->actual_clogging ?? 0;
+                $cleanWeight = $itemActualWeight * (1 - ($actualClogging / 100));
+                $itemIncome = $cleanWeight * $actualPrice;
                 
                 $metals[] = $product?->name . ' (' . $item->weight . ' кг)';
                 $declaredWeight += $item->weight;
-                $actualWeight += $item->actual_weight ?? 0;
+                $totalActualWeight += $itemActualWeight;
                 $calculatedCosts += $itemCost;
                 $actualIncome += $itemIncome;
                 $totalDiscrepancy += $item->stock_discrepancy ?? 0;
@@ -412,7 +511,7 @@ class ShipmentManager extends Component
                 $shipment->stage === 'draft' ? 'Черновик' : 'Подтверждено',
                 implode('; ', $metals),
                 number_format($declaredWeight, 2),
-                number_format($actualWeight, 2),
+                number_format($totalActualWeight, 2),
                 number_format($calculatedCosts, 2),
                 number_format($actualIncome, 2),
                 number_format($shippingCost, 2),
@@ -461,7 +560,7 @@ class ShipmentManager extends Component
             'Заявленный вес (кг)',
             'Фактический вес (кг)',
             'Расчетные затраты',
-            'Фактический доход',
+            'Валовая выручка',
             'Затраты на отгрузку',
             'Чистая прибыль',
             'Рентабельность (%)',
@@ -471,7 +570,7 @@ class ShipmentManager extends Component
         foreach ($shipments as $shipment) {
             $metals = [];
             $declaredWeight = 0;
-            $actualWeight = 0;
+            $totalActualWeight = 0;
             $calculatedCosts = 0;
             $actualIncome = 0;
             
@@ -480,18 +579,20 @@ class ShipmentManager extends Component
                 $purchase = $product?->average_purchase_price ?? 0;
                 $clogging = $product?->clogging ?? 0;
                 
-                // Расчет затрат с учетом засора
-                if ($clogging >= 100) {
-                    $itemCost = $item->weight * $purchase * 10;
-                } else {
-                    $itemCost = $item->weight * ($purchase / (1 - ($clogging / 100)));
-                }
+                // Правильная формула затрат: Чистый вес × Средняя цена
+                $cleanWeightCost = $item->weight * (1 - ($clogging / 100));
+                $itemCost = $cleanWeightCost * $purchase;
                 
-                $itemIncome = ($item->actual_weight ?? 0) * ($item->actual_price ?? 0);
+                // Вычисляем валовую выручку с учетом засора
+                $itemActualWeight = $item->actual_weight ?? 0;
+                $actualPrice = $item->actual_price ?? 0;
+                $actualClogging = $item->actual_clogging ?? 0;
+                $cleanWeight = $itemActualWeight * (1 - ($actualClogging / 100));
+                $itemIncome = $cleanWeight * $actualPrice;
                 
                 $metals[] = $product?->name . ' (' . $item->weight . ' кг)';
                 $declaredWeight += $item->weight;
-                $actualWeight += $item->actual_weight ?? 0;
+                $totalActualWeight += $itemActualWeight;
                 $calculatedCosts += $itemCost;
                 $actualIncome += $itemIncome;
             }
@@ -509,7 +610,7 @@ class ShipmentManager extends Component
                 $shipment->stage === 'draft' ? 'Черновик' : 'Подтверждено',
                 implode('; ', $metals),
                 number_format($declaredWeight, 2),
-                number_format($actualWeight, 2),
+                number_format($totalActualWeight, 2),
                 number_format($calculatedCosts, 2),
                 number_format($actualIncome, 2),
                 number_format($shippingCost, 2),
@@ -592,7 +693,9 @@ class ShipmentManager extends Component
             'Засор (%)',
             'Расчетные затраты на позицию',
             'Фактическая цена продажи',
-            'Фактический доход с позиции',
+            'Засор фактический (%)',
+            'Чистый вес (кг)',
+            'Валовая выручка с позиции',
             'Прибыль с позиции',
             'Рентабельность позиции (%)',
             'Тип списания',
@@ -609,14 +712,17 @@ class ShipmentManager extends Component
                 $purchase = $product?->average_purchase_price ?? 0;
                 $clogging = $product?->clogging ?? 0;
                 
-                // Расчет затрат с учетом засора
-                if ($clogging >= 100) {
-                    $itemCost = $item->weight * $purchase * 10;
-                } else {
-                    $itemCost = $item->weight * ($purchase / (1 - ($clogging / 100)));
-                }
+                // Правильная формула затрат: Чистый вес × Средняя цена
+                $cleanWeightCost = $item->weight * (1 - ($clogging / 100));
+                $itemCost = $cleanWeightCost * $purchase;
                 
-                $itemIncome = ($item->actual_weight ?? 0) * ($item->actual_price ?? 0);
+                // Вычисляем валовую выручку с учетом засора
+                $actualWeight = $item->actual_weight ?? 0;
+                $actualPrice = $item->actual_price ?? 0;
+                $actualClogging = $item->actual_clogging ?? 0;
+                $cleanWeight = $actualWeight * (1 - ($actualClogging / 100));
+                $itemIncome = $cleanWeight * $actualPrice;
+                
                 $itemProfit = $itemIncome - $itemCost;
                 $itemProfitability = $itemCost > 0 ? ($itemProfit / $itemCost) * 100 : 0;
                 
@@ -634,6 +740,8 @@ class ShipmentManager extends Component
                     number_format($clogging, 2),
                     number_format($itemCost, 2),
                     number_format($item->actual_price ?? 0, 2),
+                    number_format($actualClogging, 2),
+                    number_format($cleanWeight, 2),
                     number_format($itemIncome, 2),
                     number_format($itemProfit, 2),
                     number_format($itemProfitability, 2),

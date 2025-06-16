@@ -77,7 +77,8 @@
                     <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Дата</th>
                     <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Предприятие</th>
                     <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Позиции</th>
-                    <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Прибыль</th>
+                    <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Валовая выручка</th>
+                    <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Чистая прибыль</th>
                     <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Статус</th>
                     <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Действия</th>
                 </tr>
@@ -104,6 +105,16 @@
                                     </span>
                                 @endforeach
                             </div>
+                        </td>
+                        <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">
+                            @if($shipment->stage === 'confirmed')
+                                @php $revenue = $this->getShipmentRevenue($shipment); @endphp
+                                <span class="font-semibold text-blue-600">
+                                    {{ number_format($revenue, 2) }} ₽
+                                </span>
+                            @else
+                                <span class="text-gray-400">—</span>
+                            @endif
                         </td>
                         <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">
                             @if($shipment->stage === 'confirmed')
@@ -146,7 +157,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="py-8 text-center text-zinc-400 dark:text-zinc-500">
+                        <td colspan="8" class="py-8 text-center text-zinc-400 dark:text-zinc-500">
                             <div class="flex flex-col items-center">
                                 <svg class="h-12 w-12 text-zinc-300 mb-2" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
@@ -171,9 +182,17 @@
                 <h3 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Создание отгрузки</h3>
                 <form wire:submit.prevent="saveShipment" class="space-y-6">
                     <div class="border-b border-zinc-200 dark:border-zinc-700 pb-4 mb-4">
-                        <h4 class="text-lg font-semibold mb-2 text-gray-900 dark:text-white">Позиции отгрузки</h4>
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="text-lg font-semibold text-gray-900 dark:text-white">Позиции отгрузки</h4>
+                            @if($editingItemIndex !== null)
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                    Редактирование позиции #{{ $editingItemIndex + 1 }}
+                                </span>
+                            @endif
+                        </div>
                         <div class="grid grid-cols-1 md:grid-cols-5 gap-2 mb-2">
-                            <select wire:model="product_id" class="col-span-2 rounded-md border-zinc-300 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 focus:border-blue-500 focus:ring focus:ring-blue-200/50 dark:focus:border-blue-400 dark:focus:ring-blue-900/40">
+                            <select wire:model.live="product_id" class="col-span-2 rounded-md border-zinc-300 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 focus:border-blue-500 focus:ring focus:ring-blue-200/50 dark:focus:border-blue-400 dark:focus:ring-blue-900/40">
                                 <option value="">Выберите металл</option>
                                 @foreach($products as $product)
                                     <option value="{{ $product->id }}">
@@ -182,7 +201,7 @@
                                 @endforeach
                             </select>
                             <div class="relative">
-                                <input type="number" step="0.01" min="0" wire:model="weight" placeholder="Вес, кг" class="w-full rounded-md border-zinc-300 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 focus:border-blue-500 focus:ring focus:ring-blue-200/50 dark:focus:border-blue-400 dark:focus:ring-blue-900/40">
+                                <input type="number" step="0.01" min="0" wire:model.live="weight" placeholder="Вес, кг" class="w-full rounded-md border-zinc-300 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 focus:border-blue-500 focus:ring focus:ring-blue-200/50 dark:focus:border-blue-400 dark:focus:ring-blue-900/40">
                                 @if($product_id && $weight)
                                     @php
                                         $selectedProduct = $products->find($product_id);
@@ -195,15 +214,28 @@
                                     @endif
                                 @endif
                             </div>
-                            <select wire:model="writeoff_type" class="rounded-md border-zinc-300 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 focus:border-blue-500 focus:ring focus:ring-blue-200/50 dark:focus:border-blue-400 dark:focus:ring-blue-900/40">
+                            <select wire:model.live="writeoff_type" class="rounded-md border-zinc-300 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 focus:border-blue-500 focus:ring focus:ring-blue-200/50 dark:focus:border-blue-400 dark:focus:ring-blue-900/40">
                                 <option value="partial">С остатком</option>
                                 <option value="full">В ноль</option>
                             </select>
-                            <input type="number" step="0.01" min="0" wire:model="stock_after" placeholder="Остаток на складе" class="rounded-md border-zinc-300 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 focus:border-blue-500 focus:ring focus:ring-blue-200/50 dark:focus:border-blue-400 dark:focus:ring-blue-900/40">
-                            <button type="button" wire:click="addShipmentItem" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                <svg class="-ml-0.5 mr-2 h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
-                                Добавить
-                            </button>
+                            <input type="number" step="0.01" min="0" wire:model.live="stock_after" placeholder="Остаток на складе" class="rounded-md border-zinc-300 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 focus:border-blue-500 focus:ring focus:ring-blue-200/50 dark:focus:border-blue-400 dark:focus:ring-blue-900/40">
+                            @if($editingItemIndex !== null)
+                                <div class="flex gap-2">
+                                    <button type="button" wire:click="updateShipmentItem" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                        <svg class="-ml-0.5 mr-2 h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                        Обновить
+                                    </button>
+                                    <button type="button" wire:click="cancelEditItem" class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                        <svg class="-ml-0.5 mr-2 h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                                        Отмена
+                                    </button>
+                                </div>
+                            @else
+                                <button type="button" wire:click="addShipmentItem" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    <svg class="-ml-0.5 mr-2 h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+                                    Добавить
+                                </button>
+                            @endif
                         </div>
                         <div class="overflow-x-auto mt-4">
                             <table class="min-w-full table-auto rounded-lg overflow-hidden">
@@ -226,14 +258,12 @@
                                             $purchase = $product?->average_purchase_price ?? 0;
                                             $clogging = $product?->clogging ?? 0;
                                             
-                                            if ($clogging >= 100) {
-                                                $cost = $item['weight'] * $purchase * 10;
-                                            } else {
-                                                $cost = $item['weight'] * ($purchase / (1 - ($clogging / 100)));
-                                            }
+                                            // Правильная формула затрат: Чистый вес × Средняя цена
+                                            $cleanWeightCost = $item['weight'] * (1 - ($clogging / 100));
+                                            $cost = $cleanWeightCost * $purchase;
                                             $totalCost += $cost;
                                         @endphp
-                                        <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800">
+                                        <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800 {{ $editingItemIndex === $index ? 'bg-yellow-50 border-l-4 border-yellow-400' : '' }}">
                                             <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">
                                                 <div class="font-medium">{{ $products->find($item['product_id'])->name ?? '' }}</div>
                                                 <div class="text-xs text-gray-500">
@@ -261,9 +291,14 @@
                                             </td>
                                             <td class="whitespace-nowrap px-3.5 py-2.5 text-sm font-medium">{{ number_format($cost, 2) }} ₽</td>
                                             <td class="whitespace-nowrap px-3.5 py-2.5 text-center">
-                                                <button type="button" wire:click="removeShipmentItem({{ $index }})" class="inline-flex items-center justify-center w-7 h-7 rounded-full text-red-600 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-red-500" title="Удалить позицию">
-                                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                                                </button>
+                                                <div class="flex items-center gap-1">
+                                                    <button type="button" wire:click="editShipmentItem({{ $index }})" class="inline-flex items-center justify-center w-7 h-7 rounded-full text-blue-600 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500" title="Редактировать позицию">
+                                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                                    </button>
+                                                    <button type="button" wire:click="removeShipmentItem({{ $index }})" class="inline-flex items-center justify-center w-7 h-7 rounded-full text-red-600 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-red-500" title="Удалить позицию">
+                                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     @empty
@@ -346,18 +381,21 @@
                                         $purchase = $product?->average_purchase_price ?? 0;
                                         $clogging = $product?->clogging ?? 0;
                                         
-                                        // Правильный расчет затрат с учетом засора
-                                        if ($clogging >= 100) {
-                                            $cost = $item['weight'] * $purchase * 10;
-                                        } else {
-                                            $cost = $item['weight'] * ($purchase / (1 - ($clogging / 100)));
-                                        }
+                                        // Правильная формула затрат: Чистый вес × Средняя цена
+                                        $cleanWeightCost = $item['weight'] * (1 - ($clogging / 100));
+                                        $cost = $cleanWeightCost * $purchase;
                                         
-                                        $income = ($item['actual_weight'] ?? 0) * ($item['actual_price'] ?? 0);
+                                        // Вычисляем чистый вес без засора
+                                        $actualWeight = $item['actual_weight'] ?? 0;
+                                        $actualPrice = $item['actual_price'] ?? 0;
+                                        $actualClogging = $item['actual_clogging'] ?? 0;
+                                        $cleanWeight = $actualWeight * (1 - ($actualClogging / 100));
+                                        
+                                        $income = $cleanWeight * $actualPrice;
                                         $profit = $income - $cost;
                                         $totalProfit += $profit;
                                     @endphp
-                                    <tr>
+                                    <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800">
                                         <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">{{ $products->find($item['product_id'])->name ?? '' }}</td>
                                         <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">{{ $item['weight'] }}</td>
                                         <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">
@@ -380,11 +418,26 @@
                             </tbody>
                             <tfoot class="bg-zinc-50 dark:bg-zinc-800">
                                 <tr>
-                                    <td colspan="6" class="px-3.5 py-2.5 text-right font-semibold">Общая прибыль:</td>
+                                    <td colspan="6" class="px-3.5 py-2.5 text-right font-semibold">Общая прибыль (без затрат на отгрузку):</td>
                                     <td class="px-3.5 py-2.5 font-bold">
                                         <span class="{{ $totalProfit >= 0 ? 'text-green-600' : 'text-red-600' }}">{{ number_format($totalProfit, 2) }}</span>
                                     </td>
                                 </tr>
+                                @if($confirmShipment && $confirmShipment->shipping_cost > 0)
+                                <tr>
+                                    <td colspan="6" class="px-3.5 py-2.5 text-right font-semibold">Затраты на отгрузку:</td>
+                                    <td class="px-3.5 py-2.5 font-bold text-red-600">
+                                        -{{ number_format($confirmShipment->shipping_cost, 2) }}
+                                    </td>
+                                </tr>
+                                <tr class="border-t-2 border-gray-400">
+                                    <td colspan="6" class="px-3.5 py-2.5 text-right font-bold">Чистая прибыль:</td>
+                                    <td class="px-3.5 py-2.5 font-bold">
+                                        @php $netProfit = $totalProfit - ($confirmShipment->shipping_cost ?? 0); @endphp
+                                        <span class="{{ $netProfit >= 0 ? 'text-green-600' : 'text-red-600' }}">{{ number_format($netProfit, 2) }}</span>
+                                    </td>
+                                </tr>
+                                @endif
                             </tfoot>
                         </table>
                     </div>
@@ -414,8 +467,9 @@
                     <div><b>Номер авто:</b> {{ $detailsShipment->car_number }}</div>
                     <div><b>Водитель:</b> {{ $detailsShipment->driver_name }}</div>
                     <div><b>Комментарий:</b> {{ $detailsShipment->comment }}</div>
-                    <div><b>Затраты на отгрузку:</b> {{ number_format($detailsShipment->shipping_cost, 2) }}</div>
-                    <div class="mt-2"><b>Общая прибыль:</b> <span class="font-semibold {{ $this->getShipmentProfit($detailsShipment) >= 0 ? 'text-green-600' : 'text-red-600' }}">{{ number_format($this->getShipmentProfit($detailsShipment), 2) }}</span></div>
+                    <div><b>Затраты на отгрузку:</b> {{ number_format($detailsShipment->shipping_cost, 2) }} ₽</div>
+                    <div class="mt-2"><b>Валовая выручка:</b> <span class="font-semibold text-blue-600">{{ number_format($this->getShipmentRevenue($detailsShipment), 2) }} ₽</span></div>
+                    <div><b>Чистая прибыль:</b> <span class="font-semibold {{ $this->getShipmentProfit($detailsShipment) >= 0 ? 'text-green-600' : 'text-red-600' }}">{{ number_format($this->getShipmentProfit($detailsShipment), 2) }} ₽</span></div>
                 </div>
                 <div class="overflow-x-auto mt-4">
                     <table class="min-w-full table-auto rounded-lg overflow-hidden">
