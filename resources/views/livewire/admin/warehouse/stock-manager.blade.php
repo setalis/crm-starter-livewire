@@ -79,19 +79,29 @@
                     <table class="min-w-full table-auto">
                         <thead class="bg-zinc-50 dark:bg-zinc-800">
                             <tr>
-                                <th class="px-3.5 py-2.5 text-left text-sm font-semibold rtl:text-right">{{ __('Наименование') }}</th>
-                                <th class="px-3.5 py-2.5 text-left text-sm font-semibold rtl:text-right">{{ __('Тип') }}</th>
-                                <th class="px-3.5 py-2.5 text-left text-sm font-semibold rtl:text-right">{{ __('Остаток') }}</th>
-                                <th class="px-3.5 py-2.5 text-left text-sm font-semibold rtl:text-right">{{ __('Единица измерения') }}</th>
-                                <th class="px-3.5 py-2.5 text-left text-sm font-semibold rtl:text-right">{{ __('Средняя цена закупки') }}</th>
-                                <th class="px-3.5 py-2.5 text-left text-sm font-semibold rtl:text-right">{{ __('Сумма') }}</th>
+                                <th class="px-3.5 py-2.5 text-center text-sm font-semibold rtl:text-right">{{ __('Изображение') }}</th>
+                                <th class="px-3.5 py-2.5 text-center text-sm font-semibold rtl:text-right">{{ __('Наименование') }}</th>
+                                <th class="px-3.5 py-2.5 text-center text-sm font-semibold rtl:text-right">{{ __('Тип') }}</th>
+                                <th class="px-3.5 py-2.5 text-center text-sm font-semibold rtl:text-right">{{ __('Остаток') }}</th>
+                                <th class="px-3.5 py-2.5 text-center text-sm font-semibold rtl:text-right">{{ __('Единица измерения') }}</th>
+                                <th class="px-3.5 py-2.5 text-center text-sm font-semibold rtl:text-right">{{ __('Средняя цена закупки') }}</th>
+                                <th class="px-3.5 py-2.5 text-center text-sm font-semibold rtl:text-right">{{ __('Сумма') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-zinc-200 dark:divide-zinc-700">
                             @forelse($products as $product)
                             <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800" wire:key="product-{{ $product->id }}">
-                                <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">{{ $product->name }}</td>
-                                <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">
+                                <td class="whitespace-nowrap px-3.5 py-2.5 text-center">
+                                    @if($product->image)
+                                        <img src="{{ Storage::url($product->image) }}" alt="{{ $product->name }}" class="w-12 h-12 object-cover rounded-lg mx-auto">
+                                    @else
+                                        <div class="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center mx-auto">
+                                            <i class="bi bi-image text-gray-400 text-xl"></i>
+                                        </div>
+                                    @endif
+                                </td>
+                                <td class="whitespace-nowrap px-3.5 py-2.5 text-sm text-center">{{ $product->name }}</td>
+                                <td class="whitespace-nowrap px-3.5 py-2.5 text-sm text-center">
                                     <span @class([
                                         'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
                                         'bg-green-100 text-green-800' => $product->type === 'simple',
@@ -100,7 +110,7 @@
                                         {{ $product->type === 'simple' ? 'Простой' : 'Составной' }}
                                     </span>
                                 </td>
-                                <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">
+                                <td class="whitespace-nowrap px-3.5 py-2.5 text-sm text-center">
                                     <span @class([
                                         'font-semibold',
                                         'text-red-600' => $product->stock <= 10,
@@ -110,13 +120,13 @@
                                         {{ number_format($product->stock, 3) }}
                                     </span>
                                 </td>
-                                <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">{{ $product->unit->name }}</td>
-                                <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">{{ number_format($product->average_purchase_price, 2) }} ₴</td>
-                                <td class="whitespace-nowrap px-3.5 py-2.5 text-sm font-semibold">{{ number_format($product->stock * $product->average_purchase_price, 2) }} ₴</td>
+                                <td class="whitespace-nowrap px-3.5 py-2.5 text-sm text-center">{{ $product->unit->name }}</td>
+                                <td class="whitespace-nowrap px-3.5 py-2.5 text-sm text-center">{{ number_format($product->average_purchase_price, 2) }} ₴</td>
+                                <td class="whitespace-nowrap px-3.5 py-2.5 text-sm font-semibold text-center">{{ number_format($product->stock * $product->average_purchase_price, 2) }} ₴</td>
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="6" class="py-12 text-center">
+                                <td colspan="7" class="py-12 text-center">
                                     <div class="space-y-4">
                                         <div class="flex justify-center text-zinc-400 dark:text-zinc-500">
                                             <i class="bi bi-box text-5xl"></i>
@@ -133,8 +143,8 @@
                         @if($products->count() > 0)
                         <tfoot class="bg-zinc-50 dark:bg-zinc-800">
                             <tr>
-                                <td colspan="5" class="px-3.5 py-2.5 text-sm font-semibold text-right">{{ __('Общая сумма товаров:') }}</td>
-                                <td class="px-3.5 py-2.5 text-sm font-bold">
+                                <td colspan="6" class="px-3.5 py-2.5 text-sm font-semibold text-right">{{ __('Общая сумма товаров:') }}</td>
+                                <td class="px-3.5 py-2.5 text-sm font-bold text-center">
                                     {{ number_format($products->sum(function($product) { return $product->stock * $product->average_purchase_price; }), 2) }} ₴
                                 </td>
                             </tr>

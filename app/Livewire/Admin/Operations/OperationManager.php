@@ -575,19 +575,14 @@ class OperationManager extends Component
                 $reverseDescription,
                 auth()->id()
             );
-        } else {
-            // При отмене продажи - снимаем деньги из кассы
-            try {
-                $operation->cashRegister->withdrawMoney(
-                    $operation->total_amount,
-                    $reverseDescription,
-                    auth()->id()
-                );
-            } catch (\Exception $e) {
-                // Если недостаточно денег в кассе, все равно продолжаем редактирование
-                // но можно добавить предупреждение
-            }
-        }
+                        } else {
+                    // При отмене продажи - снимаем деньги из кассы
+                    $operation->cashRegister->withdrawMoney(
+                        $operation->total_amount,
+                        $reverseDescription,
+                        auth()->id()
+                    );
+                }
 
         // Удаляем старые транзакции, связанные с этой операцией
         $operation->transactions()->delete();
@@ -712,16 +707,11 @@ class OperationManager extends Component
                     );
                 } else {
                     // При отмене продажи - снимаем деньги из кассы
-                    try {
-                        $operation->cashRegister->withdrawMoney(
-                            $operation->total_amount,
-                            $reverseDescription,
-                            auth()->id()
-                        );
-                    } catch (\Exception $e) {
-                        // Если недостаточно денег в кассе, все равно удаляем операцию но уведомляем
-                        session()->flash('warning', 'Недостаточно средств в кассе для полного возврата. Операция удалена, но остаток кассы может быть отрицательным.');
-                    }
+                    $operation->cashRegister->withdrawMoney(
+                        $operation->total_amount,
+                        $reverseDescription,
+                        auth()->id()
+                    );
                 }
             }
             

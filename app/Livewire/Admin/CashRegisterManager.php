@@ -95,20 +95,16 @@ class CashRegisterManager extends Component
             'description' => 'nullable|string|max:255',
         ]);
 
-        try {
-            $this->selectedRegister->addMoney(
-                $this->amount, 
-                $this->description ?: 'Пополнение кассы', 
-                auth()->id()
-            );
+        $this->selectedRegister->addMoney(
+            $this->amount, 
+            $this->description ?: 'Пополнение кассы', 
+            auth()->id()
+        );
 
-            session()->flash('message', 'Средства успешно добавлены в кассу');
-            $this->closeModals();
-            $this->loadCashRegisters();
-            $this->selectedRegister = $this->selectedRegister->fresh();
-        } catch (\Exception $e) {
-            session()->flash('error', $e->getMessage());
-        }
+        session()->flash('message', 'Средства успешно добавлены в кассу');
+        $this->closeModals();
+        $this->loadCashRegisters();
+        $this->selectedRegister = $this->selectedRegister->fresh();
     }
 
     public function withdrawMoney()
@@ -118,20 +114,16 @@ class CashRegisterManager extends Component
             'description' => 'nullable|string|max:255',
         ]);
 
-        try {
-            $this->selectedRegister->withdrawMoney(
-                $this->amount, 
-                $this->description ?: 'Снятие средств из кассы', 
-                auth()->id()
-            );
+        $this->selectedRegister->withdrawMoney(
+            $this->amount, 
+            $this->description ?: 'Снятие средств из кассы', 
+            auth()->id()
+        );
 
-            session()->flash('message', 'Средства успешно сняты из кассы');
-            $this->closeModals();
-            $this->loadCashRegisters();
-            $this->selectedRegister = $this->selectedRegister->fresh();
-        } catch (\Exception $e) {
-            session()->flash('error', $e->getMessage());
-        }
+        session()->flash('message', 'Средства успешно сняты из кассы');
+        $this->closeModals();
+        $this->loadCashRegisters();
+        $this->selectedRegister = $this->selectedRegister->fresh();
     }
 
     public function createRegister()

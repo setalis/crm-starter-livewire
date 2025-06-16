@@ -47,10 +47,6 @@ class CashRegister extends Model
 
     public function withdrawMoney($amount, $description = null, $user_id = null)
     {
-        if ($this->balance < $amount) {
-            throw new \Exception('Недостаточно средств в кассе');
-        }
-
         $this->decrement('balance', $amount);
         $this->refresh(); // Обновляем модель чтобы получить актуальный баланс
         
