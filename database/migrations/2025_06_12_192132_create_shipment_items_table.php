@@ -22,6 +22,10 @@ return new class extends Migration
             $table->float('actual_weight')->nullable(); // фактический вес по позиции
             $table->float('actual_price')->nullable(); // цена на заводе по позиции
             $table->float('actual_clogging')->nullable(); // засор по позиции
+            // Учет остатков на складе
+            $table->float('expected_stock_before')->nullable(); // ожидаемый остаток до списания
+            $table->float('actual_stock_before')->nullable(); // фактический остаток до списания
+            $table->float('stock_discrepancy')->nullable(); // расхождение (избыток/недостача)
             $table->timestamps();
         });
     }

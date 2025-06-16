@@ -121,7 +121,7 @@
                                     {{ $shipment->stage === 'draft' ? 'Черновик' : 'Подтверждено' }}
                                 </span>
                                 @if($shipment->stage === 'draft')
-                                    <button type="button" wire:click="openConfirmModal({{ $shipment->id }})" class="inline-flex items-center px-2 py-1 border border-transparent text-xs leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    <button type="button" wire:click="openConfirmModal({{ $shipment->id }})" class="inline-flex items-center px-2 py-1 border border-transparent text-xs leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" title="Внести фактические данные">
                                         <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
                                         Внести факт
                                     </button>
@@ -129,19 +129,16 @@
                             </div>
                         </td>
                         <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">
-                            <div class="flex flex-col gap-1">
-                                <button type="button" wire:click="openDetailsModal({{ $shipment->id }})" class="inline-flex items-center px-2 py-1 border border-transparent text-xs leading-4 font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                    <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                                    Подробнее
+                            <div class="flex items-center gap-1">
+                                <button type="button" wire:click="openDetailsModal({{ $shipment->id }})" class="inline-flex items-center justify-center w-7 h-7 rounded-full text-blue-600 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500" title="Подробнее">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                                 </button>
-                                <button type="button" wire:click="openModal({{ $shipment->id }})" class="inline-flex items-center px-2 py-1 border border-transparent text-xs leading-4 font-medium rounded-md text-yellow-700 bg-yellow-100 hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
-                                    <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                                    Редактировать
+                                <button type="button" wire:click="openModal({{ $shipment->id }})" class="inline-flex items-center justify-center w-7 h-7 rounded-full text-yellow-600 bg-yellow-100 hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-yellow-500" title="Редактировать">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                                 </button>
                                 @if($shipment->stage === 'confirmed')
-                                    <button type="button" wire:click="openConfirmModal({{ $shipment->id }})" class="inline-flex items-center px-2 py-1 border border-transparent text-xs leading-4 font-medium rounded-md text-green-700 bg-green-100 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                                        <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                                        Редактировать факт
+                                    <button type="button" wire:click="openConfirmModal({{ $shipment->id }})" class="inline-flex items-center justify-center w-7 h-7 rounded-full text-green-600 bg-green-100 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-green-500" title="Редактировать фактические данные">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                                     </button>
                                 @endif
                             </div>
@@ -216,6 +213,7 @@
                                         <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Вес, кг</th>
                                         <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Тип списания</th>
                                         <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Остаток на складе</th>
+                                        <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Расхождение</th>
                                         <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Предв. затраты</th>
                                         <th class="px-3.5 py-2.5"></th>
                                     </tr>
@@ -252,22 +250,30 @@
                                                 </span>
                                             </td>
                                             <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">{{ $item['stock_after'] ?? '—' }}</td>
+                                            <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">
+                                                @if(isset($item['stock_discrepancy']) && $item['stock_discrepancy'] != 0)
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $item['stock_discrepancy'] > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                                        {{ $item['stock_discrepancy'] > 0 ? '+' : '' }}{{ $item['stock_discrepancy'] }} кг
+                                                    </span>
+                                                @else
+                                                    <span class="text-gray-400">—</span>
+                                                @endif
+                                            </td>
                                             <td class="whitespace-nowrap px-3.5 py-2.5 text-sm font-medium">{{ number_format($cost, 2) }} ₽</td>
-                                            <td class="whitespace-nowrap px-3.5 py-2.5 text-right">
-                                                <button type="button" wire:click="removeShipmentItem({{ $index }})" class="inline-flex items-center px-2 py-1 border border-transparent text-xs leading-4 font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-                                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                                                    <span class="ml-1">Удалить</span>
+                                            <td class="whitespace-nowrap px-3.5 py-2.5 text-center">
+                                                <button type="button" wire:click="removeShipmentItem({{ $index }})" class="inline-flex items-center justify-center w-7 h-7 rounded-full text-red-600 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-red-500" title="Удалить позицию">
+                                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                                 </button>
                                             </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="6" class="py-8 text-center text-zinc-400 dark:text-zinc-500">Нет добавленных позиций</td>
+                                            <td colspan="7" class="py-8 text-center text-zinc-400 dark:text-zinc-500">Нет добавленных позиций</td>
                                         </tr>
                                     @endforelse
                                     @if(count($shipmentItems) > 0)
                                         <tr class="bg-zinc-50 dark:bg-zinc-800 font-semibold">
-                                            <td colspan="4" class="px-3.5 py-2.5 text-right">Общие предварительные затраты:</td>
+                                            <td colspan="5" class="px-3.5 py-2.5 text-right">Общие предварительные затраты:</td>
                                             <td class="px-3.5 py-2.5">{{ number_format($totalCost, 2) }} ₽</td>
                                             <td></td>
                                         </tr>
@@ -420,6 +426,7 @@
                                 <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Факт. вес</th>
                                 <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Цена на заводе</th>
                                 <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Засор</th>
+                                <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Расхождение склада</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-zinc-200 dark:divide-zinc-700">
@@ -430,6 +437,15 @@
                                     <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">{{ $item->actual_weight }}</td>
                                     <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">{{ $item->actual_price }}</td>
                                     <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">{{ $item->actual_clogging }}</td>
+                                    <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">
+                                        @if($item->stock_discrepancy && $item->stock_discrepancy != 0)
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $item->stock_discrepancy > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                                {{ $item->stock_discrepancy > 0 ? '+' : '' }}{{ $item->stock_discrepancy }} кг
+                                            </span>
+                                        @else
+                                            <span class="text-gray-400">—</span>
+                                        @endif
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>

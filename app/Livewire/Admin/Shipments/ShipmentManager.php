@@ -86,6 +86,9 @@ class ShipmentManager extends Component
                     'weight' => $item->weight,
                     'writeoff_type' => $item->writeoff_type,
                     'stock_after' => $item->stock_after,
+                    'expected_stock_before' => $item->expected_stock_before,
+                    'actual_stock_before' => $item->actual_stock_before,
+                    'stock_discrepancy' => $item->stock_discrepancy,
                 ];
             }
         } else {
@@ -125,6 +128,16 @@ class ShipmentManager extends Component
 
         if ($this->editMode && $this->editShipmentId) {
             $shipment = Shipment::findOrFail($this->editShipmentId);
+            
+            // Возвращаем товары на склад от предыдущих позиций
+            foreach ($shipment->items as $oldItem) {
+                $product = Product::find($oldItem->product_id);
+                if ($product) {
+                    $product->stock += $oldItem->weight;
+                    $product->save();
+                }
+            }
+            
             $shipment->update([
                 'car_number' => $this->car_number,
                 'driver_name' => $this->driver_name,
@@ -133,7 +146,31 @@ class ShipmentManager extends Component
                 'shipping_cost' => $this->shipping_cost ?? 0,
             ]);
             $shipment->items()->delete();
+            
+            // Добавляем новые позиции с учетом остатков
             foreach ($this->shipmentItems as $item) {
+                $product = Product::find($item['product_id']);
+                $expectedStockBefore = $product->stock;
+                $actualStockBefore = $product->stock;
+                
+                // Списываем товар со склада
+                $product->stock -= $item['weight'];
+                
+                // Устанавливаем новый остаток в зависимости от типа списания
+                if ($item['writeoff_type'] === 'full') {
+                    $newStock = 0;
+                } else {
+                    $newStock = $item['stock_after'] ?? $product->stock;
+                }
+                
+                $stockDiscrepancy = $newStock - $product->stock;
+                $product->stock = $newStock;
+                $product->save();
+                
+                $item['expected_stock_before'] = $expectedStockBefore;
+                $item['actual_stock_before'] = $actualStockBefore;
+                $item['stock_discrepancy'] = $stockDiscrepancy;
+                
                 $shipment->items()->create($item);
             }
         } else {
@@ -145,7 +182,31 @@ class ShipmentManager extends Component
                 'shipping_cost' => $this->shipping_cost ?? 0,
                 'stage' => 'draft',
             ]);
+            
+            // Добавляем позиции с учетом остатков
             foreach ($this->shipmentItems as $item) {
+                $product = Product::find($item['product_id']);
+                $expectedStockBefore = $product->stock;
+                $actualStockBefore = $product->stock;
+                
+                // Списываем товар со склада
+                $product->stock -= $item['weight'];
+                
+                // Устанавливаем новый остаток в зависимости от типа списания
+                if ($item['writeoff_type'] === 'full') {
+                    $newStock = 0;
+                } else {
+                    $newStock = $item['stock_after'] ?? $product->stock;
+                }
+                
+                $stockDiscrepancy = $newStock - $product->stock;
+                $product->stock = $newStock;
+                $product->save();
+                
+                $item['expected_stock_before'] = $expectedStockBefore;
+                $item['actual_stock_before'] = $actualStockBefore;
+                $item['stock_discrepancy'] = $stockDiscrepancy;
+                
                 $shipment->items()->create($item);
             }
         }
@@ -181,6 +242,9 @@ class ShipmentManager extends Component
                 'actual_weight' => $item->actual_weight,
                 'actual_price' => $item->actual_price,
                 'actual_clogging' => $item->actual_clogging,
+                'expected_stock_before' => $item->expected_stock_before,
+                'actual_stock_before' => $item->actual_stock_before,
+                'stock_discrepancy' => $item->stock_discrepancy,
             ];
         }
         $this->isConfirmModal = true;
@@ -301,6 +365,7 @@ class ShipmentManager extends Component
             'Затраты на отгрузку',
             'Чистая прибыль',
             'Рентабельность (%)',
+            'Общее расхождение склада (кг)',
             'Комментарий'
         ];
         
@@ -310,6 +375,7 @@ class ShipmentManager extends Component
             $actualWeight = 0;
             $calculatedCosts = 0;
             $actualIncome = 0;
+            $totalDiscrepancy = 0;
             
             foreach ($shipment->items as $item) {
                 $product = $this->products->find($item->product_id);
@@ -330,6 +396,7 @@ class ShipmentManager extends Component
                 $actualWeight += $item->actual_weight ?? 0;
                 $calculatedCosts += $itemCost;
                 $actualIncome += $itemIncome;
+                $totalDiscrepancy += $item->stock_discrepancy ?? 0;
             }
             
             $shippingCost = $shipment->shipping_cost ?? 0;
@@ -351,6 +418,7 @@ class ShipmentManager extends Component
                 number_format($shippingCost, 2),
                 number_format($netProfit, 2),
                 number_format($profitability, 2),
+                number_format($totalDiscrepancy, 2),
                 $shipment->comment ?: '',
             ];
         }
@@ -529,6 +597,9 @@ class ShipmentManager extends Component
             'Рентабельность позиции (%)',
             'Тип списания',
             'Остаток после списания',
+            'Ожидаемый остаток до списания',
+            'Фактический остаток до списания',
+            'Расхождение склада (кг)',
             'Комментарий к отгрузке'
         ];
         
@@ -568,6 +639,9 @@ class ShipmentManager extends Component
                     number_format($itemProfitability, 2),
                     $item->writeoff_type === 'full' ? 'В ноль' : 'С остатком',
                     number_format($item->stock_after ?? 0, 2),
+                    number_format($item->expected_stock_before ?? 0, 2),
+                    number_format($item->actual_stock_before ?? 0, 2),
+                    number_format($item->stock_discrepancy ?? 0, 2),
                     $shipment->comment ?: '',
                 ];
             }
