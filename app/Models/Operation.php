@@ -40,4 +40,9 @@ class Operation extends Model
     {
         return $this->hasMany(CashTransaction::class);
     }
+
+    public function conversion()
+    {
+        return $this->hasOne(Conversion::class);
+    }
 }

@@ -13,6 +13,7 @@ use App\Livewire\Admin\Warehouse\StockManager;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Passwords\Confirm;
 use App\Livewire\Admin\Shipments\ShipmentManager;
+use App\Livewire\Admin\Conversions\ConversionManager;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -34,6 +35,7 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::get('cash-register', CashRegisterManager::class)->name('cash-register.index');
     Route::get('warehouse/stock', StockManager::class)->name('warehouse.stock.index');
     Route::get('shipments', ShipmentManager::class)->name('shipments.index');
+    Route::get('conversions', ConversionManager::class)->name('conversions.index');
 });
 
 Route::middleware(['auth'])->group(function () {

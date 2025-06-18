@@ -33,6 +33,11 @@ class Element extends Model
         return $this->hasMany(OperationItemElement::class);
     }
 
+    public function conversionElements()
+    {
+        return $this->hasMany(ConversionElement::class);
+    }
+
     public function getAveragePurchasePriceAttribute()
     {
         $purchaseElements = $this->operationItemElements()

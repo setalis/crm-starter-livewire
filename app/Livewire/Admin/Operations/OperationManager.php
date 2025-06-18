@@ -758,7 +758,14 @@ class OperationManager extends Component
 
     public function showOperationDetails($operationId)
     {
-        $this->selectedOperation = Operation::with(['user', 'items.product.unit', 'items.elements.element.unit'])->find($operationId);
+        $this->selectedOperation = Operation::with([
+            'user', 
+            'items.product.unit', 
+            'items.elements.element.unit',
+            'conversion.sourceProduct.unit',
+            'conversion.targetProduct.unit',
+            'conversion.elements.element.unit'
+        ])->find($operationId);
         $this->showOperationDetailsModal = true;
     }
 

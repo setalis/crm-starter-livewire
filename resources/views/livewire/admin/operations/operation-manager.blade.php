@@ -32,32 +32,50 @@
                     <table class="w-full">
                         <thead class="hidden md:table-header-group">
                             <tr class="bg-gray-100 text-center">
-                                <th class="px-4 py-2">Date</th>
-                                <th class="px-4 py-2">Number</th>
-                                <th class="px-4 py-2">Type</th>
-                                <th class="px-4 py-2">User</th>
-                                <th class="px-4 py-2">Items</th>
-                                <th class="px-4 py-2 text-right">Total Amount</th>
-                                <th class="px-4 py-2">Actions</th>
+                                <th class="px-4 py-2">Дата</th>
+                                <th class="px-4 py-2">Номер</th>
+                                <th class="px-4 py-2">Тип</th>
+                                <th class="px-4 py-2">Пользователь</th>
+                                <th class="px-4 py-2">Элементы</th>
+                                <th class="px-4 py-2 text-right">Общая сумма</th>
+                                <th class="px-4 py-2">Действия</th>
                             </tr>
                         </thead>
                         <tbody class="block md:table-row-group">
                             @foreach($operationsList as $operation)
                             <tr class="block md:table-row border-b md:border-none mb-4 md:mb-0">
-                                <td data-label="Date" class="flex items-center justify-between md:table-cell p-2 md:px-4 md:py-2 md:border md:text-center">{{ $operation->created_at->format('d-m-Y H:i') }}</td>
-                                <td data-label="Number" class="flex items-center justify-between md:table-cell p-2 md:px-4 md:py-2 md:border md:text-center">{{ $operation->operation_number }}</td>
-                                <td data-label="Type" class="flex items-center justify-between md:table-cell p-2 md:px-4 md:py-2 md:border md:text-center">{{ ucfirst($operation->type) }}</td>
-                                <td data-label="User" class="flex items-center justify-between md:table-cell p-2 md:px-4 md:py-2 md:border md:text-center">{{ $operation->user->name }}</td>
-                                <td data-label="Items" class="flex items-center justify-between md:table-cell p-2 md:px-4 md:py-2 md:border md:text-center">
+                                <td data-label="Дата" class="flex items-center justify-between md:table-cell p-2 md:px-4 md:py-2 md:border md:text-center">{{ $operation->created_at->format('d-m-Y H:i') }}</td>
+                                <td data-label="Номер" class="flex items-center justify-between md:table-cell p-2 md:px-4 md:py-2 md:border md:text-center">{{ $operation->operation_number }}</td>
+                                <td data-label="Тип" class="flex items-center justify-between md:table-cell p-2 md:px-4 md:py-2 md:border md:text-center">
+                                    @if($operation->type === 'purchase')
+                                        Покупка
+                                    @elseif($operation->type === 'sale')
+                                        Продажа
+                                    @elseif($operation->type === 'conversion')
+                                        Конвертация
+                                    @else
+                                        {{ ucfirst($operation->type) }}
+                                    @endif
+                                </td>
+                                <td data-label="Пользователь" class="flex items-center justify-between md:table-cell p-2 md:px-4 md:py-2 md:border md:text-center">{{ $operation->user->name }}</td>
+                                <td data-label="Элементы" class="flex items-center justify-between md:table-cell p-2 md:px-4 md:py-2 md:border md:text-center">
                                     <button wire:click="showOperationDetails({{ $operation->id }})" class="border border-blue-600 w-7 h-7 rounded-md flex items-center justify-center hover:bg-blue-100 cursor-pointer text-blue-600 hover:text-blue-800 underline font-medium mx-auto">
-                                        {{ $operation->items->count() }}
+                                        @if($operation->type === 'conversion')
+                                            1
+                                        @else
+                                            {{ $operation->items->count() }}
+                                        @endif
                                     </button>
                                 </td>
-                                <td data-label="Total Amount" class="flex items-center justify-between md:table-cell p-2 md:px-4 md:py-2 md:border md:text-right">{{ number_format($operation->total_amount, 2) }}</td>
-                                <td data-label="Action" class="flex items-center justify-between md:table-cell p-2 md:px-4 md:py-2 md:border md:text-center">
+                                <td data-label="Общая сумма" class="flex items-center justify-between md:table-cell p-2 md:px-4 md:py-2 md:border md:text-right">{{ number_format($operation->total_amount, 2) }}</td>
+                                <td data-label="Действия" class="flex items-center justify-between md:table-cell p-2 md:px-4 md:py-2 md:border md:text-center">
                                     <div class="inline-block">
-                                        <button wire:click="edit({{ $operation->id }})" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Edit</button>
-                                        <button wire:click="delete({{ $operation->id }})" wire:confirm="Are you sure you want to delete this operation?" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Delete</button>
+                                        @if($operation->type === 'conversion')
+                                            <span class="text-sm text-gray-500 italic">Управляется в конвертациях</span>
+                                        @else
+                                            <button wire:click="edit({{ $operation->id }})" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Изменить</button>
+                                            <button wire:click="delete({{ $operation->id }})" wire:confirm="Вы уверены, что хотите удалить эту операцию?" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Удалить</button>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
@@ -107,8 +125,17 @@
                                 <label class="text-sm font-medium text-gray-500">Тип</label>
                                 <p class="text-sm text-gray-900">
                                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium 
-                                        {{ $selectedOperation->type === 'purchase' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800' }}">
-                                        {{ $selectedOperation->type === 'purchase' ? 'Покупка' : 'Продажа' }}
+                                        {{ $selectedOperation->type === 'purchase' ? 'bg-green-100 text-green-800' : 
+                                           ($selectedOperation->type === 'sale' ? 'bg-blue-100 text-blue-800' : 'bg-amber-100 text-amber-800') }}">
+                                        @if($selectedOperation->type === 'purchase')
+                                            Покупка
+                                        @elseif($selectedOperation->type === 'sale')
+                                            Продажа
+                                        @elseif($selectedOperation->type === 'conversion')
+                                            Конвертация
+                                        @else
+                                            {{ ucfirst($selectedOperation->type) }}
+                                        @endif
                                     </span>
                                 </p>
                             </div>
@@ -123,10 +150,95 @@
                         </div>
                     </div>
 
+                    <!-- Conversion Details -->
+                    @if($selectedOperation->type === 'conversion' && $selectedOperation->conversion)
+                    <div class="mb-6 bg-amber-50 p-4 rounded-lg border border-amber-200">
+                        <h4 class="text-md font-medium text-amber-900 mb-4">Детали конвертации</h4>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Исходный продукт -->
+                            <div class="bg-white p-4 rounded border">
+                                <h5 class="font-semibold text-gray-900 mb-2">Исходный продукт</h5>
+                                <div class="space-y-2">
+                                    <p class="text-sm">
+                                        <span class="font-medium text-gray-700">Название:</span> 
+                                        {{ $selectedOperation->conversion->sourceProduct->name }}
+                                    </p>
+                                    <p class="text-sm">
+                                        <span class="font-medium text-gray-700">Количество:</span> 
+                                        {{ number_format($selectedOperation->conversion->source_quantity, 3) }} {{ $selectedOperation->conversion->sourceProduct->unit->name ?? 'кг' }}
+                                    </p>
+                                    <p class="text-sm">
+                                        <span class="font-medium text-gray-700">Тип:</span>
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium 
+                                            {{ $selectedOperation->conversion->sourceProduct->type === 'simple' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800' }}">
+                                            {{ $selectedOperation->conversion->sourceProduct->type === 'simple' ? 'Простой' : 'Составной' }}
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Целевой продукт -->
+                            <div class="bg-white p-4 rounded border">
+                                <h5 class="font-semibold text-gray-900 mb-2">Целевой продукт</h5>
+                                <div class="space-y-2">
+                                    <p class="text-sm">
+                                        <span class="font-medium text-gray-700">Название:</span> 
+                                        {{ $selectedOperation->conversion->targetProduct->name }}
+                                    </p>
+                                    <p class="text-sm">
+                                        <span class="font-medium text-gray-700">Количество:</span> 
+                                        {{ number_format($selectedOperation->conversion->target_quantity, 3) }} {{ $selectedOperation->conversion->targetProduct->unit->name ?? 'кг' }}
+                                    </p>
+                                    <p class="text-sm">
+                                        <span class="font-medium text-gray-700">Тип:</span>
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium 
+                                            {{ $selectedOperation->conversion->targetProduct->type === 'simple' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800' }}">
+                                            {{ $selectedOperation->conversion->targetProduct->type === 'simple' ? 'Простой' : 'Составной' }}
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Дополнительные элементы (если есть) -->
+                        @if($selectedOperation->conversion->elements->count() > 0)
+                        <div class="mt-4">
+                            <h5 class="font-semibold text-gray-900 mb-3">Добавленные элементы в запасы</h5>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                @foreach($selectedOperation->conversion->elements as $conversionElement)
+                                <div class="bg-white p-3 rounded border">
+                                    <div class="flex justify-between items-center">
+                                        <span class="font-medium text-gray-900">{{ $conversionElement->element->name }}</span>
+                                        <span class="text-sm font-semibold text-gray-700">
+                                            {{ number_format($conversionElement->quantity, 3) }} {{ $conversionElement->element->unit->name ?? 'кг' }}
+                                        </span>
+                                    </div>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+
+                        <!-- Заметки -->
+                        @if($selectedOperation->conversion->notes)
+                        <div class="mt-4">
+                            <h5 class="font-semibold text-gray-900 mb-2">Заметки</h5>
+                            <p class="text-sm text-gray-700 bg-white p-3 rounded border">{{ $selectedOperation->conversion->notes }}</p>
+                        </div>
+                        @endif
+                    </div>
+                    @endif
+
                     <!-- Items List -->
-                    <h4 class="text-md font-medium text-gray-900 mb-3">Товары в операции</h4>
-                    <div class="space-y-4 max-h-96 overflow-y-auto">
-                        @foreach($selectedOperation->items as $item)
+                    @if($selectedOperation->items->count() > 0)
+                        @if($selectedOperation->type !== 'conversion')
+                        <h4 class="text-md font-medium text-gray-900 mb-3">Товары в операции</h4>
+                        @else
+                        <h4 class="text-md font-medium text-gray-900 mb-3">Связанные товары</h4>
+                        @endif
+                        <div class="space-y-4 max-h-96 overflow-y-auto">
+                            @foreach($selectedOperation->items as $item)
                         <div class="border border-gray-200 rounded-lg p-4">
                             <div class="flex justify-between items-start mb-3">
                                 <div>
@@ -182,8 +294,13 @@
                             </div>
                             @endif
                         </div>
-                        @endforeach
-                    </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="text-center py-8 text-gray-500">
+                            <p>В данной операции нет связанных товаров</p>
+                        </div>
+                    @endif
                 </div>
 
                 <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">

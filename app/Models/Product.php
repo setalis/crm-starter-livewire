@@ -39,6 +39,16 @@ class Product extends Model
         return $this->hasMany(OperationItem::class);
     }
 
+    public function sourceConversions()
+    {
+        return $this->hasMany(Conversion::class, 'source_product_id');
+    }
+
+    public function targetConversions()
+    {
+        return $this->hasMany(Conversion::class, 'target_product_id');
+    }
+
     public function getAveragePurchasePriceAttribute()
     {
         $purchaseItems = $this->operationItems()
