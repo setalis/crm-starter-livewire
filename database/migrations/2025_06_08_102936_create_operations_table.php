@@ -13,9 +13,11 @@ return new class extends Migration
     {
         Schema::create('operations', function (Blueprint $table) {
             $table->id();
+            $table->string('operation_number')->nullable();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->enum('type', ['purchase', 'sale']);
-            $table->decimal('total_amount', 10, 2);
+            $table->enum('type', ['purchase', 'sale', 'conversion']);
+            $table->decimal('total_amount', 10, 2)->default(0);
+            $table->foreignId('cash_register_id')->nullable()->constrained()->onDelete('set null');
             $table->timestamps();
         });
     }

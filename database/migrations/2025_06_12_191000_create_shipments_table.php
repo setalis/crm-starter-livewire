@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('shipments', function (Blueprint $table) {
             $table->id();
-            $table->string('car_number'); // номер автомобиля
-            $table->string('driver_name'); // ФИО водителя
-            $table->string('company'); // предприятие
+            $table->string('car_number')->nullable(); // номер автомобиля
+            $table->string('driver_name')->nullable(); // ФИО водителя
+            $table->string('company')->nullable(); // предприятие
             $table->text('comment')->nullable(); // комментарий
             $table->enum('stage', ['draft', 'confirmed'])->default('draft'); // этап: черновик/подтверждено
             $table->float('actual_weight')->nullable(); // фактический вес с завода

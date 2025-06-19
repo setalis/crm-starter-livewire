@@ -14,17 +14,31 @@ use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Passwords\Confirm;
 use App\Livewire\Admin\Shipments\ShipmentManager;
 use App\Livewire\Admin\Conversions\ConversionManager;
+use App\Livewire\Admin\Users\UserManager;
+use App\Livewire\Admin\Roles\RoleManager;
+use App\Livewire\Admin\Permissions\PermissionManager;
+use App\Livewire\Admin\Sections\SectionManager;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
-Route::view('dashboard', 'dashboard')
+Route::get('dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
-Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(function () {
+// Админская панель (для супер админов, админов и бухгалтеров)
+Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    // Управление пользователями и правами доступа
+    Route::middleware('can:users.view')->get('users', UserManager::class)->name('users.index');
+    Route::middleware('can:roles.view')->get('roles', RoleManager::class)->name('roles.index');
+    Route::middleware('can:roles.create')->get('roles/create', \App\Livewire\Admin\Roles\RoleEditor::class)->name('roles.create');
+    Route::middleware('can:roles.edit')->get('roles/{roleId}/edit', \App\Livewire\Admin\Roles\RoleEditor::class)->name('roles.edit');
+    Route::middleware('can:permissions.view')->get('permissions', PermissionManager::class)->name('permissions.index');
+    Route::middleware('can:sections.view')->get('sections', SectionManager::class)->name('sections.index');
+    
+    // Основные разделы
     Route::get('units', UnitManager::class)->name('units.index');
     Route::get('elements', ElementManager::class)->name('elements.index');
     Route::get('products', ProductManager::class)->name('products.index');
@@ -36,6 +50,19 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::get('warehouse/stock', StockManager::class)->name('warehouse.stock.index');
     Route::get('shipments', ShipmentManager::class)->name('shipments.index');
     Route::get('conversions', ConversionManager::class)->name('conversions.index');
+});
+
+// Панель менеджера (упрощенная версия)
+Route::middleware(['auth', 'verified', 'manager'])->prefix('manager')->name('manager.')->group(function () {
+    Route::view('dashboard', 'manager.dashboard')->name('dashboard');
+    Route::get('products', ProductManager::class)->name('products.index');
+    Route::get('operations', OperationManager::class)->name('operations.index');
+    Route::get('operations/{type}', OperationManager::class)
+        ->whereIn('type', ['purchase', 'sale'])
+        ->name('operations.create');
+    Route::get('warehouse/stock', StockManager::class)->name('warehouse.stock.index');
+    Route::get('cash-register', CashRegisterManager::class)->name('cash-register.index');
+    Route::get('shipments', ShipmentManager::class)->name('shipments.index');
 });
 
 Route::middleware(['auth'])->group(function () {

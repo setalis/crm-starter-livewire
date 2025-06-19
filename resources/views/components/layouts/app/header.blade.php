@@ -11,37 +11,40 @@
                 <x-app-logo />
             </a>
 
-            <flux:navbar class="-mb-px max-lg:hidden">
-                <flux:navbar.item icon="layout-grid" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
+            <div class="hidden lg:flex items-center -mb-px">
+                <a href="{{ route('dashboard') }}" class="flex items-center px-4 py-2 text-sm font-medium rounded-t-lg {{ request()->routeIs('dashboard') ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700' }}" wire:navigate>
+                    <flux:icon name="layout-grid" class="w-4 h-4 mr-2" />
                     {{ __('Dashboard') }}
-                </flux:navbar.item>
-            </flux:navbar>
+                </a>
+            </div>
 
-            <flux:spacer />
+            <div class="flex-1"></div>
 
-            <flux:navbar class="me-1.5 space-x-0.5 rtl:space-x-reverse py-0!">
+            <div class="flex items-center space-x-1 mr-4">
                 <flux:tooltip :content="__('Search')" position="bottom">
-                    <flux:navbar.item class="!h-10 [&>div>svg]:size-5" icon="magnifying-glass" href="#" :label="__('Search')" />
+                    <a href="#" class="p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+                        <flux:icon name="magnifying-glass" class="w-5 h-5" />
+                    </a>
                 </flux:tooltip>
                 <flux:tooltip :content="__('Repository')" position="bottom">
-                    <flux:navbar.item
-                        class="h-10 max-lg:hidden [&>div>svg]:size-5"
-                        icon="folder-git-2"
+                    <a
                         href="https://github.com/laravel/livewire-starter-kit"
                         target="_blank"
-                        :label="__('Repository')"
-                    />
+                        class="hidden lg:block p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+                    >
+                        <flux:icon name="folder-git-2" class="w-5 h-5" />
+                    </a>
                 </flux:tooltip>
                 <flux:tooltip :content="__('Documentation')" position="bottom">
-                    <flux:navbar.item
-                        class="h-10 max-lg:hidden [&>div>svg]:size-5"
-                        icon="book-open-text"
+                    <a
                         href="https://laravel.com/docs/starter-kits#livewire"
                         target="_blank"
-                        label="Documentation"
-                    />
+                        class="hidden lg:block p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+                    >
+                        <flux:icon name="book-open-text" class="w-5 h-5" />
+                    </a>
                 </flux:tooltip>
-            </flux:navbar>
+            </div>
 
             <!-- Desktop User Menu -->
             <flux:dropdown position="top" align="end">

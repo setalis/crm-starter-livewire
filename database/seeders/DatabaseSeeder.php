@@ -14,14 +14,29 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Сначала создаем разделы
+        $this->call(SectionSeeder::class);
+        
+        // Затем роли и разрешения
+        $this->call(RolePermissionSeeder::class);
 
-        User::factory()->create([
+        // Создаем супер админа
+        $superAdmin = User::updateOrCreate(
+            ['email' => 'slavrtm@gmail.com'],
+            [
             'name' => 'Администратор',
             'email' => 'slavrtm@gmail.com',
             'password' => Hash::make('77788399'),
-        ]);
+            ]
+        );
 
+        // Назначаем роль супер админа
+        $superAdmin->assignRole('super-admin');
+
+        // Создаем тестовых пользователей
+        $this->call(TestUsersSeeder::class);
+
+        // Остальные сидеры
         $this->call(UnitSeeder::class);
         $this->call(ElementSeeder::class);
         $this->call(ProductSeeder::class);

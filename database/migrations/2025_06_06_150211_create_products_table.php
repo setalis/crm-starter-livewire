@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('image')->nullable();
             $table->boolean('is_published')->default(false);
             $table->decimal('stock', 10, 3)->default(0);
+            $table->integer('position')->default(0);
             $table->timestamps();
         });
     }

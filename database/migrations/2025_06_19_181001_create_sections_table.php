@@ -11,8 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('operations', function (Blueprint $table) {
-            $table->string('operation_number')->unique()->nullable()->after('id');
+        Schema::create('sections', function (Blueprint $table) {
+            $table->id();
+            $table->timestamps();
         });
     }
 
@@ -21,9 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('operations', function (Blueprint $table) {
-            $table->dropUnique(['operation_number']);
-            $table->dropColumn('operation_number');
-        });
+        Schema::dropIfExists('sections');
     }
 };
