@@ -64,6 +64,33 @@ class ProductSeeder extends Seeder
                     ],
                 ]);
             }
+            
+            // Добавляем ценовые шкалы для простых продуктов
+            if ($product['type'] === 'simple' && $product['name'] === 'Черный металл') {
+                DB::table('product_price_scales')->insert([
+                    [
+                        'product_id' => $productId,
+                        'threshold_kg' => 10,
+                        'price' => 0.95, // При покупке от 10 кг - 0.95 руб/кг
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ],
+                    [
+                        'product_id' => $productId,
+                        'threshold_kg' => 50,
+                        'price' => 0.90, // При покупке от 50 кг - 0.90 руб/кг
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ],
+                    [
+                        'product_id' => $productId,
+                        'threshold_kg' => 100,
+                        'price' => 0.85, // При покупке от 100 кг - 0.85 руб/кг
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ],
+                ]);
+            }
         }
     }
 } 

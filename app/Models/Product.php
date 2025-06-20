@@ -107,4 +107,37 @@ class Product extends Model
         $totalPercentage = $this->elements->sum('pivot.percentage');
         return $totalPercentage <= 100;
     }
+
+    /**
+     * Получает цену для продукта в зависимости от веса (применяет ценовые шкалы)
+     */
+    public function getPriceForWeight($weight, $operationType = 'purchase')
+    {
+        // Для составных продуктов используем расчетную цену
+        if ($this->type === 'composite') {
+            return $this->getCompositeProductPricePerKg();
+        }
+
+        // Для простых продуктов проверяем ценовые шкалы
+        $basePrice = $operationType === 'purchase' ? $this->purchase_price : $this->selling_price;
+        
+        // Если нет ценовых шкал, возвращаем базовую цену
+        if ($this->priceScales->isEmpty()) {
+            return $basePrice;
+        }
+
+        // Ищем подходящую ценовую шкалу
+        $applicableScale = $this->priceScales
+            ->where('threshold_kg', '<=', $weight)
+            ->sortByDesc('threshold_kg')
+            ->first();
+
+        // Если нашли подходящую шкалу, используем её цену
+        if ($applicableScale) {
+            return $applicableScale->price;
+        }
+
+        // Если вес меньше минимального порога, используем базовую цену
+        return $basePrice;
+    }
 }

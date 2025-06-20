@@ -110,9 +110,11 @@ class RolePermissionSeeder extends Seeder
             // Отправки
             'shipments' => [
                 'shipments.view' => 'Просмотр отправок',
-                'shipments.create' => 'Создание отправок',
+                'shipments.create' => 'Создание отправок (черновик)',
                 'shipments.edit' => 'Редактирование отправок',
+                'shipments.confirm' => 'Подтверждение отправок (ввод фактических данных)',
                 'shipments.delete' => 'Удаление отправок',
+                'shipments.export' => 'Экспорт отчетов по отправкам',
             ],
             // Конверсии
             'conversions' => [
@@ -167,9 +169,9 @@ class RolePermissionSeeder extends Seeder
         })->get();
         $admin->syncPermissions($adminPermissions);
 
-        // Бухгалтер получает разрешения на финансовые операции и аналитику
+        // Бухгалтер получает разрешения на финансовые операции, отгрузки и аналитику
         $accountantPermissions = Permission::whereHas('section', function ($query) {
-            $query->whereIn('name', ['operations', 'cash', 'analytics', 'settings']);
+            $query->whereIn('name', ['operations', 'cash', 'shipments', 'analytics', 'settings']);
         })->whereNotIn('name', ['settings.system'])->get();
         $accountant->syncPermissions($accountantPermissions);
 
@@ -185,6 +187,7 @@ class RolePermissionSeeder extends Seeder
             'shipments.view',
             'shipments.create',
             'shipments.edit',
+            'shipments.confirm',
         ])->get();
         $manager->syncPermissions($managerPermissions);
     }

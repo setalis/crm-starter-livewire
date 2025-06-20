@@ -41,6 +41,10 @@ class ProductManager extends Component
     {
         $this->units = Unit::all();
         $this->elements = Element::all();
+        
+        // Устанавливаем единицу измерения "Килограмм" по умолчанию при загрузке
+        $defaultUnit = Unit::where('name', 'Килограмм')->first();
+        $this->unit_id = $defaultUnit ? $defaultUnit->id : ($this->units->first()?->id ?? null);
     }
 
     public function render()
@@ -51,6 +55,7 @@ class ProductManager extends Component
 
     public function openModal()
     {
+        $this->resetInputFields();
         $this->isModal = true;
     }
 
@@ -65,7 +70,9 @@ class ProductManager extends Component
         $this->product_id = null;
         $this->name = null;
         $this->type = 'simple';
-        $this->unit_id = null;
+        // Устанавливаем единицу измерения "Килограмм" по умолчанию
+        $defaultUnit = Unit::where('name', 'Килограмм')->first();
+        $this->unit_id = $defaultUnit ? $defaultUnit->id : ($this->units->first()?->id ?? null);
         $this->purchase_price = null;
         $this->selling_price = null;
         $this->clogging = null;
@@ -204,12 +211,25 @@ class ProductManager extends Component
         $this->image = $product->image;
         $this->is_published = $product->is_published;
         $this->stock = $product->stock;
-        $this->priceScales = $product->priceScales->toArray();
+        $this->priceScales = $product->priceScales->map(function ($scale) {
+            return [
+                'threshold_kg' => $scale->threshold_kg,
+                'price' => $scale->price
+            ];
+        })->toArray();
         $this->selectedElements = $product->elements->mapWithKeys(function ($element) {
             return [$element->id => ['percentage' => $element->pivot->percentage]];
         })->toArray();
 
-        $this->openModal();
+        // Очищаем поля для добавления элементов
+        $this->element_id_to_add = null;
+        $this->element_percentage_to_add = null;
+        $this->photo = null;
+
+        $this->isModal = true;
+        
+        // Принудительно обновляем компонент
+        $this->dispatch('refresh');
     }
 
     public function delete($id)

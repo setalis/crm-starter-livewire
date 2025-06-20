@@ -118,6 +118,17 @@ class ShipmentManager extends Component
 
     public function openModal($shipmentId = null)
     {
+        // Проверяем права доступа
+        if ($shipmentId && !auth()->user()->can('shipments.edit')) {
+            session()->flash('error', 'У вас нет прав для редактирования отгрузок.');
+            return;
+        }
+        
+        if (!$shipmentId && !auth()->user()->can('shipments.create')) {
+            session()->flash('error', 'У вас нет прав для создания отгрузок.');
+            return;
+        }
+        
         $this->isModal = true;
         $this->editMode = false;
         if ($shipmentId) {
@@ -155,6 +166,17 @@ class ShipmentManager extends Component
 
     public function saveShipment()
     {
+        // Проверяем права доступа
+        if ($this->editMode && !auth()->user()->can('shipments.edit')) {
+            session()->flash('error', 'У вас нет прав для редактирования отгрузок.');
+            return;
+        }
+        
+        if (!$this->editMode && !auth()->user()->can('shipments.create')) {
+            session()->flash('error', 'У вас нет прав для создания отгрузок.');
+            return;
+        }
+        
         $this->validate([
             'car_number' => 'nullable|string',
             'driver_name' => 'nullable|string',
@@ -303,6 +325,12 @@ class ShipmentManager extends Component
 
     public function openConfirmModal($shipmentId)
     {
+        // Проверяем права доступа
+        if (!auth()->user()->can('shipments.confirm')) {
+            session()->flash('error', 'У вас нет прав для подтверждения отгрузок.');
+            return;
+        }
+        
         $this->confirmShipmentId = $shipmentId;
         $this->confirmShipment = Shipment::with('items')->findOrFail($shipmentId);
         $this->confirmItems = [];
@@ -332,6 +360,12 @@ class ShipmentManager extends Component
 
     public function saveConfirmation()
     {
+        // Проверяем права доступа
+        if (!auth()->user()->can('shipments.confirm')) {
+            session()->flash('error', 'У вас нет прав для подтверждения отгрузок.');
+            return;
+        }
+        
         foreach ($this->confirmItems as $itemData) {
             $item = ShipmentItem::find($itemData['id']);
             if ($item) {
@@ -444,6 +478,12 @@ class ShipmentManager extends Component
 
     public function exportShipments()
     {
+        // Проверяем права доступа
+        if (!auth()->user()->can('shipments.export')) {
+            session()->flash('error', 'У вас нет прав для экспорта отчетов по отгрузкам.');
+            return;
+        }
+        
         $shipments = $this->shipments;
         
         $csvData = [];
@@ -546,6 +586,12 @@ class ShipmentManager extends Component
 
     public function exportShipmentsExcel()
     {
+        // Проверяем права доступа
+        if (!auth()->user()->can('shipments.export')) {
+            session()->flash('error', 'У вас нет прав для экспорта отчетов по отгрузкам.');
+            return;
+        }
+        
         $shipments = $this->shipments;
         
         $data = [];
@@ -676,6 +722,12 @@ class ShipmentManager extends Component
 
     public function exportShipmentsDetailed()
     {
+        // Проверяем права доступа
+        if (!auth()->user()->can('shipments.export')) {
+            session()->flash('error', 'У вас нет прав для экспорта отчетов по отгрузкам.');
+            return;
+        }
+        
         $shipments = $this->shipments;
         
         $csvData = [];

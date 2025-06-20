@@ -21,7 +21,10 @@ use App\Livewire\Admin\Sections\SectionManager;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    if (auth()->check()) {
+        return redirect()->route('dashboard');
+    }
+    return redirect()->route('login');
 })->name('home');
 
 Route::get('dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])

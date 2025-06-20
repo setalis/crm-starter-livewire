@@ -10,14 +10,18 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
         
-        // Если пользователь менеджер, перенаправляем его на панель менеджера
-        if ($user->hasRole('manager')) {
-            return redirect()->route('manager.dashboard');
-        }
+        // Определяем тип панели для пользователя
+        $panelType = $user->getPanelType();
         
-        // Если у пользователя есть доступ к админской панели, показываем админский dashboard
-        if ($user->hasAdminAccess()) {
-            return view('dashboard');
+        switch ($panelType) {
+            case 'manager':
+                return redirect()->route('manager.dashboard');
+            
+            case 'admin':
+                if ($user->hasAdminAccess()) {
+                    return view('dashboard');
+                }
+                break;
         }
         
         // Если нет доступа ни к одной панели

@@ -217,18 +217,23 @@ class OperationManager extends Component
     {
         if (!$this->activeOperationId || !$productId) return;
 
-        $product = Product::with('unit', 'elements.unit')->find($productId);
+        $product = Product::with('unit', 'elements.unit', 'priceScales')->find($productId);
         if (!$product) return;
 
+        $operationType = $this->activeOperation['type'];
+        $initialWeight = 1;
+        $initialPricePerUnit = $product->getPriceForWeight($initialWeight, $operationType);
+        
         $newItem = [
             'product_id' => $product->id,
             'name' => $product->name,
             'type' => $product->type,
             'unit' => $product->unit->short_name,
-            'weight' => 1,
+            'weight' => $initialWeight,
             'clogging' => $product->type === 'simple' ? ($product->clogging ?? 0) : 0,
-            'price_per_unit' => $this->activeOperation['type'] === 'purchase' ? $product->purchase_price : $product->selling_price,
+            'price_per_unit' => $initialPricePerUnit,
             'price' => 0,
+            'custom_price_set' => false,
             'elements' => [],
         ];
 
@@ -273,6 +278,8 @@ class OperationManager extends Component
         // operations.OP-123.cartItems.0.weight
         if (preg_match('/operations\.([a-zA-Z0-9-]+)\.cartItems\.(\d+)\.(.+)/', $name, $matches)) {
             
+            $operationId = $matches[1];
+            $itemIndex = (int)$matches[2];
             $propertyPath = $matches[3]; // e.g., 'price_per_unit' or 'elements.0.price'
 
             // Round price fields to 2 decimal places upon input
@@ -282,26 +289,58 @@ class OperationManager extends Component
                 data_set($this, $name, round($value, 2));
             }
 
-            $this->calculateTotals();
+            $this->calculateTotals($operationId, $itemIndex, $propertyPath);
         }
     }
 
-    public function calculateTotals()
+    public function calculateTotals($changedOperationId = null, $changedItemIndex = null, $changedProperty = null)
     {
-        if (!$this->activeOperationId || !isset($this->operations[$this->activeOperationId])) {
+        $operationId = $changedOperationId ?? $this->activeOperationId;
+        
+        if (!$operationId || !isset($this->operations[$operationId])) {
             return;
         }
 
         $totalAmount = 0;
-        foreach ($this->operations[$this->activeOperationId]['cartItems'] as &$item) {
-             $weight = (float)($item['weight'] ?? 0);
+        $operationType = $this->operations[$operationId]['type'] ?? 'purchase';
+        
+        foreach ($this->operations[$operationId]['cartItems'] as $index => &$item) {
+            $weight = (float)($item['weight'] ?? 0);
             $clogging = (float)($item['clogging'] ?? 0);
             $item['price'] = 0;
 
             if ($item['type'] === 'simple') {
                 $effectiveWeight = $weight - ($weight * $clogging / 100);
-                $price_per_unit = (float)($item['price_per_unit'] ?? 0);
-                $item['price'] = $effectiveWeight * $price_per_unit;
+                $currentPricePerUnit = (float)($item['price_per_unit'] ?? 0);
+                
+                // Если изменился вес или засорённость этого товара, проверяем нужно ли обновить цену
+                if ($index == $changedItemIndex && ($changedProperty === 'weight' || $changedProperty === 'clogging')) {
+                    // Получаем автоматическую цену для нового веса
+                    $product = Product::with('priceScales')->find($item['product_id']);
+                    if ($product) {
+                        $autoPricePerUnit = $product->getPriceForWeight($weight, $operationType);
+                        
+                        // Если текущая цена равна старой автоматической цене или это первоначальная загрузка,
+                        // обновляем цену на новую автоматическую
+                        if (!isset($item['custom_price_set']) || $item['custom_price_set'] === false) {
+                            $item['price_per_unit'] = $autoPricePerUnit;
+                            $currentPricePerUnit = $autoPricePerUnit;
+                        }
+                    }
+                }
+                
+                // Если изменилась цена этого товара, помечаем что цена задана пользователем
+                if ($index == $changedItemIndex && $changedProperty === 'price_per_unit') {
+                    // Проверяем, отличается ли введенная цена от автоматической
+                    $product = Product::with('priceScales')->find($item['product_id']);
+                    if ($product) {
+                        $autoPricePerUnit = $product->getPriceForWeight($weight, $operationType);
+                        // Если цена отличается от автоматической более чем на 0.01, считаем её пользовательской
+                        $item['custom_price_set'] = abs($currentPricePerUnit - $autoPricePerUnit) > 0.01;
+                    }
+                }
+                
+                $item['price'] = $effectiveWeight * $currentPricePerUnit;
             } else { // Composite product
                 $itemPrice = 0;
                 if (is_array($item['elements'])) {
@@ -317,7 +356,7 @@ class OperationManager extends Component
             }
             $totalAmount += (float)($item['price'] ?? 0);
         }
-        $this->operations[$this->activeOperationId]['totalAmount'] = $totalAmount;
+        $this->operations[$operationId]['totalAmount'] = $totalAmount;
     }
     
     public function store()
@@ -603,6 +642,24 @@ class OperationManager extends Component
         // Преобразуем существующую операцию в формат корзины
         $cartItems = [];
         foreach ($operation->items as $item) {
+            // Рассчитываем цену за единицу на основе сохранённой стоимости и веса
+            $pricePerUnit = 0;
+            $customPriceSet = false;
+            
+            if ($item->product->type === 'simple' && $item->weight > 0) {
+                $effectiveWeight = $item->weight - ($item->weight * ($item->clogging ?? 0) / 100);
+                if ($effectiveWeight > 0) {
+                    $pricePerUnit = $item->price / $effectiveWeight;
+                    
+                    // Проверяем, отличается ли сохранённая цена от автоматической
+                    $product = Product::with('priceScales')->find($item->product_id);
+                    if ($product) {
+                        $autoPricePerUnit = $product->getPriceForWeight($item->weight, $operation->type);
+                        $customPriceSet = abs($pricePerUnit - $autoPricePerUnit) > 0.01;
+                    }
+                }
+            }
+            
             $cartItem = [
                 'product_id' => $item->product_id,
                 'name' => $item->product->name,
@@ -610,10 +667,9 @@ class OperationManager extends Component
                 'unit' => $item->product->unit->short_name,
                 'weight' => $item->weight,
                 'clogging' => $item->product->type === 'simple' ? ($item->clogging ?? 0) : 0,
-                'price_per_unit' => $item->product->type === 'simple' 
-                    ? ($operation->type === 'purchase' ? $item->product->purchase_price : $item->product->selling_price)
-                    : 0,
+                'price_per_unit' => $pricePerUnit,
                 'price' => $item->price,
+                'custom_price_set' => $customPriceSet,
                 'elements' => [],
             ];
 

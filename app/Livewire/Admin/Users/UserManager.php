@@ -157,13 +157,31 @@ class UserManager extends Component
 
     public function render()
     {
-        $users = User::query()
-            ->when($this->search, function ($query) {
-                $query->where('name', 'like', '%' . $this->search . '%')
-                      ->orWhere('email', 'like', '%' . $this->search . '%');
-            })
-            ->with('roles')
-            ->paginate(10);
+        $users = User::with('roles');
+
+        if (!empty($this->search)) {
+            $searchTerm = mb_strtolower(trim($this->search), 'UTF-8');
+            $users = $users->get()->filter(function ($user) use ($searchTerm) {
+                $name = mb_strtolower($user->name, 'UTF-8');
+                $email = mb_strtolower($user->email, 'UTF-8');
+                return mb_strpos($name, $searchTerm, 0, 'UTF-8') !== false || 
+                       mb_strpos($email, $searchTerm, 0, 'UTF-8') !== false;
+            });
+            
+            // Пагинация для коллекции
+            $currentPage = request()->get('page', 1);
+            $perPage = 10;
+            $currentItems = $users->slice(($currentPage - 1) * $perPage, $perPage)->values();
+            $users = new \Illuminate\Pagination\LengthAwarePaginator(
+                $currentItems,
+                $users->count(),
+                $perPage,
+                $currentPage,
+                ['path' => request()->url(), 'pageName' => 'page']
+            );
+        } else {
+            $users = $users->paginate(10);
+        }
 
         $roles = Role::all();
 

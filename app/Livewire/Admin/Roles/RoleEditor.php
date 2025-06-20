@@ -93,9 +93,9 @@ class RoleEditor extends Component
         }
     }
 
-    public function toggleSection($sectionPermissions)
+    public function toggleSection($sectionPermissionNames)
     {
-        $sectionPermissionNames = $sectionPermissions->pluck('name')->toArray();
+        // $sectionPermissionNames уже приходит как массив имен разрешений
         $allSelected = count(array_intersect($sectionPermissionNames, $this->selectedPermissions)) === count($sectionPermissionNames);
         
         if ($allSelected) {

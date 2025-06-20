@@ -18,43 +18,43 @@
 
                 @if(auth()->user()->hasAdminAccess())
                     <flux:navlist.group heading="Справочники" expandable :expanded="request()->routeIs('admin.units.*') || request()->routeIs('admin.elements.*') || request()->routeIs('admin.products.*')">
-                        <flux:navlist.item :href="route('admin.units.index')" :current="request()->routeIs('admin.units.index')" wire:navigate>
+                        <flux:navlist.item icon="scale" :href="route('admin.units.index')" :current="request()->routeIs('admin.units.index')" wire:navigate>
                             {{ __('Единицы измерения') }}
                         </flux:navlist.item>
-                        <flux:navlist.item :href="route('admin.elements.index')" :current="request()->routeIs('admin.elements.index')" wire:navigate>
+                        <flux:navlist.item icon="squares-2x2" :href="route('admin.elements.index')" :current="request()->routeIs('admin.elements.index')" wire:navigate>
                             {{ __('Элементы') }}
                         </flux:navlist.item>
-                        <flux:navlist.item :href="route('admin.products.index')" :current="request()->routeIs('admin.products.index')" wire:navigate>
+                        <flux:navlist.item icon="cube" :href="route('admin.products.index')" :current="request()->routeIs('admin.products.index')" wire:navigate>
                             {{ __('Продукты') }}
                         </flux:navlist.item>
                     </flux:navlist.group>
 
                     <flux:navlist.group heading="Операции" expandable :expanded="request()->routeIs('admin.operations.*')">
-                        <flux:navlist.item :href="route('admin.operations.index')" :current="request()->routeIs('admin.operations.index')" wire:navigate>
+                        <flux:navlist.item icon="document-text" :href="route('admin.operations.index')" :current="request()->routeIs('admin.operations.index')" wire:navigate>
                             {{ __('Все операции') }}
                         </flux:navlist.item>
-                        <flux:navlist.item :href="route('admin.operations.create', 'purchase')" :current="request()->routeIs('admin.operations.create') && request()->route('type') == 'purchase'" wire:navigate>
+                        <flux:navlist.item icon="plus-circle" :href="route('admin.operations.create', 'purchase')" :current="request()->routeIs('admin.operations.create') && request()->route('type') == 'purchase'" wire:navigate>
                             {{ __('Покупка') }}
                         </flux:navlist.item>
-                        <flux:navlist.item :href="route('admin.operations.create', 'sale')" :current="request()->routeIs('admin.operations.create') && request()->route('type') == 'sale'" wire:navigate>
+                        <flux:navlist.item icon="arrow-up-right" :href="route('admin.operations.create', 'sale')" :current="request()->routeIs('admin.operations.create') && request()->route('type') == 'sale'" wire:navigate>
                             {{ __('Продажа') }}
                         </flux:navlist.item>
                     </flux:navlist.group>
 
                     <flux:navlist.group heading="Склад" expandable :expanded="request()->routeIs('admin.warehouse.*') || request()->routeIs('admin.conversions.*')">
-                        <flux:navlist.item :href="route('admin.warehouse.stock.index')" :current="request()->routeIs('admin.warehouse.stock.index')" wire:navigate>
+                        <flux:navlist.item icon="building-storefront" :href="route('admin.warehouse.stock.index')" :current="request()->routeIs('admin.warehouse.stock.index')" wire:navigate>
                             {{ __('Остатки') }}
                         </flux:navlist.item>
-                        <flux:navlist.item :href="route('admin.shipments.index')" :current="request()->routeIs('admin.shipments.*')" wire:navigate>
+                        <flux:navlist.item icon="truck" :href="route('admin.shipments.index')" :current="request()->routeIs('admin.shipments.*')" wire:navigate>
                             {{ __('Отгрузки') }}
                         </flux:navlist.item>
-                        <flux:navlist.item :href="route('admin.conversions.index')" :current="request()->routeIs('admin.conversions.*')" wire:navigate>
+                        <flux:navlist.item icon="arrow-path" :href="route('admin.conversions.index')" :current="request()->routeIs('admin.conversions.*')" wire:navigate>
                             {{ __('Конвертация продуктов') }}
                         </flux:navlist.item>
                     </flux:navlist.group>
 
                     <flux:navlist.group heading="Финансы" expandable :expanded="request()->routeIs('admin.cash-register.*')">
-                        <flux:navlist.item :href="route('admin.cash-register.index')" :current="request()->routeIs('admin.cash-register.index')" wire:navigate>
+                        <flux:navlist.item icon="banknotes" :href="route('admin.cash-register.index')" :current="request()->routeIs('admin.cash-register.index')" wire:navigate>
                             {{ __('Касса') }}
                         </flux:navlist.item>
                     </flux:navlist.group>
@@ -86,34 +86,34 @@
                 @else
                     <!-- Навигация для менеджеров -->
                     <flux:navlist.group heading="Товары" expandable :expanded="request()->routeIs('manager.products.*')">
-                        <flux:navlist.item :href="route('manager.products.index')" :current="request()->routeIs('manager.products.index')" wire:navigate>
+                        <flux:navlist.item icon="cube" :href="route('manager.products.index')" :current="request()->routeIs('manager.products.index')" wire:navigate>
                             {{ __('Продукты') }}
                         </flux:navlist.item>
                     </flux:navlist.group>
 
                     <flux:navlist.group heading="Операции" expandable :expanded="request()->routeIs('manager.operations.*')">
-                        <flux:navlist.item :href="route('manager.operations.index')" :current="request()->routeIs('manager.operations.index')" wire:navigate>
+                        <flux:navlist.item icon="document-text" :href="route('manager.operations.index')" :current="request()->routeIs('manager.operations.index')" wire:navigate>
                             {{ __('Все операции') }}
                         </flux:navlist.item>
-                        <flux:navlist.item :href="route('manager.operations.create', 'purchase')" :current="request()->routeIs('manager.operations.create') && request()->route('type') == 'purchase'" wire:navigate>
+                        <flux:navlist.item icon="plus-circle" :href="route('manager.operations.create', 'purchase')" :current="request()->routeIs('manager.operations.create') && request()->route('type') == 'purchase'" wire:navigate>
                             {{ __('Покупка') }}
                         </flux:navlist.item>
-                        <flux:navlist.item :href="route('manager.operations.create', 'sale')" :current="request()->routeIs('manager.operations.create') && request()->route('type') == 'sale'" wire:navigate>
+                        <flux:navlist.item icon="arrow-up-right" :href="route('manager.operations.create', 'sale')" :current="request()->routeIs('manager.operations.create') && request()->route('type') == 'sale'" wire:navigate>
                             {{ __('Продажа') }}
                         </flux:navlist.item>
                     </flux:navlist.group>
 
                     <flux:navlist.group heading="Склад" expandable :expanded="request()->routeIs('manager.warehouse.*') || request()->routeIs('manager.shipments.*')">
-                        <flux:navlist.item :href="route('manager.warehouse.stock.index')" :current="request()->routeIs('manager.warehouse.stock.index')" wire:navigate>
+                        <flux:navlist.item icon="building-storefront" :href="route('manager.warehouse.stock.index')" :current="request()->routeIs('manager.warehouse.stock.index')" wire:navigate>
                             {{ __('Остатки') }}
                         </flux:navlist.item>
-                        <flux:navlist.item :href="route('manager.shipments.index')" :current="request()->routeIs('manager.shipments.*')" wire:navigate>
+                        <flux:navlist.item icon="truck" :href="route('manager.shipments.index')" :current="request()->routeIs('manager.shipments.*')" wire:navigate>
                             {{ __('Отгрузки') }}
                         </flux:navlist.item>
                     </flux:navlist.group>
 
                     <flux:navlist.group heading="Финансы" expandable :expanded="request()->routeIs('manager.cash-register.*')">
-                        <flux:navlist.item :href="route('manager.cash-register.index')" :current="request()->routeIs('manager.cash-register.index')" wire:navigate>
+                        <flux:navlist.item icon="banknotes" :href="route('manager.cash-register.index')" :current="request()->routeIs('manager.cash-register.index')" wire:navigate>
                             {{ __('Касса') }}
                         </flux:navlist.item>
                     </flux:navlist.group>

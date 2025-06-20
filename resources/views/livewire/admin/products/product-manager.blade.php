@@ -95,6 +95,7 @@
                     <flux:select.option value="composite">Составной</flux:select.option>
                 </flux:select>
                 <flux:select :label="__('Единица измерения')" wire:model="unit_id">
+                    <flux:select.option value="">-- Выберите единицу измерения --</flux:select.option>
                     @foreach($units as $unit)
                         <flux:select.option value="{{ $unit->id }}">{{ $unit->name }}</flux:select.option>
                     @endforeach
@@ -132,7 +133,13 @@
                                          </div>
                                      </div>
                                      <div class="w-1/4">
-                                         <flux:input type="number" wire:model.live="selectedElements.{{ $elementId }}.percentage" placeholder="%" step="0.01" />
+                                         <input type="number" 
+                                             wire:model.live.debounce.500ms="selectedElements.{{ $elementId }}.percentage" 
+                                             placeholder="%" 
+                                             step="0.01"
+                                             data-flux-control
+                                             data-flux-group-target
+                                             class="w-full border rounded-lg block disabled:shadow-none dark:shadow-none appearance-none text-base sm:text-sm py-2 h-10 leading-[1.375rem] ps-3 pe-3 bg-white dark:bg-white/10 dark:disabled:bg-white/[7%] text-zinc-700 disabled:text-zinc-500 placeholder-zinc-400 disabled:placeholder-zinc-400/70 dark:text-zinc-300 dark:disabled:text-zinc-400 dark:placeholder-zinc-400 dark:disabled:placeholder-zinc-500 shadow-xs border-zinc-200 border-b-zinc-300/80 disabled:border-b-zinc-200 dark:border-white/10 dark:disabled:border-white/5">
                                      </div>
                                      <div class="w-1/4 text-sm text-gray-600">
                                          = {{ round($elements->find($elementId)->price * $data['percentage'], 2) }} грн/кг
@@ -185,7 +192,13 @@
                             </div>
                             @if($element_id_to_add)
                                 <div class="w-1/4">
-                                    <flux:input type="number" wire:model.live="element_percentage_to_add" placeholder="%" />
+                                    <input type="number" 
+                                        wire:model.live.debounce.500ms="element_percentage_to_add" 
+                                        placeholder="%" 
+                                        step="0.01"
+                                        data-flux-control
+                                        data-flux-group-target
+                                        class="w-full border rounded-lg block disabled:shadow-none dark:shadow-none appearance-none text-base sm:text-sm py-2 h-10 leading-[1.375rem] ps-3 pe-3 bg-white dark:bg-white/10 dark:disabled:bg-white/[7%] text-zinc-700 disabled:text-zinc-500 placeholder-zinc-400 disabled:placeholder-zinc-400/70 dark:text-zinc-300 dark:disabled:text-zinc-400 dark:placeholder-zinc-400 dark:disabled:placeholder-zinc-500 shadow-xs border-zinc-200 border-b-zinc-300/80 disabled:border-b-zinc-200 dark:border-white/10 dark:disabled:border-white/5">
                                     @error('element_percentage_to_add') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                                 </div>
                             @endif
