@@ -29,6 +29,7 @@ class ProductManager extends Component
     public $element_id_to_add;
     public $element_percentage_to_add;
     public $stock;
+    public $user_comment = '';
 
     #[Session]
     public bool $is_published = false;
@@ -84,6 +85,7 @@ class ProductManager extends Component
         $this->element_id_to_add = null;
         $this->element_percentage_to_add = null;
         $this->stock = null;
+        $this->user_comment = '';
     }
 
     public function addElement()
@@ -170,6 +172,7 @@ class ProductManager extends Component
         }
 
         $data = [
+            'user_id' => auth()->id(),
             'name' => $this->name,
             'type' => $this->type,
             'unit_id' => $this->unit_id,
@@ -182,6 +185,29 @@ class ProductManager extends Component
         ];
 
         $product = Product::updateOrCreate(['id' => $this->product_id], $data);
+
+        // Добавляем системный комментарий
+        if ($this->product_id) {
+            $product->addSystemComment(
+                "Продукт отредактирован пользователем " . auth()->user()->name,
+                ['action' => 'edit', 'product_data' => $data]
+            );
+        } else {
+            $product->addSystemComment(
+                "Продукт создан пользователем " . auth()->user()->name,
+                ['action' => 'create', 'product_data' => $data]
+            );
+        }
+
+        // Добавляем пользовательский комментарий если есть
+        if (!empty($this->user_comment)) {
+            $product->addComment(
+                $this->user_comment,
+                'comment',
+                false
+            );
+            $this->dispatch('comment-added');
+        }
 
         $product->priceScales()->delete();
         foreach ($this->priceScales as $scale) {
@@ -234,7 +260,15 @@ class ProductManager extends Component
 
     public function delete($id)
     {
-        Product::find($id)->delete();
+        $product = Product::find($id);
+        
+        // Добавляем системный комментарий перед удалением
+        $product->addSystemComment(
+            "Продукт удален пользователем " . auth()->user()->name,
+            ['action' => 'delete', 'product_name' => $product->name]
+        );
+        
+        $product->delete();
         session()->flash('message', 'Продукт удален.');
     }
 

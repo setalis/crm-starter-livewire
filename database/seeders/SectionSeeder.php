@@ -83,6 +83,13 @@ class SectionSeeder extends Seeder
                 'icon' => 'settings',
                 'sort_order' => 10,
             ],
+            [
+                'name' => 'comments',
+                'display_name' => 'Комментарии',
+                'description' => 'Управление комментариями и системными сообщениями',
+                'icon' => 'message-circle',
+                'sort_order' => 11,
+            ],
         ];
 
         foreach ($sections as $section) {

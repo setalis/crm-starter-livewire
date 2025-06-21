@@ -25,6 +25,7 @@ class ConversionManager extends Component
     public $source_quantity;
     public $target_quantity;
     public $notes;
+    public $user_comment = '';
 
     // Элементы для составного продукта (автоматически рассчитываются)
     public $calculatedElements = [];
@@ -65,6 +66,7 @@ class ConversionManager extends Component
         $this->source_quantity = null;
         $this->target_quantity = null;
         $this->notes = null;
+        $this->user_comment = '';
         $this->calculatedElements = [];
     }
 
@@ -165,6 +167,28 @@ class ConversionManager extends Component
             $conversion->load('elements.element');
             $conversion->execute();
 
+            // Добавляем системный комментарий
+            $conversion->addSystemComment(
+                "Конвертация создана пользователем " . auth()->user()->name,
+                [
+                    'action' => 'create',
+                    'source_product' => $conversion->sourceProduct->name,
+                    'target_product' => $conversion->targetProduct->name,
+                    'source_quantity' => $conversion->source_quantity,
+                    'target_quantity' => $conversion->target_quantity,
+                ]
+            );
+
+            // Добавляем пользовательский комментарий если есть
+            if (!empty($this->user_comment)) {
+                $conversion->addComment(
+                    $this->user_comment,
+                    'comment',
+                    false
+                );
+                $this->dispatch('comment-added');
+            }
+
             DB::commit();
 
             $this->closeModal();
@@ -186,6 +210,16 @@ class ConversionManager extends Component
             if (!$operation || !$operation->conversion) {
                 throw new \Exception('Конвертация не найдена');
             }
+
+            // Добавляем системный комментарий перед отменой
+            $operation->conversion->addSystemComment(
+                "Конвертация отменена пользователем " . auth()->user()->name,
+                [
+                    'action' => 'reverse',
+                    'source_product' => $operation->conversion->sourceProduct->name,
+                    'target_product' => $operation->conversion->targetProduct->name,
+                ]
+            );
 
             // Отменяем конвертацию
             $operation->conversion->reverse();

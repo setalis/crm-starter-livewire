@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('shipments', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // пользователь, создавший отгрузку
             $table->string('car_number')->nullable(); // номер автомобиля
             $table->string('driver_name')->nullable(); // ФИО водителя
             $table->string('company')->nullable(); // предприятие

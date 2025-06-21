@@ -25,6 +25,7 @@ class OperationManager extends Component
 
     public bool $isModal = false;
     public ?string $notification = null;
+    public string $operationComment = '';
     
     // Product selection modal
     public bool $showProductModal = false;
@@ -130,6 +131,9 @@ class OperationManager extends Component
 
     public function closeModal()
     {
+        // Сбрасываем комментарий
+        $this->operationComment = '';
+        
         // Проверяем, есть ли другие операции в сессии
         if (!empty($this->operations)) {
             // Если есть операции, остаемся в модальном окне и переключаемся на первую доступную
@@ -508,6 +512,39 @@ class OperationManager extends Component
                 }
             }
             
+            // Добавляем системный комментарий
+            if ($isEditing) {
+                $operation->addSystemComment(
+                    "Операция отредактирована пользователем " . auth()->user()->name,
+                    [
+                        'action' => 'edit',
+                        'operation_type' => $operation->type,
+                        'total_amount' => $operation->total_amount,
+                        'items_count' => count($activeOp['cartItems'])
+                    ]
+                );
+            } else {
+                $operation->addSystemComment(
+                    "Операция создана пользователем " . auth()->user()->name,
+                    [
+                        'action' => 'create',
+                        'operation_type' => $operation->type,
+                        'total_amount' => $operation->total_amount,
+                        'items_count' => count($activeOp['cartItems'])
+                    ]
+                );
+            }
+
+            // Добавляем пользовательский комментарий если есть
+            if (!empty($this->operationComment)) {
+                $operation->addComment(
+                    $this->operationComment,
+                    'comment',
+                    false
+                );
+                $this->dispatch('comment-added');
+            }
+
             return $operation;
         });
         
@@ -518,6 +555,9 @@ class OperationManager extends Component
         // Удаляем текущую операцию из сессии после сохранения
         $currentOperationId = $this->activeOperationId;
         unset($this->operations[$currentOperationId]);
+        
+        // Сбрасываем комментарий
+        $this->operationComment = '';
         
         // Проверяем, есть ли другие операции в сессии
         if (!empty($this->operations)) {
@@ -776,6 +816,17 @@ class OperationManager extends Component
                 $item->elements()->delete();
             }
             $operation->items()->delete();
+            
+            // Добавляем системный комментарий перед удалением
+            $operation->addSystemComment(
+                "Операция удалена пользователем " . auth()->user()->name,
+                [
+                    'action' => 'delete',
+                    'operation_type' => $operation->type,
+                    'total_amount' => $operation->total_amount,
+                    'operation_number' => $operation->operation_number
+                ]
+            );
             
             // Удаляем связанные транзакции кассы
             $operation->transactions()->delete();

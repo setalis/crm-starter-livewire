@@ -60,7 +60,7 @@
                     </flux:navlist.group>
 
                     @if(auth()->user()->hasAnyPermission(['users.view', 'roles.view', 'permissions.view', 'sections.view']))
-                    <flux:navlist.group heading="Администрирование" expandable :expanded="request()->routeIs('admin.users.*') || request()->routeIs('admin.roles.*') || request()->routeIs('admin.permissions.*') || request()->routeIs('admin.sections.*')">
+                    <flux:navlist.group heading="Администрирование" expandable :expanded="request()->routeIs('admin.users.*') || request()->routeIs('admin.roles.*') || request()->routeIs('admin.permissions.*') || request()->routeIs('admin.sections.*') || request()->routeIs('admin.comments.*')">
                         @can('users.view')
                         <flux:navlist.item icon="users" :href="route('admin.users.index')" :current="request()->routeIs('admin.users.*')" wire:navigate>
                             {{ __('Пользователи') }}
@@ -79,6 +79,11 @@
                         @can('sections.view')
                         <flux:navlist.item icon="folder" :href="route('admin.sections.index')" :current="request()->routeIs('admin.sections.*')" wire:navigate>
                             {{ __('Разделы') }}
+                        </flux:navlist.item>
+                        @endcan
+                        @can('comments.view')
+                        <flux:navlist.item icon="chat-bubble-left-right" :href="route('admin.comments.index')" :current="request()->routeIs('admin.comments.*')" wire:navigate>
+                            {{ __('Комментарии') }}
                         </flux:navlist.item>
                         @endcan
                     </flux:navlist.group>
@@ -206,9 +211,14 @@
 
                     <flux:spacer />
 
-                    <!-- Часы -->
-                    <div class="flex items-center text-sm text-gray-600 dark:text-gray-400 mr-4">
-                        <livewire:admin.components.live-clock />
+                    <!-- Комментарии и часы -->
+                    <div class="flex items-center space-x-4">
+                        @if(auth()->user()->hasAdminAccess())
+                            <livewire:admin.components.comments-notification />
+                        @endif
+                        <div class="text-sm text-gray-600 dark:text-gray-400">
+                            <livewire:admin.components.live-clock />
+                        </div>
                     </div>
 
                     <!-- Профиль пользователя справа -->

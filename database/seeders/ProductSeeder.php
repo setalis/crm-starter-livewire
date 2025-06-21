@@ -12,6 +12,7 @@ class ProductSeeder extends Seeder
     {
         $products = [
             [
+                'user_id' => 1, // системный пользователь
                 'name' => 'Черный металл',
                 'type' => 'simple',
                 'unit_id' => 1, // кг
@@ -26,6 +27,7 @@ class ProductSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
+                'user_id' => 1, // системный пользователь
                 'name' => 'Нержавеющая сталь 304',
                 'type' => 'composite',
                 'unit_id' => 1, // кг

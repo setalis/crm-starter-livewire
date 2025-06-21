@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
+use App\Traits\HasComments;
 use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
 {
+    use HasComments;
+
     protected $fillable = [
+        'user_id',
         'name',
         'type',
         'unit_id',
@@ -18,6 +22,11 @@ class Product extends Model
         'position',
         'stock'
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function unit()
     {

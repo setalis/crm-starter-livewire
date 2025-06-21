@@ -120,6 +120,15 @@
                     <flux:input :label="__('Стоимость за 1% содержания')" wire:model="price" type="number" step="0.01" />
                     <flux:input :label="__('Стоимость за единицу измерения')" wire:model="unit_price" type="number" step="0.01" />
                     <flux:input :label="__('Начальный остаток')" wire:model="stock" type="number" step="0.001" />
+                    
+                    <!-- Комментарий -->
+                    @can('comments.create')
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Комментарий</label>
+                        <textarea wire:model="user_comment" rows="2" placeholder="Добавьте комментарий к элементу..." 
+                                  class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
+                    </div>
+                    @endcan
                 </div>
             </div>
             <div class="flex justify-end gap-x-4 bg-zinc-50 px-4 py-3 dark:bg-zinc-800 sm:px-6">

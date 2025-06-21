@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('elements', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // пользователь, создавший элемент
             $table->string('name')->comment('Наименование');
             $table->foreignId('unit_id')
                 ->comment('Единица измерения')

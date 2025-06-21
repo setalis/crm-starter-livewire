@@ -255,6 +255,15 @@
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
+
+                <!-- Комментарий -->
+                @can('comments.create')
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Комментарий</label>
+                    <textarea wire:model="user_comment" rows="2" placeholder="Ваш комментарий к конвертации..."
+                              class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
+                </div>
+                @endcan
                 
                 <div class="flex justify-end space-x-3">
                     <button type="button" wire:click="closeModal"

@@ -222,6 +222,15 @@
                     </div>
                      <flux:button class="mt-2" wire:click="addPriceScale">{{ __('Добавить шкалу') }}</flux:button>
                 </div>
+                
+                <!-- Комментарий -->
+                @can('comments.create')
+                <div class="sm:col-span-2 mt-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Комментарий</label>
+                    <textarea wire:model="user_comment" rows="2" placeholder="Добавьте комментарий к продукту..." 
+                              class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
+                </div>
+                @endcan
             </div>
         </div>
         <div class="flex justify-end gap-x-4 bg-zinc-50 px-4 py-3 dark:bg-zinc-800 sm:px-6">

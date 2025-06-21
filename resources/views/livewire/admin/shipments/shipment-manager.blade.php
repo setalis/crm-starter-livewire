@@ -354,6 +354,12 @@
                             <textarea wire:model="comment" rows="2" class="w-full rounded-md border-zinc-300 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 focus:border-blue-500 focus:ring focus:ring-blue-200/50 dark:focus:border-blue-400 dark:focus:ring-blue-900/40"></textarea>
                         </div>
                     </div>
+                    @can('comments.create')
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Ваш комментарий</label>
+                        <textarea wire:model="user_comment" rows="2" placeholder="Добавьте ваш комментарий к отгрузке..." class="w-full rounded-md border-zinc-300 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 focus:border-blue-500 focus:ring focus:ring-blue-200/50 dark:focus:border-blue-400 dark:focus:ring-blue-900/40"></textarea>
+                    </div>
+                    @endcan
                     <div class="pt-6 flex justify-end">
                         <button type="submit" class="inline-flex items-center px-6 py-2 border border-transparent text-base leading-6 font-semibold rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                             <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>

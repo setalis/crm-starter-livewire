@@ -29,6 +29,8 @@ class ElementManager extends Component
 
     public ?string $stock = null;
 
+    public string $user_comment = '';
+
     public function mount(): void
     {
         $this->units = Unit::all();
@@ -48,6 +50,7 @@ class ElementManager extends Component
     {
         $this->resetErrorBag();
         $this->resetExcept('units');
+        $this->user_comment = '';
         $this->isModal = true;
     }
 
@@ -62,6 +65,7 @@ class ElementManager extends Component
         $this->price = $element->price;
         $this->unit_price = $element->unit_price;
         $this->stock = $element->stock ?? 0;
+        $this->user_comment = '';
         $this->isModal = true;
     }
 
@@ -75,16 +79,49 @@ class ElementManager extends Component
             'stock' => ['required', 'numeric', 'min:0'],
         ]);
 
-        Element::query()->updateOrCreate(
+        $validated['user_id'] = auth()->id();
+
+        $element = Element::query()->updateOrCreate(
             ['id' => $this->id],
             $validated
         );
+
+        // Добавляем системный комментарий
+        if ($this->id) {
+            $element->addSystemComment(
+                "Элемент отредактирован пользователем " . auth()->user()->name,
+                ['action' => 'edit', 'element_data' => $validated]
+            );
+        } else {
+            $element->addSystemComment(
+                "Элемент создан пользователем " . auth()->user()->name,
+                ['action' => 'create', 'element_data' => $validated]
+            );
+        }
+
+        // Добавляем пользовательский комментарий если есть
+        if (!empty($this->user_comment)) {
+            $element->addComment(
+                $this->user_comment,
+                'comment',
+                false
+            );
+            $this->dispatch('comment-added');
+        }
 
         $this->isModal = false;
     }
 
     public function delete(int $id): void
     {
-        Element::query()->find($id)->delete();
+        $element = Element::query()->find($id);
+        
+        // Добавляем системный комментарий перед удалением
+        $element->addSystemComment(
+            "Элемент удален пользователем " . auth()->user()->name,
+            ['action' => 'delete', 'element_name' => $element->name]
+        );
+        
+        $element->delete();
     }
 }

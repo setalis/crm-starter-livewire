@@ -135,6 +135,16 @@ class RolePermissionSeeder extends Seeder
                 'settings.edit' => 'Редактирование настроек',
                 'settings.system' => 'Системные настройки',
             ],
+            // Комментарии
+            'comments' => [
+                'comments.view' => 'Просмотр комментариев',
+                'comments.create' => 'Создание комментариев',
+                'comments.edit' => 'Редактирование комментариев',
+                'comments.delete' => 'Удаление комментариев',
+                'comments.manage' => 'Управление статусом прочтения',
+                'comments.system' => 'Просмотр системных сообщений',
+                'comments.all' => 'Доступ ко всем комментариям пользователей',
+            ],
         ];
 
         // Создаем разрешения
@@ -169,13 +179,13 @@ class RolePermissionSeeder extends Seeder
         })->get();
         $admin->syncPermissions($adminPermissions);
 
-        // Бухгалтер получает разрешения на финансовые операции, отгрузки и аналитику
+        // Бухгалтер получает разрешения на финансовые операции, отгрузки, аналитику и комментарии
         $accountantPermissions = Permission::whereHas('section', function ($query) {
-            $query->whereIn('name', ['operations', 'cash', 'shipments', 'analytics', 'settings']);
-        })->whereNotIn('name', ['settings.system'])->get();
+            $query->whereIn('name', ['operations', 'cash', 'shipments', 'analytics', 'settings', 'comments']);
+        })->whereNotIn('name', ['settings.system', 'comments.all', 'comments.delete'])->get();
         $accountant->syncPermissions($accountantPermissions);
 
-        // Менеджер получает ограниченные разрешения для торговых операций
+        // Менеджер получает ограниченные разрешения для торговых операций и базовые комментарии
         $managerPermissions = Permission::whereIn('name', [
             'products.view',
             'operations.view',
@@ -188,6 +198,10 @@ class RolePermissionSeeder extends Seeder
             'shipments.create',
             'shipments.edit',
             'shipments.confirm',
+            'comments.view',
+            'comments.create',
+            'comments.edit',
+            'comments.manage',
         ])->get();
         $manager->syncPermissions($managerPermissions);
     }

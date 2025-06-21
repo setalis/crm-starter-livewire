@@ -11,6 +11,7 @@ class ElementSeeder extends Seeder
     {
         DB::table('elements')->insert([
             [
+                'user_id' => 1, // системный пользователь
                 'name' => 'Молибден',
                 'unit_id' => 1, // кг
                 'price' => 2.50, // грн за 1% содержания
@@ -20,6 +21,7 @@ class ElementSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
+                'user_id' => 1, // системный пользователь
                 'name' => 'Никель',
                 'unit_id' => 1, // кг
                 'price' => 1.80, // грн за 1% содержания
@@ -29,6 +31,7 @@ class ElementSeeder extends Seeder
                 'updated_at' => now(),
             ],  
             [
+                'user_id' => 1, // системный пользователь
                 'name' => 'Ванадий',
                 'unit_id' => 1, // кг
                 'price' => 3.20, // грн за 1% содержания

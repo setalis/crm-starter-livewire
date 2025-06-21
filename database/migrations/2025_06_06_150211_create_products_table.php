@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // пользователь, создавший продукт
             $table->string('name');
             $table->enum('type', ['simple', 'composite'])->default('simple');
             $table->foreignId('unit_id')->constrained()->onDelete('cascade');

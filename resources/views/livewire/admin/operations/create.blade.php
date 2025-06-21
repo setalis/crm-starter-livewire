@@ -183,7 +183,18 @@
                                     </div>
                                 </div>
                                 
-                                <div class="mt-4 border-t pt-4 text-right">
+                                <!-- Комментарий -->
+                                @can('comments.create')
+                                <div class="mt-4 border-t pt-4">
+                                    <label class="block text-gray-700 text-sm font-bold mb-2">Комментарий:</label>
+                                    <textarea wire:model="operationComment" 
+                                              rows="3" 
+                                              placeholder="Добавьте комментарий к операции..." 
+                                              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
+                                </div>
+                                @endcan
+                                
+                                <div class="mt-4 text-right">
                                     <h4 class="text-lg font-bold">Total Amount: {{ number_format($operations[$activeOperationId]['totalAmount'] ?? 0, 2) }}</h4>
                                 </div>
                             </div>

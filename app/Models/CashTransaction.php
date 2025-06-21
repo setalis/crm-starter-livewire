@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\HasComments;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class CashTransaction extends Model
 {
-    use HasFactory;
+    use HasFactory, HasComments;
 
     protected $fillable = [
         'cash_register_id',
