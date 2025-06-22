@@ -29,54 +29,122 @@
         @endcan
     </div>
 
+    <!-- Адаптивная таблица разрешений -->
     <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-        <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
-            <thead class="bg-gray-50 dark:bg-gray-800">
-                <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Разрешение</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Отображаемое имя</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Раздел</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Роли</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Действия</th>
-                </tr>
-            </thead>
-            <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+        <!-- Десктопная версия -->
+        <div class="hidden lg:block">
+            <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
+                <thead class="bg-gray-50 dark:bg-gray-800">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Разрешение</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Отображаемое имя</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Раздел</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Роли</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Действия</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                    @forelse ($permissions as $permission)
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="font-medium text-gray-900 dark:text-gray-100">{{ $permission->name }}</div>
+                                @if($permission->description)
+                                    <div class="text-sm text-gray-500 dark:text-gray-400">{{ $permission->description }}</div>
+                                @endif
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">
+                                {{ $permission->display_name ?: '-' }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                @if($permission->section)
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
+                                        {{ $permission->section->display_name }}
+                                    </span>
+                                @else
+                                    <span class="text-gray-500 dark:text-gray-400">Без раздела</span>
+                                @endif
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                    {{ $permission->roles_count }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <div class="flex space-x-2">
+                                    @can('permissions.edit')
+                                        <button wire:click="edit({{ $permission->id }})" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
+                                            Редактировать
+                                        </button>
+                                    @endcan
+                                    @can('permissions.delete')
+                                        <button 
+                                            wire:click="delete({{ $permission->id }})" 
+                                            class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 {{ $permission->roles_count > 0 ? 'opacity-50 cursor-not-allowed' : '' }}"
+                                            wire:confirm="Вы уверены, что хотите удалить это разрешение?"
+                                            {{ $permission->roles_count > 0 ? 'disabled' : '' }}
+                                        >
+                                            Удалить
+                                        </button>
+                                    @endcan
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                                Разрешения не найдены
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Планшетная версия -->
+        <div class="hidden md:block lg:hidden">
+            <div class="bg-gray-50 dark:bg-gray-800 px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                <div class="grid grid-cols-4 gap-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <div>Разрешение</div>
+                    <div>Раздел</div>
+                    <div class="text-center">Роли</div>
+                    <div class="text-center">Действия</div>
+                </div>
+            </div>
+            <div class="divide-y divide-gray-200 dark:divide-gray-700">
                 @forelse ($permissions as $permission)
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
-                        <td class="px-6 py-4 whitespace-nowrap">
+                <div class="px-4 py-4 hover:bg-gray-50 dark:hover:bg-gray-800 bg-white dark:bg-gray-900">
+                    <div class="grid grid-cols-4 gap-4 items-center">
+                        <div>
                             <div class="font-medium text-gray-900 dark:text-gray-100">{{ $permission->name }}</div>
-                            @if($permission->description)
-                                <div class="text-sm text-gray-500 dark:text-gray-400">{{ $permission->description }}</div>
+                            @if($permission->display_name)
+                                <div class="text-xs text-gray-500 dark:text-gray-400">{{ $permission->display_name }}</div>
                             @endif
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">
-                            {{ $permission->display_name ?: '-' }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        </div>
+                        <div>
                             @if($permission->section)
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
                                     {{ $permission->section->display_name }}
                                 </span>
                             @else
-                                <span class="text-gray-500 dark:text-gray-400">Без раздела</span>
+                                <span class="text-xs text-gray-500 dark:text-gray-400">Без раздела</span>
                             @endif
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                        </div>
+                        <div class="text-center">
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
                                 {{ $permission->roles_count }}
                             </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <div class="flex space-x-2">
+                        </div>
+                        <div class="text-center">
+                            <div class="flex items-center justify-center space-x-2">
                                 @can('permissions.edit')
-                                    <button wire:click="edit({{ $permission->id }})" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
-                                        Редактировать
+                                    <button wire:click="edit({{ $permission->id }})" class="text-sm text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
+                                        Изменить
                                     </button>
                                 @endcan
                                 @can('permissions.delete')
                                     <button 
                                         wire:click="delete({{ $permission->id }})" 
-                                        class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 {{ $permission->roles_count > 0 ? 'opacity-50 cursor-not-allowed' : '' }}"
+                                        class="text-sm text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 {{ $permission->roles_count > 0 ? 'opacity-50 cursor-not-allowed' : '' }}"
                                         wire:confirm="Вы уверены, что хотите удалить это разрешение?"
                                         {{ $permission->roles_count > 0 ? 'disabled' : '' }}
                                     >
@@ -84,17 +152,77 @@
                                     </button>
                                 @endcan
                             </div>
-                        </td>
-                    </tr>
+                        </div>
+                    </div>
+                </div>
                 @empty
-                    <tr>
-                        <td colspan="5" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-                            Разрешения не найдены
-                        </td>
-                    </tr>
+                <div class="px-4 py-12 text-center text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-900">
+                    Разрешения не найдены
+                </div>
                 @endforelse
-            </tbody>
-        </table>
+            </div>
+        </div>
+
+        <!-- Мобильная версия (карточки) -->
+        <div class="md:hidden bg-white dark:bg-gray-900">
+            @forelse ($permissions as $permission)
+                <div class="border-b border-gray-200 dark:border-gray-700 p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
+                    <!-- Заголовок карточки -->
+                    <div class="mb-3">
+                        <h3 class="font-medium text-gray-900 dark:text-gray-100">{{ $permission->name }}</h3>
+                        @if($permission->display_name)
+                            <div class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ $permission->display_name }}</div>
+                        @endif
+                        @if($permission->description)
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $permission->description }}</div>
+                        @endif
+                    </div>
+
+                    <!-- Детали -->
+                    <div class="grid grid-cols-2 gap-4 mb-3">
+                        <div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400">Раздел</div>
+                            @if($permission->section)
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200 mt-1">
+                                    {{ $permission->section->display_name }}
+                                </span>
+                            @else
+                                <div class="text-sm text-gray-500 dark:text-gray-400">Без раздела</div>
+                            @endif
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400">Ролей</div>
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 mt-1">
+                                {{ $permission->roles_count }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Действия -->
+                    <div class="flex items-center justify-end space-x-3 pt-2 border-t border-gray-100 dark:border-gray-600">
+                        @can('permissions.edit')
+                            <button wire:click="edit({{ $permission->id }})" class="text-sm text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
+                                Редактировать
+                            </button>
+                        @endcan
+                        @can('permissions.delete')
+                            <button 
+                                wire:click="delete({{ $permission->id }})" 
+                                class="text-sm text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 {{ $permission->roles_count > 0 ? 'opacity-50 cursor-not-allowed' : '' }}"
+                                wire:confirm="Вы уверены, что хотите удалить это разрешение?"
+                                {{ $permission->roles_count > 0 ? 'disabled' : '' }}
+                            >
+                                Удалить
+                            </button>
+                        @endcan
+                    </div>
+                </div>
+            @empty
+                <div class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                    Разрешения не найдены
+                </div>
+            @endforelse
+        </div>
     </div>
 
     <div class="mt-4">

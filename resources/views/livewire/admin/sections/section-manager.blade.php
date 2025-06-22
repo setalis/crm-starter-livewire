@@ -29,92 +29,290 @@
         @endcan
     </div>
 
-    <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-        <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
-            <thead class="bg-gray-50 dark:bg-gray-800">
-                <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Раздел</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Имя</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Описание</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Разрешения</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Порядок</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Статус</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Действия</th>
-                </tr>
-            </thead>
-            <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+    <!-- Адаптивная таблица разделов -->
+    <div class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <!-- Десктопная версия таблицы -->
+        <div class="hidden lg:block overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Раздел</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Имя</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Описание</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Разрешения</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Порядок</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Статус</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @forelse ($sections as $section)
+                        <tr class="hover:bg-gray-50 transition-colors duration-150">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center space-x-3">
+                                    @if($section->icon)
+                                        <div class="h-5 w-5 text-gray-400">
+                                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
+                                            </svg>
+                                        </div>
+                                    @endif
+                                    <div>
+                                        <div class="font-medium text-gray-900">{{ $section->display_name }}</div>
+                                        <div class="text-sm text-gray-500">{{ $section->name }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <code class="text-sm bg-gray-100 px-2 py-1 rounded text-gray-800">{{ $section->name }}</code>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="max-w-xs truncate text-gray-900" title="{{ $section->description }}">
+                                    {{ $section->description }}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                    {{ $section->permissions_count }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-gray-900">{{ $section->sort_order }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                @can('sections.edit')
+                                    <button wire:click="toggleStatus({{ $section->id }})" 
+                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $section->is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
+                                        {{ $section->is_active ? 'Активен' : 'Неактивен' }}
+                                    </button>
+                                @else
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $section->is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
+                                        {{ $section->is_active ? 'Активен' : 'Неактивен' }}
+                                    </span>
+                                @endcan
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                <div class="flex items-center justify-center space-x-2">
+                                    @can('sections.edit')
+                                        <button wire:click="edit({{ $section->id }})" class="inline-flex items-center justify-center w-8 h-8 rounded-full text-blue-600 bg-blue-100 hover:bg-blue-200 transition-colors duration-150" title="Редактировать">
+                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
+                                        </button>
+                                    @endcan
+                                    @can('sections.delete')
+                                        <button 
+                                            wire:click="delete({{ $section->id }})" 
+                                            class="inline-flex items-center justify-center w-8 h-8 rounded-full text-red-600 bg-red-100 hover:bg-red-200 {{ $section->permissions_count > 0 ? 'opacity-50 cursor-not-allowed' : '' }}"
+                                            wire:confirm="Вы уверены, что хотите удалить этот раздел?"
+                                            {{ $section->permissions_count > 0 ? 'disabled' : '' }}
+                                            title="Удалить"
+                                        >
+                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    @endcan
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" class="py-12 text-center text-gray-500">
+                                <div class="flex flex-col items-center">
+                                    <svg class="h-12 w-12 text-gray-300 mb-2" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    <p>Разделы не найдены</p>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Планшетная версия таблицы -->
+        <div class="hidden md:block lg:hidden">
+            <div class="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                <div class="grid grid-cols-4 gap-4 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <div>Раздел</div>
+                    <div>Разрешения</div>
+                    <div>Статус</div>
+                    <div class="text-center">Действия</div>
+                </div>
+            </div>
+            <div class="divide-y divide-gray-200">
                 @forelse ($sections as $section)
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="flex items-center space-x-3">
+                <div class="px-4 py-4 hover:bg-gray-50 transition-colors duration-150">
+                    <div class="grid grid-cols-4 gap-4 items-center">
+                        <div>
+                            <div class="flex items-center space-x-2">
                                 @if($section->icon)
-                                    <div class="h-5 w-5 text-gray-400">
-                                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <div class="h-4 w-4 text-gray-400">
+                                        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
                                             <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
                                         </svg>
                                     </div>
                                 @endif
                                 <div>
-                                    <div class="font-medium text-gray-900 dark:text-gray-100">{{ $section->display_name }}</div>
-                                    <div class="text-sm text-gray-500 dark:text-gray-400">{{ $section->name }}</div>
+                                    <div class="text-sm font-medium text-gray-900">{{ $section->display_name }}</div>
+                                    <div class="text-xs text-gray-500">{{ $section->name }}</div>
                                 </div>
                             </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <code class="text-sm bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-gray-800 dark:text-gray-200">{{ $section->name }}</code>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="max-w-xs truncate text-gray-900 dark:text-gray-100" title="{{ $section->description }}">
+                            <div class="text-xs text-gray-500 mt-1 truncate max-w-xs" title="{{ $section->description }}">
                                 {{ $section->description }}
                             </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
+                        </div>
+                        <div>
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                                 {{ $section->permissions_count }}
                             </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">{{ $section->sort_order }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-xs text-gray-500 mt-1">Порядок: {{ $section->sort_order }}</div>
+                        </div>
+                        <div>
                             @can('sections.edit')
                                 <button wire:click="toggleStatus({{ $section->id }})" 
-                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $section->is_active ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200' }}">
+                                    class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $section->is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
                                     {{ $section->is_active ? 'Активен' : 'Неактивен' }}
                                 </button>
                             @else
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $section->is_active ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200' }}">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $section->is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
                                     {{ $section->is_active ? 'Активен' : 'Неактивен' }}
                                 </span>
                             @endcan
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <div class="flex space-x-2">
+                        </div>
+                        <div class="text-center">
+                            <div class="flex items-center justify-center space-x-1">
                                 @can('sections.edit')
-                                    <button wire:click="edit({{ $section->id }})" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
-                                        Редактировать
+                                    <button wire:click="edit({{ $section->id }})" class="inline-flex items-center justify-center w-7 h-7 rounded-full text-blue-600 bg-blue-100 hover:bg-blue-200" title="Редактировать">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
                                     </button>
                                 @endcan
                                 @can('sections.delete')
                                     <button 
                                         wire:click="delete({{ $section->id }})" 
-                                        class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 {{ $section->permissions_count > 0 ? 'opacity-50 cursor-not-allowed' : '' }}"
+                                        class="inline-flex items-center justify-center w-7 h-7 rounded-full text-red-600 bg-red-100 hover:bg-red-200 {{ $section->permissions_count > 0 ? 'opacity-50 cursor-not-allowed' : '' }}"
                                         wire:confirm="Вы уверены, что хотите удалить этот раздел?"
                                         {{ $section->permissions_count > 0 ? 'disabled' : '' }}
+                                        title="Удалить"
                                     >
-                                        Удалить
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
                                     </button>
                                 @endcan
                             </div>
-                        </td>
-                    </tr>
+                        </div>
+                    </div>
+                </div>
                 @empty
-                    <tr>
-                        <td colspan="7" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-                            Разделы не найдены
-                        </td>
-                    </tr>
+                <div class="px-4 py-12 text-center text-gray-500">
+                    <div class="flex flex-col items-center">
+                        <svg class="h-12 w-12 text-gray-300 mb-2" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <p>Разделы не найдены</p>
+                    </div>
+                </div>
                 @endforelse
-            </tbody>
-        </table>
+            </div>
+        </div>
+
+        <!-- Мобильная версия (карточки) -->
+        <div class="md:hidden">
+            <div class="divide-y divide-gray-200">
+                @forelse ($sections as $section)
+                <div class="p-4 space-y-3">
+                    <!-- Заголовок карточки -->
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            @if($section->icon)
+                                <div class="h-5 w-5 text-gray-400">
+                                    <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
+                                    </svg>
+                                </div>
+                            @endif
+                            <div>
+                                <div class="text-sm font-medium text-gray-900">{{ $section->display_name }}</div>
+                                <div class="text-xs text-gray-500">{{ $section->name }}</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            @can('sections.edit')
+                                <button wire:click="edit({{ $section->id }})" class="inline-flex items-center justify-center w-8 h-8 rounded-full text-blue-600 bg-blue-100 hover:bg-blue-200" title="Редактировать">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                </button>
+                            @endcan
+                            @can('sections.delete')
+                                <button 
+                                    wire:click="delete({{ $section->id }})" 
+                                    class="inline-flex items-center justify-center w-8 h-8 rounded-full text-red-600 bg-red-100 hover:bg-red-200 {{ $section->permissions_count > 0 ? 'opacity-50 cursor-not-allowed' : '' }}"
+                                    wire:confirm="Вы уверены, что хотите удалить этот раздел?"
+                                    {{ $section->permissions_count > 0 ? 'disabled' : '' }}
+                                    title="Удалить"
+                                >
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            @endcan
+                        </div>
+                    </div>
+
+                    <!-- Описание -->
+                    @if($section->description)
+                    <div class="text-sm text-gray-600">
+                        {{ $section->description }}
+                    </div>
+                    @endif
+
+                    <!-- Детали -->
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <span class="text-gray-500">Разрешения:</span>
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 ml-1">
+                                {{ $section->permissions_count }}
+                            </span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">Порядок:</span>
+                            <span class="font-medium text-gray-900">{{ $section->sort_order }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Статус -->
+                    <div class="pt-2 border-t border-gray-100">
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-500 text-sm">Статус:</span>
+                            @can('sections.edit')
+                                <button wire:click="toggleStatus({{ $section->id }})" 
+                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $section->is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
+                                    {{ $section->is_active ? 'Активен' : 'Неактивен' }}
+                                </button>
+                            @else
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $section->is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
+                                    {{ $section->is_active ? 'Активен' : 'Неактивен' }}
+                                </span>
+                            @endcan
+                        </div>
+                    </div>
+                </div>
+                @empty
+                <div class="p-4 py-12 text-center text-gray-500">
+                    <div class="flex flex-col items-center">
+                        <svg class="h-12 w-12 text-gray-300 mb-2" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <p>Разделы не найдены</p>
+                    </div>
+                </div>
+                @endforelse
+            </div>
+        </div>
     </div>
 
     <div class="mt-4">

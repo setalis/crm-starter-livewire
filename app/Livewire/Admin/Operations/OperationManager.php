@@ -314,12 +314,14 @@ class OperationManager extends Component
             $item['price'] = 0;
 
             if ($item['type'] === 'simple') {
+                // Чистый вес = полный вес - засор
                 $effectiveWeight = $weight - ($weight * $clogging / 100);
                 $currentPricePerUnit = (float)($item['price_per_unit'] ?? 0);
                 
                 // Если изменился вес или засорённость этого товара, проверяем нужно ли обновить цену
-                if ($index == $changedItemIndex && ($changedProperty === 'weight' || $changedProperty === 'clogging')) {
-                    // Получаем автоматическую цену для нового веса
+                // ВАЖНО: цена за единицу НЕ меняется от засора, меняется только эффективный вес
+                if ($index == $changedItemIndex && $changedProperty === 'weight') {
+                    // Получаем автоматическую цену для полного веса (без засора)
                     $product = Product::with('priceScales')->find($item['product_id']);
                     if ($product) {
                         $autoPricePerUnit = $product->getPriceForWeight($weight, $operationType);
@@ -344,6 +346,7 @@ class OperationManager extends Component
                     }
                 }
                 
+                // ИСПРАВЛЕННАЯ ФОРМУЛА: чистый_вес * цена_за_единицу = итоговая_сумма
                 $item['price'] = $effectiveWeight * $currentPricePerUnit;
             } else { // Composite product
                 $itemPrice = 0;
@@ -473,15 +476,24 @@ class OperationManager extends Component
                 if (!$product) continue;
 
                 $weight = (float)$cartItem['weight'];
+                $clogging = (float)($cartItem['clogging'] ?? 0);
+                
+                // Рассчитываем чистый вес (для простых продуктов учитываем засор)
+                $effectiveWeight = $weight;
+                if ($product->type === 'simple') {
+                    $effectiveWeight = $weight - ($weight * $clogging / 100);
+                }
+                
                 $multiplier = $operation->type === 'purchase' ? 1 : -1;
 
                 // Validate and update product stock for BOTH simple and composite
-                if ($operation->type === 'sale' && $product->stock < $weight) {
+                // ВАЖНО: проверяем и обновляем ЧИСТЫЙ вес на складе
+                if ($operation->type === 'sale' && $product->stock < $effectiveWeight) {
                     throw \Illuminate\Validation\ValidationException::withMessages([
-                        'cart' => "Недостаточно товара '{$product->name}' на складе. В наличии: {$product->stock} {$product->unit->short_name}.",
+                        'cart' => "Недостаточно товара '{$product->name}' на складе. В наличии: {$product->stock} {$product->unit->short_name}, требуется: {$effectiveWeight} {$product->unit->short_name}.",
                     ]);
                 }
-                $product->increment('stock', $weight * $multiplier);
+                $product->increment('stock', $effectiveWeight * $multiplier);
 
                 // If composite, ALSO validate and update element stocks
                 if ($product->type === 'composite' && !empty($cartItem['elements'])) {
@@ -619,9 +631,17 @@ class OperationManager extends Component
             if (!$product) continue;
 
             $weight = (float)$item->weight;
+            $clogging = (float)($item->clogging ?? 0);
+            
+            // Рассчитываем чистый вес (для простых продуктов учитываем засор)
+            $effectiveWeight = $weight;
+            if ($product->type === 'simple') {
+                $effectiveWeight = $weight - ($weight * $clogging / 100);
+            }
 
             // Revert product stock for BOTH simple and composite
-            $product->increment('stock', $weight * $multiplier);
+            // ВАЖНО: возвращаем ЧИСТЫЙ вес на склад
+            $product->increment('stock', $effectiveWeight * $multiplier);
 
             // If composite, ALSO revert element stocks
             if ($product->type === 'composite') {
@@ -772,9 +792,17 @@ class OperationManager extends Component
                 if (!$product) continue;
 
                 $weight = (float)$item->weight;
+                $clogging = (float)($item->clogging ?? 0);
+                
+                // Рассчитываем чистый вес (для простых продуктов учитываем засор)
+                $effectiveWeight = $weight;
+                if ($product->type === 'simple') {
+                    $effectiveWeight = $weight - ($weight * $clogging / 100);
+                }
 
                 // Revert product stock for BOTH simple and composite
-                $product->increment('stock', $weight * $multiplier);
+                // ВАЖНО: возвращаем ЧИСТЫЙ вес на склад
+                $product->increment('stock', $effectiveWeight * $multiplier);
 
                 // If composite, ALSO revert element stocks
                 if ($product->type === 'composite') {

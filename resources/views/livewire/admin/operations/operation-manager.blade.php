@@ -28,71 +28,238 @@
                 @if($isModal)
                     @include('livewire.admin.operations.create')
                 @endif
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="hidden md:table-header-group">
-                            <tr class="bg-gray-100 text-center">
-                                <th class="px-4 py-2">Дата</th>
-                                <th class="px-4 py-2">Номер</th>
-                                <th class="px-4 py-2">Тип</th>
-                                <th class="px-4 py-2">Пользователь</th>
-                                <th class="px-4 py-2">Элементы</th>
-                                <th class="px-4 py-2 text-right">Общая сумма</th>
-                                <th class="px-4 py-2">Действия</th>
-                            </tr>
-                        </thead>
-                        <tbody class="block md:table-row-group">
-                            @foreach($operationsList as $operation)
-                            <tr class="block md:table-row border-b md:border-none mb-4 md:mb-0">
-                                <td data-label="Дата" class="flex items-center justify-between md:table-cell p-2 md:px-4 md:py-2 md:border md:text-center">{{ \App\Helpers\Settings::formatDateTime($operation->created_at) }}</td>
-                                <td data-label="Номер" class="flex items-center justify-between md:table-cell p-2 md:px-4 md:py-2 md:border md:text-center">{{ $operation->operation_number }}</td>
-                                <td data-label="Тип" class="flex items-center justify-between md:table-cell p-2 md:px-4 md:py-2 md:border md:text-center">
-                                    @if($operation->type === 'purchase')
-                                        Покупка
-                                    @elseif($operation->type === 'sale')
-                                        Продажа
-                                    @elseif($operation->type === 'conversion')
-                                        Конвертация
-                                    @else
-                                        {{ ucfirst($operation->type) }}
-                                    @endif
-                                </td>
-                                <td data-label="Пользователь" class="flex items-center justify-between md:table-cell p-2 md:px-4 md:py-2 md:border md:text-center">{{ $operation->user->name }}</td>
-                                <td data-label="Элементы" class="flex items-center justify-between md:table-cell p-2 md:px-4 md:py-2 md:border md:text-center">
-                                    <button wire:click="showOperationDetails({{ $operation->id }})" class="border border-blue-600 w-7 h-7 rounded-md flex items-center justify-center hover:bg-blue-100 cursor-pointer text-blue-600 hover:text-blue-800 underline font-medium mx-auto">
+                <!-- Адаптивная таблица операций -->
+                <div class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+                    <!-- Десктопная версия таблицы -->
+                    <div class="hidden lg:block overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дата</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Номер</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Тип</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Пользователь</th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Элементы</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Сумма</th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                @foreach($operationsList as $operation)
+                                <tr class="hover:bg-gray-50 transition-colors duration-150">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {{ \App\Helpers\Settings::formatDateTime($operation->created_at) }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="text-sm font-medium text-gray-900">{{ $operation->operation_number }}</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span @class([
+                                            'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
+                                            'bg-green-100 text-green-800' => $operation->type === 'purchase',
+                                            'bg-blue-100 text-blue-800' => $operation->type === 'sale',
+                                            'bg-yellow-100 text-yellow-800' => $operation->type === 'conversion',
+                                        ])>
+                                            @if($operation->type === 'purchase')
+                                                Покупка
+                                            @elseif($operation->type === 'sale')
+                                                Продажа
+                                            @elseif($operation->type === 'conversion')
+                                                Конвертация
+                                            @else
+                                                {{ ucfirst($operation->type) }}
+                                            @endif
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {{ $operation->user->name }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                                        <button wire:click="showOperationDetails({{ $operation->id }})" 
+                                                class="inline-flex items-center justify-center w-8 h-8 text-sm font-medium text-blue-600 bg-blue-100 rounded-full hover:bg-blue-200 transition-colors duration-150">
+                                            @if($operation->type === 'conversion')
+                                                1
+                                            @else
+                                                {{ $operation->items->count() }}
+                                            @endif
+                                        </button>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-gray-900">
+                                        {{ \App\Helpers\Settings::formatPrice($operation->total_amount) }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-center">
                                         @if($operation->type === 'conversion')
-                                            1
+                                            <span class="text-xs text-gray-500 italic">Управляется в конвертациях</span>
                                         @else
-                                            {{ $operation->items->count() }}
-                                        @endif
-                                    </button>
-                                </td>
-                                <td data-label="Общая сумма" class="flex items-center justify-between md:table-cell p-2 md:px-4 md:py-2 md:border md:text-right">{{ number_format($operation->total_amount, 2) }}</td>
-                                <td data-label="Действия" class="flex items-center justify-between md:table-cell p-2 md:px-4 md:py-2 md:border md:text-center">
-                                    <div class="inline-block">
-                                        @if($operation->type === 'conversion')
-                                            <span class="text-sm text-gray-500 italic">Управляется в конвертациях</span>
-                                        @else
-                                            <div class="space-x-1">
-                                                <flux:button size="sm" wire:click="showOperationDetails({{ $operation->id }})" variant="ghost" class="text-gray-500 hover:text-gray-700" title="Просмотр">
+                                            <div class="flex items-center justify-center space-x-1">
+                                                <flux:button size="sm" wire:click="showOperationDetails({{ $operation->id }})" variant="ghost" class="text-gray-400 hover:text-gray-600" title="Просмотр">
                                                     <flux:icon name="eye" variant="outline" />
                                                 </flux:button>
-                                                <flux:button size="sm" wire:click="edit({{ $operation->id }})" variant="ghost" class="text-blue-500 hover:text-blue-700" title="Редактировать">
+                                                <flux:button size="sm" wire:click="edit({{ $operation->id }})" variant="ghost" class="text-blue-400 hover:text-blue-600" title="Редактировать">
                                                     <flux:icon name="pencil" variant="outline" />
                                                 </flux:button>
                                                 <flux:button size="sm" wire:click="delete({{ $operation->id }})" 
                                                             wire:confirm="Вы уверены, что хотите удалить эту операцию?" 
-                                                            variant="ghost" class="text-red-500 hover:text-red-700" title="Удалить">
+                                                            variant="ghost" class="text-red-400 hover:text-red-600" title="Удалить">
+                                                    <flux:icon name="trash" variant="outline" />
+                                                </flux:button>
+                                            </div>
+                                        @endif
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Планшетная версия таблицы -->
+                    <div class="hidden md:block lg:hidden">
+                        <div class="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                            <div class="grid grid-cols-5 gap-4 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <div>Операция</div>
+                                <div>Тип</div>
+                                <div>Пользователь</div>
+                                <div class="text-right">Сумма</div>
+                                <div class="text-center">Действия</div>
+                            </div>
+                        </div>
+                        <div class="divide-y divide-gray-200">
+                            @foreach($operationsList as $operation)
+                            <div class="px-4 py-4 hover:bg-gray-50 transition-colors duration-150">
+                                <div class="grid grid-cols-5 gap-4 items-center">
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900">{{ $operation->operation_number }}</div>
+                                        <div class="text-xs text-gray-500">{{ \App\Helpers\Settings::formatDate($operation->created_at) }}</div>
+                                    </div>
+                                    <div>
+                                        <span @class([
+                                            'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium',
+                                            'bg-green-100 text-green-800' => $operation->type === 'purchase',
+                                            'bg-blue-100 text-blue-800' => $operation->type === 'sale',
+                                            'bg-yellow-100 text-yellow-800' => $operation->type === 'conversion',
+                                        ])>
+                                            @if($operation->type === 'purchase')
+                                                Покупка
+                                            @elseif($operation->type === 'sale')
+                                                Продажа
+                                            @elseif($operation->type === 'conversion')
+                                                Конвертация
+                                            @else
+                                                {{ ucfirst($operation->type) }}
+                                            @endif
+                                        </span>
+                                    </div>
+                                    <div class="text-sm text-gray-900">{{ $operation->user->name }}</div>
+                                    <div class="text-right">
+                                        <div class="text-sm font-medium text-gray-900">{{ \App\Helpers\Settings::formatPrice($operation->total_amount) }}</div>
+                                        <button wire:click="showOperationDetails({{ $operation->id }})" 
+                                                class="text-xs text-blue-600 hover:text-blue-800">
+                                            @if($operation->type === 'conversion')
+                                                1 элемент
+                                            @else
+                                                {{ $operation->items->count() }} поз.
+                                            @endif
+                                        </button>
+                                    </div>
+                                    <div class="text-center">
+                                        @if($operation->type === 'conversion')
+                                            <span class="text-xs text-gray-500">—</span>
+                                        @else
+                                            <div class="flex items-center justify-center space-x-1">
+                                                <flux:button size="sm" wire:click="showOperationDetails({{ $operation->id }})" variant="ghost" class="text-gray-400 hover:text-gray-600" title="Просмотр">
+                                                    <flux:icon name="eye" variant="outline" />
+                                                </flux:button>
+                                                <flux:button size="sm" wire:click="edit({{ $operation->id }})" variant="ghost" class="text-blue-400 hover:text-blue-600" title="Редактировать">
+                                                    <flux:icon name="pencil" variant="outline" />
+                                                </flux:button>
+                                                <flux:button size="sm" wire:click="delete({{ $operation->id }})" 
+                                                            wire:confirm="Вы уверены, что хотите удалить эту операцию?" 
+                                                            variant="ghost" class="text-red-400 hover:text-red-600" title="Удалить">
                                                     <flux:icon name="trash" variant="outline" />
                                                 </flux:button>
                                             </div>
                                         @endif
                                     </div>
-                                </td>
-                            </tr>
+                                </div>
+                            </div>
                             @endforeach
-                        </tbody>
-                    </table>
+                        </div>
+                    </div>
+
+                    <!-- Мобильная версия (карточки) -->
+                    <div class="md:hidden">
+                        <div class="divide-y divide-gray-200">
+                            @foreach($operationsList as $operation)
+                            <div class="p-4 space-y-3">
+                                <!-- Заголовок карточки -->
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900">{{ $operation->operation_number }}</div>
+                                        <div class="text-xs text-gray-500">{{ \App\Helpers\Settings::formatDateTime($operation->created_at) }}</div>
+                                    </div>
+                                    <span @class([
+                                        'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium',
+                                        'bg-green-100 text-green-800' => $operation->type === 'purchase',
+                                        'bg-blue-100 text-blue-800' => $operation->type === 'sale',
+                                        'bg-yellow-100 text-yellow-800' => $operation->type === 'conversion',
+                                    ])>
+                                        @if($operation->type === 'purchase')
+                                            Покупка
+                                        @elseif($operation->type === 'sale')
+                                            Продажа
+                                        @elseif($operation->type === 'conversion')
+                                            Конвертация
+                                        @else
+                                            {{ ucfirst($operation->type) }}
+                                        @endif
+                                    </span>
+                                </div>
+
+                                <!-- Детали операции -->
+                                <div class="grid grid-cols-2 gap-4 text-sm">
+                                    <div>
+                                        <span class="text-gray-500">Пользователь:</span>
+                                        <div class="font-medium text-gray-900">{{ $operation->user->name }}</div>
+                                    </div>
+                                    <div>
+                                        <span class="text-gray-500">Позиций:</span>
+                                        <button wire:click="showOperationDetails({{ $operation->id }})" class="font-medium text-blue-600 hover:text-blue-800">
+                                            @if($operation->type === 'conversion')
+                                                1
+                                            @else
+                                                {{ $operation->items->count() }}
+                                            @endif
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Сумма и действия -->
+                                <div class="flex items-center justify-between pt-2 border-t border-gray-100">
+                                    <div class="text-lg font-semibold text-gray-900">
+                                        {{ \App\Helpers\Settings::formatPrice($operation->total_amount) }}
+                                    </div>
+                                    @if($operation->type !== 'conversion')
+                                        <div class="flex items-center space-x-2">
+                                            <flux:button size="sm" wire:click="showOperationDetails({{ $operation->id }})" variant="ghost" class="text-gray-400 hover:text-gray-600" title="Просмотр">
+                                                <flux:icon name="eye" variant="outline" />
+                                            </flux:button>
+                                            <flux:button size="sm" wire:click="edit({{ $operation->id }})" variant="ghost" class="text-blue-400 hover:text-blue-600" title="Редактировать">
+                                                <flux:icon name="pencil" variant="outline" />
+                                            </flux:button>
+                                            <flux:button size="sm" wire:click="delete({{ $operation->id }})" 
+                                                        wire:confirm="Вы уверены, что хотите удалить эту операцию?" 
+                                                        variant="ghost" class="text-red-400 hover:text-red-600" title="Удалить">
+                                                <flux:icon name="trash" variant="outline" />
+                                            </flux:button>
+                                        </div>
+                                    @else
+                                        <span class="text-xs text-gray-500 italic">Управляется в конвертациях</span>
+                                    @endif
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+                    </div>
                 </div>
                 <div class="mt-4">
                     {{ $operationsList->links() }}
@@ -266,20 +433,41 @@
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-3">
                                 <div>
-                                    <label class="text-xs text-gray-500">Вес</label>
+                                    <label class="text-xs text-gray-500">Общий вес</label>
                                     <p class="text-sm text-gray-900">{{ number_format($item->weight, 2) }} {{ $item->product->unit->short_name }}</p>
                                 </div>
-                                @if($item->clogging)
-                                <div>
-                                    <label class="text-xs text-gray-500">Засор</label>
-                                    <p class="text-sm text-gray-900">{{ $item->clogging }}%</p>
-                                </div>
+                                @if($item->product->type === 'simple')
+                                    @php
+                                        $clogging = $item->clogging ?? 0;
+                                        $effectiveWeight = $item->weight - ($item->weight * $clogging / 100);
+                                    @endphp
+                                    <div>
+                                        <label class="text-xs text-gray-500">Засор</label>
+                                        <p class="text-sm text-gray-900">{{ $clogging }}%</p>
+                                    </div>
+                                    <div>
+                                        <label class="text-xs text-gray-500">Чистый вес</label>
+                                        <p class="text-sm font-semibold text-green-600">{{ number_format($effectiveWeight, 2) }} {{ $item->product->unit->short_name }}</p>
+                                    </div>
+                                @else
+                                    <div></div>
+                                    <div></div>
                                 @endif
                                 <div>
                                     <label class="text-xs text-gray-500">Цена за единицу</label>
-                                    <p class="text-sm text-gray-900">{{ \App\Helpers\Settings::formatPrice($item->price / $item->weight) }}/{{ $item->product->unit->short_name }}</p>
+                                    @php
+                                        // Для простых продуктов рассчитываем цену за единицу на основе чистого веса
+                                        if ($item->product->type === 'simple') {
+                                            $clogging = $item->clogging ?? 0;
+                                            $effectiveWeight = $item->weight - ($item->weight * $clogging / 100);
+                                            $pricePerUnit = $effectiveWeight > 0 ? $item->price / $effectiveWeight : 0;
+                                        } else {
+                                            $pricePerUnit = $item->weight > 0 ? $item->price / $item->weight : 0;
+                                        }
+                                    @endphp
+                                    <p class="text-sm text-gray-900">{{ \App\Helpers\Settings::formatPrice($pricePerUnit) }}/{{ $item->product->unit->short_name }}</p>
                                 </div>
                             </div>
 

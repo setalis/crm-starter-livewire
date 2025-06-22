@@ -108,13 +108,13 @@
                                 <div class="flex justify-between items-center">
                                     <span class="text-xs text-gray-500 dark:text-gray-400">Покупка:</span>
                                     <span class="text-xs font-medium text-green-600 dark:text-green-400">
-                                        {{ \App\Helpers\Settings::formatPrice($product->purchase_price) }}
+                                        {{ \App\Helpers\Settings::formatPrice($product->purchase_price ?? 0) }}
                                     </span>
                                 </div>
                                 <div class="flex justify-between items-center">
                                     <span class="text-xs text-gray-500 dark:text-gray-400">Продажа:</span>
                                     <span class="text-xs font-medium text-blue-600 dark:text-blue-400">
-                                        {{ \App\Helpers\Settings::formatPrice($product->selling_price) }}
+                                        {{ \App\Helpers\Settings::formatPrice($product->selling_price ?? 0) }}
                                     </span>
                                 </div>
                                 <div class="flex justify-between items-center pt-0.5">

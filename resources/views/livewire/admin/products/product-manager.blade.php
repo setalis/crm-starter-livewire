@@ -43,10 +43,10 @@
                             </td>
                             <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">
                                 @if($product->type === 'simple')
-                                    <div class="font-medium">{{ $product->purchase_price }} грн</div>
+                                    <div class="font-medium">{{ \App\Helpers\Settings::formatPrice($product->purchase_price ?? 0) }}</div>
                                     <div class="text-xs text-gray-500">закупка</div>
                                 @else
-                                    <div class="font-medium text-blue-600">{{ $product->getCompositeProductPricePerKg() }} грн/кг</div>
+                                    <div class="font-medium text-blue-600">{{ \App\Helpers\Settings::formatPrice($product->getCompositeProductPricePerKg()) }}/кг</div>
                                     <div class="text-xs text-gray-500">{{ $product->elements->count() }} элементов</div>
                                 @endif
                             </td>
@@ -82,6 +82,78 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+
+        {{-- Mobile view --}}
+        <div class="md:hidden space-y-4">
+            @forelse($products as $product)
+            <div class="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 p-4 shadow-sm" wire:key="mobile-{{ $product->id }}">
+                <!-- Заголовок карточки -->
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex-1">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">{{ $product->name }}</h3>
+                        <div class="flex items-center space-x-2 mt-1">
+                            <span @class([
+                                'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium',
+                                'bg-green-100 text-green-800' => $product->type === 'simple',
+                                'bg-blue-100 text-blue-800' => $product->type === 'composite',
+                            ])>
+                                {{ $product->type === 'simple' ? 'Простой' : 'Составной' }}
+                            </span>
+                            <span @class([
+                                'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium',
+                                'bg-green-100 text-green-800' => $product->is_published,
+                                'bg-red-100 text-red-800' => !$product->is_published,
+                            ])>
+                                {{ $product->is_published ? 'Опубликован' : 'Не опубликован' }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Детали товара -->
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">Стоимость</div>
+                        @if($product->type === 'simple')
+                            <div class="font-medium text-gray-900 dark:text-white">{{ \App\Helpers\Settings::formatPrice($product->purchase_price ?? 0) }}</div>
+                            <div class="text-xs text-gray-500">закупка</div>
+                        @else
+                            <div class="font-medium text-blue-600">{{ \App\Helpers\Settings::formatPrice($product->getCompositeProductPricePerKg()) }}/кг</div>
+                            <div class="text-xs text-gray-500">{{ $product->elements->count() }} элементов</div>
+                        @endif
+                    </div>
+                    <div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">Остаток</div>
+                        <div class="font-medium text-gray-900 dark:text-white">{{ number_format($product->stock, 3) }} {{ $product->unit->name }}</div>
+                    </div>
+                </div>
+
+                <!-- Действия -->
+                <div class="flex items-center justify-end space-x-2 pt-3 border-t border-gray-100 dark:border-gray-600">
+                    <flux:button flat wire:click="edit({{ $product->id }})">
+                        <i class="bi bi-pencil-fill"></i>
+                        Редактировать
+                    </flux:button>
+                    <flux:button flat color="danger" wire:click="delete({{ $product->id }})">
+                        <i class="bi bi-trash-fill"></i>
+                        Удалить
+                    </flux:button>
+                </div>
+            </div>
+            @empty
+            <div class="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 p-8 text-center">
+                <div class="space-y-4">
+                    <div class="flex justify-center text-zinc-400 dark:text-zinc-500">
+                        <i class="bi bi-search text-5xl"></i>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="text-lg font-semibold">{{ __('No products found') }}</p>
+                        <p class="text-sm text-zinc-500 dark:text-zinc-400">{{ __('Please create a new product to get started.') }}</p>
+                    </div>
+                </div>
+            </div>
+            @endforelse
         </div>
     </div>
 
@@ -128,7 +200,7 @@
                                      <div class="flex-1">
                                          <div class="font-medium">{{ $elements->find($elementId)->name }}</div>
                                          <div class="text-sm text-gray-500">
-                                             {{ $elements->find($elementId)->price }} грн за 1% 
+                                             {{ \App\Helpers\Settings::formatPrice($elements->find($elementId)->price) }} за 1% 
                                              ({{ $elements->find($elementId)->unit->name }})
                                          </div>
                                      </div>
@@ -142,7 +214,7 @@
                                              class="w-full border rounded-lg block disabled:shadow-none dark:shadow-none appearance-none text-base sm:text-sm py-2 h-10 leading-[1.375rem] ps-3 pe-3 bg-white dark:bg-white/10 dark:disabled:bg-white/[7%] text-zinc-700 disabled:text-zinc-500 placeholder-zinc-400 disabled:placeholder-zinc-400/70 dark:text-zinc-300 dark:disabled:text-zinc-400 dark:placeholder-zinc-400 dark:disabled:placeholder-zinc-500 shadow-xs border-zinc-200 border-b-zinc-300/80 disabled:border-b-zinc-200 dark:border-white/10 dark:disabled:border-white/5">
                                      </div>
                                      <div class="w-1/4 text-sm text-gray-600">
-                                         = {{ round($elements->find($elementId)->price * $data['percentage'], 2) }} грн/кг
+                                         = {{ \App\Helpers\Settings::formatPrice(round($elements->find($elementId)->price * $data['percentage'], 2)) }}/кг
                                      </div>
                                      <flux:button flat color="danger" wire:click="removeElement({{ $elementId }})">
                                          <i class="bi bi-trash-fill"></i>
@@ -161,15 +233,15 @@
                                  </div>
                                  <div class="flex justify-between items-center mt-2">
                                      <span class="font-medium">Расчетная стоимость за 1 кг:</span>
-                                     <span class="font-bold text-blue-600">{{ $this->getCalculatedCompositePrice() }} грн</span>
+                                     <span class="font-bold text-blue-600">{{ \App\Helpers\Settings::formatPrice($this->getCalculatedCompositePrice()) }}</span>
                                  </div>
                                  
                                  @if($this->getCalculatedCompositePrice() > 0)
                                      <div class="mt-3 p-3 bg-blue-50 rounded border-l-4 border-blue-400">
                                          <h4 class="font-medium text-blue-800 mb-2">Пример расчета для заказа:</h4>
                                          <div class="text-sm text-blue-700 space-y-1">
-                                             <div>• При весе 5 кг: {{ $this->getCalculatedCompositePrice() }} × 5 = <strong>{{ $this->getCalculatedCompositePrice() * 5 }} грн</strong></div>
-                                             <div>• При весе 10 кг: {{ $this->getCalculatedCompositePrice() }} × 10 = <strong>{{ $this->getCalculatedCompositePrice() * 10 }} грн</strong></div>
+                                             <div>• При весе 5 кг: {{ \App\Helpers\Settings::formatPrice($this->getCalculatedCompositePrice()) }} × 5 = <strong>{{ \App\Helpers\Settings::formatPrice($this->getCalculatedCompositePrice() * 5) }}</strong></div>
+                                             <div>• При весе 10 кг: {{ \App\Helpers\Settings::formatPrice($this->getCalculatedCompositePrice()) }} × 10 = <strong>{{ \App\Helpers\Settings::formatPrice($this->getCalculatedCompositePrice() * 10) }}</strong></div>
                                          </div>
                                      </div>
                                  @endif

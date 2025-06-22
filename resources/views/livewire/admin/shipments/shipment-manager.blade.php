@@ -76,80 +76,169 @@
     </div>
 
     <!-- Таблица отгрузок -->
-    <div class="overflow-x-auto rounded-lg border border-zinc-200 bg-white shadow-sm dark:border-zinc-700 dark:bg-zinc-800">
-        <table class="min-w-full table-auto">
-            <thead class="bg-zinc-50 dark:bg-zinc-800">
-                <tr>
-                    <th class="px-3.5 py-2.5 text-left text-sm font-semibold">ID</th>
-                    <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Дата</th>
-                    <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Предприятие</th>
-                    <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Позиции</th>
-                    <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Валовая выручка</th>
-                    <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Чистая прибыль</th>
-                    <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Статус</th>
-                    <th class="px-3.5 py-2.5 text-left text-sm font-semibold">Действия</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-zinc-200 dark:divide-zinc-700">
+    <div class="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm dark:border-zinc-700 dark:bg-zinc-800">
+        <!-- Десктопная версия таблицы -->
+        <div class="hidden lg:block overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дата</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Предприятие</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Позиции</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Валовая выручка</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Чистая прибыль</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Статус</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @forelse($shipments as $shipment)
+                        <tr class="hover:bg-gray-50 transition-colors duration-150">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#{{ $shipment->id }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <div>{{ $shipment->created_at->format('d.m.Y') }}</div>
+                                <div class="text-xs text-gray-500">{{ $shipment->created_at->format('H:i') }}</div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-900">
+                                <div class="font-medium">{{ $shipment->company ?: 'Не указано' }}</div>
+                                @if($shipment->car_number)
+                                    <div class="text-xs text-gray-500">{{ $shipment->car_number }}</div>
+                                @endif
+                            </td>
+                            <td class="px-6 py-4 text-sm">
+                                <div class="flex flex-wrap gap-1">
+                                    @foreach($shipment->items as $item)
+                                        <span class="inline-block bg-blue-100 text-blue-800 rounded px-2 py-0.5 text-xs">
+                                            {{ $products->find($item->product_id)->name ?? '' }} ({{ $item->weight }} кг)
+                                        </span>
+                                    @endforeach
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                @if($shipment->stage === 'confirmed')
+                                    @php $revenue = $this->getShipmentRevenue($shipment); @endphp
+                                    <span class="font-semibold text-blue-600">
+                                        {{ \App\Helpers\Settings::formatPrice($revenue) }}
+                                    </span>
+                                @else
+                                    <span class="text-gray-400">—</span>
+                                @endif
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                @if($shipment->stage === 'confirmed')
+                                    @php $profit = $this->getShipmentProfit($shipment); @endphp
+                                    <span class="font-semibold {{ $profit >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                                        {{ \App\Helpers\Settings::formatPrice($profit) }}
+                                    </span>
+                                @else
+                                    <span class="text-gray-400">—</span>
+                                @endif
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                <div class="flex flex-col gap-1">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $shipment->stage === 'draft' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800' }}">
+                                        {{ $shipment->stage === 'draft' ? 'Черновик' : 'Подтверждено' }}
+                                    </span>
+                                    @if($shipment->stage === 'draft')
+                                        @can('shipments.confirm')
+                                        <button type="button" wire:click="openConfirmModal({{ $shipment->id }})" class="inline-flex items-center px-2 py-1 border border-transparent text-xs leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" title="Внести фактические данные">
+                                            <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                            Внести факт
+                                        </button>
+                                        @endcan
+                                    @endif
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                <div class="flex items-center justify-center gap-1">
+                                    <button type="button" wire:click="openDetailsModal({{ $shipment->id }})" class="inline-flex items-center justify-center w-8 h-8 rounded-full text-blue-600 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500 transition-colors duration-150" title="Подробнее">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                    </button>
+                                    @can('shipments.edit')
+                                    <button type="button" wire:click="openModal({{ $shipment->id }})" class="inline-flex items-center justify-center w-8 h-8 rounded-full text-yellow-600 bg-yellow-100 hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-yellow-500 transition-colors duration-150" title="Редактировать">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                    </button>
+                                    @endcan
+                                    @if($shipment->stage === 'confirmed')
+                                        @can('shipments.confirm')
+                                        <button type="button" wire:click="openConfirmModal({{ $shipment->id }})" class="inline-flex items-center justify-center w-8 h-8 rounded-full text-green-600 bg-green-100 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-green-500 transition-colors duration-150" title="Редактировать фактические данные">
+                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                        </button>
+                                        @endcan
+                                    @endif
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="8" class="py-8 text-center text-zinc-400 dark:text-zinc-500">
+                                <div class="flex flex-col items-center">
+                                    <svg class="h-12 w-12 text-zinc-300 mb-2" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                                    </svg>
+                                    <p>Нет отгрузок</p>
+                                    <p class="text-xs">Создайте первую отгрузку</p>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Планшетная версия таблицы -->
+        <div class="hidden md:block lg:hidden">
+            <div class="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                <div class="grid grid-cols-5 gap-4 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <div>Отгрузка</div>
+                    <div>Предприятие</div>
+                    <div>Статус</div>
+                    <div class="text-right">Финансы</div>
+                    <div class="text-center">Действия</div>
+                </div>
+            </div>
+            <div class="divide-y divide-gray-200">
                 @forelse($shipments as $shipment)
-                    <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800">
-                        <td class="whitespace-nowrap px-3.5 py-2.5 text-sm font-medium">#{{ $shipment->id }}</td>
-                        <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">
-                            <div>{{ $shipment->created_at->format('d.m.Y') }}</div>
-                            <div class="text-xs text-gray-500">{{ $shipment->created_at->format('H:i') }}</div>
-                        </td>
-                        <td class="px-3.5 py-2.5 text-sm">
-                            <div class="font-medium">{{ $shipment->company ?: 'Не указано' }}</div>
+                <div class="px-4 py-4 hover:bg-gray-50 transition-colors duration-150">
+                    <div class="grid grid-cols-5 gap-4 items-center">
+                        <div>
+                            <div class="text-sm font-medium text-gray-900">#{{ $shipment->id }}</div>
+                            <div class="text-xs text-gray-500">{{ $shipment->created_at->format('d.m.Y H:i') }}</div>
+                        </div>
+                        <div>
+                            <div class="text-sm font-medium text-gray-900">{{ $shipment->company ?: 'Не указано' }}</div>
                             @if($shipment->car_number)
                                 <div class="text-xs text-gray-500">{{ $shipment->car_number }}</div>
                             @endif
-                        </td>
-                        <td class="px-3.5 py-2.5 text-sm">
-                            <div class="flex flex-wrap gap-1">
-                                @foreach($shipment->items as $item)
-                                    <span class="inline-block bg-blue-100 text-blue-800 rounded px-2 py-0.5 text-xs">
-                                        {{ $products->find($item->product_id)->name ?? '' }} ({{ $item->weight }} кг)
-                                    </span>
-                                @endforeach
-                            </div>
-                        </td>
-                        <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">
-                            @if($shipment->stage === 'confirmed')
-                                @php $revenue = $this->getShipmentRevenue($shipment); @endphp
-                                <span class="font-semibold text-blue-600">
-                                    {{ number_format($revenue, 2) }} ₽
-                                </span>
-                            @else
-                                <span class="text-gray-400">—</span>
+                            <div class="text-xs text-blue-600 mt-1">{{ $shipment->items->count() }} поз.</div>
+                        </div>
+                        <div>
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $shipment->stage === 'draft' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800' }}">
+                                {{ $shipment->stage === 'draft' ? 'Черновик' : 'Подтверждено' }}
+                            </span>
+                            @if($shipment->stage === 'draft')
+                                @can('shipments.confirm')
+                                <button type="button" wire:click="openConfirmModal({{ $shipment->id }})" class="mt-1 text-xs text-blue-600 hover:text-blue-800">
+                                    Внести факт
+                                </button>
+                                @endcan
                             @endif
-                        </td>
-                        <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">
+                        </div>
+                        <div class="text-right">
                             @if($shipment->stage === 'confirmed')
-                                @php $profit = $this->getShipmentProfit($shipment); @endphp
-                                <span class="font-semibold {{ $profit >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                    {{ number_format($profit, 2) }} ₽
-                                </span>
+                                @php 
+                                    $revenue = $this->getShipmentRevenue($shipment);
+                                    $profit = $this->getShipmentProfit($shipment);
+                                @endphp
+                                <div class="text-sm font-medium text-blue-600">{{ \App\Helpers\Settings::formatPrice($revenue) }}</div>
+                                <div class="text-xs {{ $profit >= 0 ? 'text-green-600' : 'text-red-600' }}">{{ \App\Helpers\Settings::formatPrice($profit) }}</div>
                             @else
-                                <span class="text-gray-400">—</span>
+                                <span class="text-gray-400 text-sm">—</span>
                             @endif
-                        </td>
-                        <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">
-                            <div class="flex flex-col gap-1">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $shipment->stage === 'draft' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800' }}">
-                                    {{ $shipment->stage === 'draft' ? 'Черновик' : 'Подтверждено' }}
-                                </span>
-                                @if($shipment->stage === 'draft')
-                                    @can('shipments.confirm')
-                                    <button type="button" wire:click="openConfirmModal({{ $shipment->id }})" class="inline-flex items-center px-2 py-1 border border-transparent text-xs leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" title="Внести фактические данные">
-                                        <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                                        Внести факт
-                                    </button>
-                                    @endcan
-                                @endif
-                            </div>
-                        </td>
-                        <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">
-                            <div class="flex items-center gap-1">
+                        </div>
+                        <div class="text-center">
+                            <div class="flex items-center justify-center gap-1">
                                 <button type="button" wire:click="openDetailsModal({{ $shipment->id }})" class="inline-flex items-center justify-center w-7 h-7 rounded-full text-blue-600 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500" title="Подробнее">
                                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                                 </button>
@@ -166,23 +255,114 @@
                                     @endcan
                                 @endif
                             </div>
-                        </td>
-                    </tr>
+                        </div>
+                    </div>
+                </div>
                 @empty
-                    <tr>
-                        <td colspan="8" class="py-8 text-center text-zinc-400 dark:text-zinc-500">
-                            <div class="flex flex-col items-center">
-                                <svg class="h-12 w-12 text-zinc-300 mb-2" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                                </svg>
-                                <p>Нет отгрузок</p>
-                                <p class="text-xs">Создайте первую отгрузку</p>
-                            </div>
-                        </td>
-                    </tr>
+                <div class="px-4 py-8 text-center text-zinc-400">
+                    <div class="flex flex-col items-center">
+                        <svg class="h-12 w-12 text-zinc-300 mb-2" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                        </svg>
+                        <p>Нет отгрузок</p>
+                        <p class="text-xs">Создайте первую отгрузку</p>
+                    </div>
+                </div>
                 @endforelse
-            </tbody>
-        </table>
+            </div>
+        </div>
+
+        <!-- Мобильная версия (карточки) -->
+        <div class="md:hidden">
+            <div class="divide-y divide-gray-200">
+                @forelse($shipments as $shipment)
+                <div class="p-4 space-y-3">
+                    <!-- Заголовок карточки -->
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="text-sm font-medium text-gray-900">#{{ $shipment->id }}</div>
+                            <div class="text-xs text-gray-500">{{ $shipment->created_at->format('d.m.Y H:i') }}</div>
+                        </div>
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $shipment->stage === 'draft' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800' }}">
+                            {{ $shipment->stage === 'draft' ? 'Черновик' : 'Подтверждено' }}
+                        </span>
+                    </div>
+
+                    <!-- Детали отгрузки -->
+                    <div class="space-y-2">
+                        <div>
+                            <span class="text-gray-500 text-sm">Предприятие:</span>
+                            <div class="font-medium text-gray-900">{{ $shipment->company ?: 'Не указано' }}</div>
+                            @if($shipment->car_number)
+                                <div class="text-xs text-gray-500">{{ $shipment->car_number }}</div>
+                            @endif
+                        </div>
+                        
+                        <div>
+                            <span class="text-gray-500 text-sm">Позиции ({{ $shipment->items->count() }}):</span>
+                            <div class="flex flex-wrap gap-1 mt-1">
+                                @foreach($shipment->items as $item)
+                                    <span class="inline-block bg-blue-100 text-blue-800 rounded px-2 py-0.5 text-xs">
+                                        {{ $products->find($item->product_id)->name ?? '' }} ({{ $item->weight }} кг)
+                                    </span>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Финансы и действия -->
+                    <div class="flex items-center justify-between pt-2 border-t border-gray-100">
+                        <div>
+                            @if($shipment->stage === 'confirmed')
+                                @php 
+                                    $revenue = $this->getShipmentRevenue($shipment);
+                                    $profit = $this->getShipmentProfit($shipment);
+                                @endphp
+                                <div class="text-sm font-medium text-blue-600">{{ \App\Helpers\Settings::formatPrice($revenue) }}</div>
+                                <div class="text-xs {{ $profit >= 0 ? 'text-green-600' : 'text-red-600' }}">{{ \App\Helpers\Settings::formatPrice($profit) }}</div>
+                            @else
+                                <span class="text-gray-400 text-sm">Финансы не рассчитаны</span>
+                            @endif
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            @if($shipment->stage === 'draft')
+                                @can('shipments.confirm')
+                                <button type="button" wire:click="openConfirmModal({{ $shipment->id }})" class="text-xs text-blue-600 hover:text-blue-800 px-2 py-1 border border-blue-200 rounded">
+                                    Внести факт
+                                </button>
+                                @endcan
+                            @endif
+                            <button type="button" wire:click="openDetailsModal({{ $shipment->id }})" class="inline-flex items-center justify-center w-8 h-8 rounded-full text-blue-600 bg-blue-100 hover:bg-blue-200" title="Подробнее">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                            </button>
+                            @can('shipments.edit')
+                            <button type="button" wire:click="openModal({{ $shipment->id }})" class="inline-flex items-center justify-center w-8 h-8 rounded-full text-yellow-600 bg-yellow-100 hover:bg-yellow-200" title="Редактировать">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                            </button>
+                            @endcan
+                            @if($shipment->stage === 'confirmed')
+                                @can('shipments.confirm')
+                                <button type="button" wire:click="openConfirmModal({{ $shipment->id }})" class="inline-flex items-center justify-center w-8 h-8 rounded-full text-green-600 bg-green-100 hover:bg-green-200" title="Редактировать фактические данные">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                </button>
+                                @endcan
+                            @endif
+                        </div>
+                    </div>
+                </div>
+                @empty
+                <div class="p-4 text-center text-zinc-400">
+                    <div class="flex flex-col items-center">
+                        <svg class="h-12 w-12 text-zinc-300 mb-2" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                        </svg>
+                        <p>Нет отгрузок</p>
+                        <p class="text-xs">Создайте первую отгрузку</p>
+                    </div>
+                </div>
+                @endforelse
+            </div>
+        </div>
     </div>
 
     <!-- Модальное окно создания отгрузки -->
@@ -280,7 +460,7 @@
                                             <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">
                                                 <div class="font-medium">{{ $products->find($item['product_id'])->name ?? '' }}</div>
                                                 <div class="text-xs text-gray-500">
-                                                    Ср. цена: {{ number_format($purchase, 2) }} ₽/кг
+                                                    Ср. цена: {{ \App\Helpers\Settings::formatPrice($purchase) }}/кг
                                                     @if($clogging > 0)
                                                         | Засор: {{ $clogging }}%
                                                     @endif
@@ -302,7 +482,7 @@
                                                     <span class="text-gray-400">—</span>
                                                 @endif
                                             </td>
-                                            <td class="whitespace-nowrap px-3.5 py-2.5 text-sm font-medium">{{ number_format($cost, 2) }} ₽</td>
+                                            <td class="whitespace-nowrap px-3.5 py-2.5 text-sm font-medium">{{ \App\Helpers\Settings::formatPrice($cost) }}</td>
                                             <td class="whitespace-nowrap px-3.5 py-2.5 text-center">
                                                 <div class="flex items-center gap-1">
                                                     <button type="button" wire:click="editShipmentItem({{ $index }})" class="inline-flex items-center justify-center w-7 h-7 rounded-full text-blue-600 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500" title="Редактировать позицию">
@@ -322,7 +502,7 @@
                                     @if(count($shipmentItems) > 0)
                                         <tr class="bg-zinc-50 dark:bg-zinc-800 font-semibold">
                                             <td colspan="5" class="px-3.5 py-2.5 text-right">Общие предварительные затраты:</td>
-                                            <td class="px-3.5 py-2.5">{{ number_format($totalCost, 2) }} ₽</td>
+                                            <td class="px-3.5 py-2.5">{{ \App\Helpers\Settings::formatPrice($totalCost) }}</td>
                                             <td></td>
                                         </tr>
                                     @endif
@@ -486,9 +666,9 @@
                     <div><b>Номер авто:</b> {{ $detailsShipment->car_number }}</div>
                     <div><b>Водитель:</b> {{ $detailsShipment->driver_name }}</div>
                     <div><b>Комментарий:</b> {{ $detailsShipment->comment }}</div>
-                    <div><b>Затраты на отгрузку:</b> {{ number_format($detailsShipment->shipping_cost, 2) }} ₽</div>
-                    <div class="mt-2"><b>Валовая выручка:</b> <span class="font-semibold text-blue-600">{{ number_format($this->getShipmentRevenue($detailsShipment), 2) }} ₽</span></div>
-                    <div><b>Чистая прибыль:</b> <span class="font-semibold {{ $this->getShipmentProfit($detailsShipment) >= 0 ? 'text-green-600' : 'text-red-600' }}">{{ number_format($this->getShipmentProfit($detailsShipment), 2) }} ₽</span></div>
+                    <div><b>Затраты на отгрузку:</b> {{ \App\Helpers\Settings::formatPrice($detailsShipment->shipping_cost) }}</div>
+                    <div class="mt-2"><b>Валовая выручка:</b> <span class="font-semibold text-blue-600">{{ \App\Helpers\Settings::formatPrice($this->getShipmentRevenue($detailsShipment)) }}</span></div>
+                    <div><b>Чистая прибыль:</b> <span class="font-semibold {{ $this->getShipmentProfit($detailsShipment) >= 0 ? 'text-green-600' : 'text-red-600' }}">{{ \App\Helpers\Settings::formatPrice($this->getShipmentProfit($detailsShipment)) }}</span></div>
                 </div>
                 <div class="overflow-x-auto mt-4">
                     <table class="min-w-full table-auto rounded-lg overflow-hidden">

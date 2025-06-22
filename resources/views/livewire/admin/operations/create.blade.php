@@ -88,6 +88,27 @@
                                     </div>
                                 </div>
 
+                                <!-- Информационный блок о расчете засора -->
+                                <div class="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+                                    <div class="flex items-start">
+                                        <div class="flex-shrink-0">
+                                            <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                        </div>
+                                        <div class="ml-3">
+                                            <h3 class="text-sm font-medium text-blue-900">Как работает расчет засора</h3>
+                                            <div class="mt-2 text-sm text-blue-800">
+                                                <p>• <strong>Вес</strong> - общий вес металла включая засор</p>
+                                                <p>• <strong>Засор</strong> - процент примесей в металле</p>
+                                                <p>• <strong>Чистый вес</strong> = Общий вес - (Общий вес × Засор%)</p>
+                                                <p>• <strong>Итого</strong> = Чистый вес × Цена за единицу</p>
+                                                <p class="mt-1 font-medium">На склад поступает только чистый вес металла!</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                                                 <div class="mt-4 border-t pt-4">
                     <div class="flex items-end gap-2">
                         <div class="flex-grow">
@@ -124,8 +145,18 @@
                                                     <input type="number" step="0.01" wire:model.live.debounce.300ms="operations.{{ $activeOperationId }}.cartItems.{{ $index }}.price_per_unit" class="shadow-sm appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" @if($item['type'] === 'composite') disabled @endif>
                                                 </div>
                                                 <div>
-                                                    <label class="text-sm">Clogging (%)</label>
+                                                    <label class="text-sm">Засор (%)</label>
                                                     <input type="number" step="0.01" wire:model.live.debounce.300ms="operations.{{ $activeOperationId }}.cartItems.{{ $index }}.clogging" class="shadow-sm appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" @if($item['type'] === 'composite') disabled @endif>
+                                                    @if($item['type'] === 'simple')
+                                                        @php
+                                                            $weight = (float)($item['weight'] ?? 0);
+                                                            $clogging = (float)($item['clogging'] ?? 0);
+                                                            $effectiveWeight = $weight - ($weight * $clogging / 100);
+                                                        @endphp
+                                                        <div class="text-xs text-gray-600 mt-1">
+                                                            Чистый вес: <strong class="text-green-600">{{ number_format($effectiveWeight, 3) }} {{ $item['unit'] }}</strong>
+                                                        </div>
+                                                    @endif
                                                 </div>
                                                 <div class="text-right">
                                                     <label class="text-sm">Total Price</label>
