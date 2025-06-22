@@ -37,6 +37,7 @@ class DatabaseSeeder extends Seeder
         $this->call(TestUsersSeeder::class);
 
         // Остальные сидеры
+        $this->call(SettingsSeeder::class);
         $this->call(UnitSeeder::class);
         $this->call(ElementSeeder::class);
         $this->call(ProductSeeder::class);

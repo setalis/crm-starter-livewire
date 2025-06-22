@@ -60,7 +60,7 @@
                                 -
                             @endif
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $recount->created_at->format('d.m.Y H:i') }}</td>
+                                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ \App\Helpers\Settings::formatDateTime($recount->created_at) }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-1">
                             @can('recounts.view')
                                 <flux:button size="sm" wire:click="viewRecount({{ $recount->id }})" variant="ghost" class="text-gray-500 hover:text-gray-700" title="Просмотр">
@@ -179,12 +179,12 @@
                     </div>
                     <div>
                         <flux:label>Дата создания</flux:label>
-                        <p class="mt-1">{{ $selectedRecount->created_at->format('d.m.Y H:i') }}</p>
+                                                        <p class="mt-1">{{ \App\Helpers\Settings::formatDateTime($selectedRecount->created_at) }}</p>
                     </div>
                     @if($selectedRecount->completed_at)
                         <div>
                             <flux:label>Дата завершения</flux:label>
-                            <p class="mt-1">{{ $selectedRecount->completed_at->format('d.m.Y H:i') }}</p>
+                                                            <p class="mt-1">{{ \App\Helpers\Settings::formatDateTime($selectedRecount->completed_at) }}</p>
                         </div>
                     @endif
                 </div>

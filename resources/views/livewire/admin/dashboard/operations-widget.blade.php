@@ -30,7 +30,7 @@
             </div>
             <div class="mt-2 text-center">
                 <div class="text-xs text-gray-500 dark:text-gray-400">Оборот</div>
-                <div class="text-sm font-bold text-gray-900 dark:text-white">{{ number_format($todayStats['amount'], 2) }} ₴</div>
+                <div class="text-sm font-bold text-gray-900 dark:text-white">{{ \App\Helpers\Settings::formatPrice($todayStats['amount']) }}</div>
             </div>
         </div>
 
@@ -58,10 +58,10 @@
                         </div>
                         <div class="text-right">
                             <div class="text-sm font-bold text-gray-900 dark:text-white">
-                                {{ number_format($operation->total_amount, 2) }} ₴
+                                {{ \App\Helpers\Settings::formatPrice($operation->total_amount) }}
                             </div>
                             <div class="text-xs text-gray-500 dark:text-gray-400">
-                                {{ $operation->created_at->format('H:i') }}
+                                {{ \App\Helpers\Settings::formatTime($operation->created_at) }}
                             </div>
                         </div>
                     </div>
@@ -89,7 +89,7 @@
             </div>
             <div class="mt-2 text-center">
                 <div class="text-xs text-gray-500 dark:text-gray-400">Общий оборот</div>
-                <div class="text-lg font-bold text-green-600 dark:text-green-400">{{ number_format($monthStats['amount'], 2) }} ₴</div>
+                <div class="text-lg font-bold text-green-600 dark:text-green-400">{{ \App\Helpers\Settings::formatPrice($monthStats['amount']) }}</div>
             </div>
         </div>
     </div>

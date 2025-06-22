@@ -29,7 +29,7 @@
                                 Остаток: <span class="font-medium">{{ number_format($element->stock, 3) }}</span>
                             </span>
                             <span class="text-sm text-gray-600 dark:text-gray-300">
-                                За 1%: <span class="font-medium">{{ number_format($element->price, 2) }} ₴</span>
+                                За 1%: <span class="font-medium">{{ \App\Helpers\Settings::formatPrice($element->price) }}</span>
                             </span>
                         </div>
                     </div>
@@ -67,10 +67,10 @@
                             <!-- Обычный режим -->
                             <div class="text-right">
                                 <div class="text-sm font-medium text-gray-900 dark:text-white">
-                                    {{ number_format($element->unit_price, 2) }} ₴/{{ $element->unit->short_name }}
+                                    {{ \App\Helpers\Settings::formatPrice($element->unit_price) }}/{{ $element->unit->short_name }}
                                 </div>
                                 <div class="text-xs text-gray-500 dark:text-gray-400">
-                                    Сумма: {{ number_format($element->stock * $element->unit_price, 2) }} ₴
+                                    Сумма: {{ \App\Helpers\Settings::formatPrice($element->stock * $element->unit_price) }}
                                 </div>
                             </div>
                             <button 
@@ -91,7 +91,7 @@
                 <div class="flex justify-between items-center">
                     <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Общая стоимость:</span>
                     <span class="text-lg font-bold text-purple-600 dark:text-purple-400">
-                        {{ number_format($elements->sum(function($element) { return $element->stock * $element->unit_price; }), 2) }} ₴
+                        {{ \App\Helpers\Settings::formatPrice($elements->sum(function($element) { return $element->stock * $element->unit_price; })) }}
                     </span>
                 </div>
             </div>

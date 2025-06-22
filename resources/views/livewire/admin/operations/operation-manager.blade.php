@@ -44,7 +44,7 @@
                         <tbody class="block md:table-row-group">
                             @foreach($operationsList as $operation)
                             <tr class="block md:table-row border-b md:border-none mb-4 md:mb-0">
-                                <td data-label="Дата" class="flex items-center justify-between md:table-cell p-2 md:px-4 md:py-2 md:border md:text-center">{{ $operation->created_at->format('d-m-Y H:i') }}</td>
+                                <td data-label="Дата" class="flex items-center justify-between md:table-cell p-2 md:px-4 md:py-2 md:border md:text-center">{{ \App\Helpers\Settings::formatDateTime($operation->created_at) }}</td>
                                 <td data-label="Номер" class="flex items-center justify-between md:table-cell p-2 md:px-4 md:py-2 md:border md:text-center">{{ $operation->operation_number }}</td>
                                 <td data-label="Тип" class="flex items-center justify-between md:table-cell p-2 md:px-4 md:py-2 md:border md:text-center">
                                     @if($operation->type === 'purchase')
@@ -130,7 +130,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div>
                                 <label class="text-sm font-medium text-gray-500">Дата</label>
-                                <p class="text-sm text-gray-900">{{ $selectedOperation->created_at->format('d.m.Y H:i') }}</p>
+                                <p class="text-sm text-gray-900">{{ \App\Helpers\Settings::formatDateTime($selectedOperation->created_at) }}</p>
                             </div>
                             <div>
                                 <label class="text-sm font-medium text-gray-500">Тип</label>
@@ -156,7 +156,7 @@
                             </div>
                             <div>
                                 <label class="text-sm font-medium text-gray-500">Общая сумма</label>
-                                <p class="text-sm font-semibold text-gray-900">{{ number_format($selectedOperation->total_amount, 2) }} ₴</p>
+                                <p class="text-sm font-semibold text-gray-900">{{ \App\Facades\Settings::formatPrice($selectedOperation->total_amount) }}</p>
                             </div>
                         </div>
                     </div>
@@ -262,7 +262,7 @@
                                     </p>
                                 </div>
                                 <div class="text-right">
-                                    <p class="font-semibold text-lg">{{ number_format($item->price, 2) }} ₴</p>
+                                    <p class="font-semibold text-lg">{{ \App\Helpers\Settings::formatPrice($item->price) }}</p>
                                 </div>
                             </div>
 
@@ -279,7 +279,7 @@
                                 @endif
                                 <div>
                                     <label class="text-xs text-gray-500">Цена за единицу</label>
-                                    <p class="text-sm text-gray-900">{{ number_format($item->price / $item->weight, 2) }} ₴/{{ $item->product->unit->short_name }}</p>
+                                    <p class="text-sm text-gray-900">{{ \App\Helpers\Settings::formatPrice($item->price / $item->weight) }}/{{ $item->product->unit->short_name }}</p>
                                 </div>
                             </div>
 

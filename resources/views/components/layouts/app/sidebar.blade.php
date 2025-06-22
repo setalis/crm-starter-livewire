@@ -96,6 +96,11 @@
                             {{ __('Комментарии') }}
                         </flux:navlist.item>
                         @endcan
+                        @can('settings.manage')
+                        <flux:navlist.item icon="cog-6-tooth" :href="route('settings.application')" :current="request()->routeIs('settings.application')" wire:navigate>
+                            {{ __('Настройки приложения') }}
+                        </flux:navlist.item>
+                        @endcan
                     </flux:navlist.group>
                     @endif
                 @else

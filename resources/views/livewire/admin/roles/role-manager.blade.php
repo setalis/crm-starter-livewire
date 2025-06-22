@@ -56,7 +56,7 @@
                                 {{ $role->permissions_count }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">{{ $role->created_at->format('d.m.Y H:i') }}</td>
+                                                        <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">{{ \App\Helpers\Settings::formatDateTime($role->created_at) }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div class="flex space-x-2">
                                 @can('roles.edit')

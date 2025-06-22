@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Facades\Settings;
+use App\Helpers\Settings as SettingsHelper;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 
@@ -12,7 +14,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Регистрируем helper класс Settings
+        $this->app->singleton('settings', SettingsHelper::class);
+        
+        // Регистрируем фасад для Laravel 12
+        $this->app->singleton(Settings::class, function ($app) {
+            return $app['settings'];
+        });
     }
 
     /**

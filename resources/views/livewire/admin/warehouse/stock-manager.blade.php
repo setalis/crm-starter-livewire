@@ -121,8 +121,8 @@
                                     </span>
                                 </td>
                                 <td class="whitespace-nowrap px-3.5 py-2.5 text-sm text-center">{{ $product->unit->name }}</td>
-                                <td class="whitespace-nowrap px-3.5 py-2.5 text-sm text-center">{{ number_format($product->average_purchase_price, 2) }} ₴</td>
-                                <td class="whitespace-nowrap px-3.5 py-2.5 text-sm font-semibold text-center">{{ number_format($product->stock * $product->average_purchase_price, 2) }} ₴</td>
+                                <td class="whitespace-nowrap px-3.5 py-2.5 text-sm text-center">{{ \App\Helpers\Settings::formatPrice($product->average_purchase_price) }}</td>
+                                <td class="whitespace-nowrap px-3.5 py-2.5 text-sm font-semibold text-center">{{ \App\Helpers\Settings::formatPrice($product->stock * $product->average_purchase_price) }}</td>
                             </tr>
                             @empty
                             <tr>
@@ -145,7 +145,7 @@
                             <tr>
                                 <td colspan="6" class="px-3.5 py-2.5 text-sm font-semibold text-right">{{ __('Общая сумма товаров:') }}</td>
                                 <td class="px-3.5 py-2.5 text-sm font-bold text-center">
-                                    {{ number_format($products->sum(function($product) { return $product->stock * $product->average_purchase_price; }), 2) }} ₴
+                                    {{ \App\Helpers\Settings::formatPrice($products->sum(function($product) { return $product->stock * $product->average_purchase_price; })) }}
                                 </td>
                             </tr>
                         </tfoot>
@@ -193,8 +193,8 @@
                                     </span>
                                 </td>
                                 <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">{{ $element->unit->name }}</td>
-                                <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">{{ number_format($element->unit_price, 2) }} ₴</td>
-                                <td class="whitespace-nowrap px-3.5 py-2.5 text-sm font-semibold">{{ number_format($element->stock * $element->unit_price, 2) }} ₴</td>
+                                <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">{{ \App\Helpers\Settings::formatPrice($element->unit_price) }}</td>
+                                <td class="whitespace-nowrap px-3.5 py-2.5 text-sm font-semibold">{{ \App\Helpers\Settings::formatPrice($element->stock * $element->unit_price) }}</td>
                             </tr>
                             @empty
                             <tr>
@@ -217,7 +217,7 @@
                             <tr>
                                 <td colspan="4" class="px-3.5 py-2.5 text-sm font-semibold text-right">{{ __('Общая сумма элементов:') }}</td>
                                 <td class="px-3.5 py-2.5 text-sm font-bold">
-                                    {{ number_format($elements->sum(function($element) { return $element->stock * $element->unit_price; }), 2) }} ₴
+                                    {{ \App\Helpers\Settings::formatPrice($elements->sum(function($element) { return $element->stock * $element->unit_price; })) }}
                                 </td>
                             </tr>
                         </tfoot>
@@ -270,7 +270,7 @@
                         <div class="ml-4">
                             <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('Товары') }}</p>
                             <p class="text-lg font-semibold text-gray-900 dark:text-white">
-                                {{ number_format($products->sum(function($product) { return $product->stock * $product->average_purchase_price; }), 2) }} ₴
+                                {{ \App\Helpers\Settings::formatPrice($products->sum(function($product) { return $product->stock * $product->average_purchase_price; })) }}
                             </p>
                         </div>
                     </div>
@@ -285,7 +285,7 @@
                         <div class="ml-4">
                             <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('Элементы') }}</p>
                             <p class="text-lg font-semibold text-gray-900 dark:text-white">
-                                {{ number_format($elements->sum(function($element) { return $element->stock * $element->unit_price; }), 2) }} ₴
+                                {{ \App\Helpers\Settings::formatPrice($elements->sum(function($element) { return $element->stock * $element->unit_price; })) }}
                             </p>
                         </div>
                     </div>
@@ -300,11 +300,10 @@
                         <p class="text-sm text-green-600 dark:text-green-300">{{ __('Сумма всех товаров и элементов') }}</p>
                     </div>
                     <span class="text-3xl font-bold text-green-600 dark:text-green-400">
-                        {{ number_format(
+                        {{ \App\Helpers\Settings::formatPrice(
                             $products->sum(function($product) { return $product->stock * $product->average_purchase_price; }) +
-                            $elements->sum(function($element) { return $element->stock * $element->unit_price; }),
-                            2
-                        ) }} ₴
+                            $elements->sum(function($element) { return $element->stock * $element->unit_price; })
+                        ) }}
                     </span>
                 </div>
             </div>

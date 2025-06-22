@@ -57,7 +57,7 @@
                                     @if($selectedRegister->description)
                                         <p class="text-sm text-gray-600 mt-1">{{ $selectedRegister->description }}</p>
                                     @endif
-                                    <p class="text-2xl lg:text-3xl font-bold text-green-600 mt-2">{{ number_format($selectedRegister->balance, 2) }} ₴</p>
+                                    <p class="text-2xl lg:text-3xl font-bold text-green-600 mt-2">{{ \App\Helpers\Settings::formatPrice($selectedRegister->balance) }}</p>
                                 </div>
                                 <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                                     <button wire:click="showAddMoneyModalAction" class="w-full sm:w-auto bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded text-sm">
@@ -137,7 +137,7 @@
                                     @forelse($this->transactions as $transaction)
                                     <tr>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {{ $transaction->created_at->format('d.m.Y H:i') }}
+                                            {{ \App\Helpers\Settings::formatDateTime($transaction->created_at) }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium 
@@ -147,7 +147,7 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium 
                                             {{ $transaction->type === 'income' ? 'text-green-600' : 'text-red-600' }}">
-                                            {{ $transaction->type === 'income' ? '+' : '-' }}{{ number_format($transaction->amount, 2) }} ₴
+                                            {{ $transaction->type === 'income' ? '+' : '-' }}{{ \App\Helpers\Settings::formatPrice($transaction->amount) }}
                                         </td>
                                         <td class="px-6 py-4 text-sm text-gray-900">
                                             {{ $transaction->description }}
@@ -159,7 +159,7 @@
                                             {{ $transaction->user ? $transaction->user->name : 'Пользователь не найден (ID: ' . $transaction->user_id . ')' }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {{ number_format($transaction->balance_after, 2) }} ₴
+                                            {{ \App\Helpers\Settings::formatPrice($transaction->balance_after) }}
                                         </td>
                                     </tr>
                                     @empty
@@ -185,17 +185,17 @@
                                                 {{ $transaction->type === 'income' ? 'Приход' : 'Расход' }}
                                             </span>
                                             <span class="text-xs text-gray-500">
-                                                {{ $transaction->created_at->format('d.m.Y H:i') }}
+                                                {{ \App\Helpers\Settings::formatDateTime($transaction->created_at) }}
                                             </span>
                                         </div>
                                         <p class="text-lg font-semibold 
                                             {{ $transaction->type === 'income' ? 'text-green-600' : 'text-red-600' }}">
-                                            {{ $transaction->type === 'income' ? '+' : '-' }}{{ number_format($transaction->amount, 2) }} ₴
+                                            {{ $transaction->type === 'income' ? '+' : '-' }}{{ \App\Helpers\Settings::formatPrice($transaction->amount) }}
                                         </p>
                                     </div>
                                     <div class="text-right">
                                         <p class="text-sm text-gray-500">Баланс после</p>
-                                        <p class="text-sm font-medium text-gray-900">{{ number_format($transaction->balance_after, 2) }} ₴</p>
+                                        <p class="text-sm font-medium text-gray-900">{{ \App\Helpers\Settings::formatPrice($transaction->balance_after) }}</p>
                                     </div>
                                 </div>
                                 
@@ -297,7 +297,7 @@
                         
                         <div class="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
                             <p class="text-sm text-yellow-800">
-                                Доступно в кассе: <strong>{{ number_format($selectedRegister ? $selectedRegister->balance : 0, 2) }} ₴</strong>
+                                Доступно в кассе: <strong>{{ \App\Helpers\Settings::formatPrice($selectedRegister ? $selectedRegister->balance : 0) }}</strong>
                             </p>
                         </div>
 
@@ -396,7 +396,7 @@
                                 </p>
                                 @if($registerToDelete->balance != 0)
                                 <p class="text-sm text-red-600 mt-2">
-                                    <strong>Внимание:</strong> В кассе остается {{ number_format($registerToDelete->balance, 2) }} ₴
+                                    <strong>Внимание:</strong> В кассе остается {{ \App\Helpers\Settings::formatPrice($registerToDelete->balance) }}
                                 </p>
                                 @endif
                                 <p class="text-xs text-gray-400 mt-2">

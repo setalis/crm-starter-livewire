@@ -17,9 +17,9 @@ class LiveClock extends Component
 
     public function updateTime()
     {
-        $now = Carbon::now();
-        $this->currentTime = $now->format('H:i:s');
-        $this->currentDate = $now->format('d.m.Y');
+        $now = \App\Helpers\Settings::now();
+        $this->currentTime = $now->format(\App\Helpers\Settings::timeFormat() . ':s');
+        $this->currentDate = \App\Helpers\Settings::formatDate($now);
     }
 
     public function render()

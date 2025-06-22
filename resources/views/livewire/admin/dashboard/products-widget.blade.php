@@ -77,7 +77,7 @@
                 <div class="flex justify-between items-center">
                     <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Общая стоимость:</span>
                     <span class="text-lg font-bold text-blue-600 dark:text-blue-400">
-                        {{ number_format($products->sum(function($product) { return $product->stock * $product->average_purchase_price; }), 2) }} ₴
+                        {{ \App\Helpers\Settings::formatPrice($products->sum(function($product) { return $product->stock * $product->average_purchase_price; })) }}
                     </span>
                 </div>
             </div>

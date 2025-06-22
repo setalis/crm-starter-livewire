@@ -149,6 +149,7 @@ class RolePermissionSeeder extends Seeder
             'settings' => [
                 'settings.view' => 'Просмотр настроек',
                 'settings.edit' => 'Редактирование настроек',
+                'settings.manage' => 'Управление настройками приложения',
                 'settings.system' => 'Системные настройки',
             ],
             // Комментарии

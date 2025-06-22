@@ -72,7 +72,7 @@
                                 @endforeach
                             </div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">{{ $user->created_at->format('d.m.Y H:i') }}</td>
+                                                        <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">{{ \App\Helpers\Settings::formatDateTime($user->created_at) }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div class="flex space-x-2">
                                 @can('users.edit')
