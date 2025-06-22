@@ -59,6 +59,7 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::middleware('can:recounts.view')->get('recounts', RecountManager::class)->name('recounts.index');
     Route::middleware('can:cash_recounts.view')->get('cash-recounts', CashRecountManager::class)->name('cash-recounts.index');
     Route::middleware('can:comments.view')->get('comments', CommentManager::class)->name('comments.index');
+    Route::get('reports', \App\Livewire\Admin\Reports\ReportManager::class)->name('reports.index');
 });
 
 // Панель менеджера (упрощенная версия)
@@ -74,6 +75,7 @@ Route::middleware(['auth', 'verified', 'manager'])->prefix('manager')->name('man
     Route::get('shipments', ShipmentManager::class)->name('shipments.index');
     Route::middleware('can:recounts.view')->get('recounts', RecountManager::class)->name('recounts.index');
     Route::middleware('can:cash_recounts.view')->get('cash-recounts', CashRecountManager::class)->name('cash-recounts.index');
+    Route::get('reports', \App\Livewire\Admin\Reports\ReportManager::class)->name('reports.index');
 });
 
 Route::middleware(['auth'])->group(function () {

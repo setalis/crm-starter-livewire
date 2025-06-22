@@ -103,6 +103,12 @@
                         @endcan
                     </flux:navlist.group>
                     @endif
+
+                    <flux:navlist.group heading="Отчеты" expandable :expanded="request()->routeIs('admin.reports.*')">
+                        <flux:navlist.item icon="chart-bar" :href="route('admin.reports.index')" :current="request()->routeIs('admin.reports.*')" wire:navigate>
+                            {{ __('Отчеты по движению') }}
+                        </flux:navlist.item>
+                    </flux:navlist.group>
                 @else
                     <!-- Навигация для менеджеров -->
                     <flux:navlist.group heading="Товары" expandable :expanded="request()->routeIs('manager.products.*')">
@@ -146,6 +152,12 @@
                                 {{ __('Переучеты касс') }}
                             </flux:navlist.item>
                         @endcan
+                    </flux:navlist.group>
+
+                    <flux:navlist.group heading="Отчеты" expandable :expanded="request()->routeIs('manager.reports.*')">
+                        <flux:navlist.item icon="chart-bar" :href="route('manager.reports.index')" :current="request()->routeIs('manager.reports.*')" wire:navigate>
+                            {{ __('Отчеты по движению') }}
+                        </flux:navlist.item>
                     </flux:navlist.group>
                 @endif
             </flux:navlist>
