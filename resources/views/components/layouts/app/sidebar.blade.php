@@ -41,7 +41,7 @@
                         </flux:navlist.item>
                     </flux:navlist.group>
 
-                    <flux:navlist.group heading="Склад" expandable :expanded="request()->routeIs('admin.warehouse.*') || request()->routeIs('admin.conversions.*')">
+                    <flux:navlist.group heading="Склад" expandable :expanded="request()->routeIs('admin.warehouse.*') || request()->routeIs('admin.conversions.*') || request()->routeIs('admin.recounts.*')">
                         <flux:navlist.item icon="building-storefront" :href="route('admin.warehouse.stock.index')" :current="request()->routeIs('admin.warehouse.stock.index')" wire:navigate>
                             {{ __('Остатки') }}
                         </flux:navlist.item>
@@ -51,12 +51,22 @@
                         <flux:navlist.item icon="arrow-path" :href="route('admin.conversions.index')" :current="request()->routeIs('admin.conversions.*')" wire:navigate>
                             {{ __('Конвертация продуктов') }}
                         </flux:navlist.item>
+                        @can('recounts.view')
+                            <flux:navlist.item icon="clipboard-document-check" :href="route('admin.recounts.index')" :current="request()->routeIs('admin.recounts.*')" wire:navigate>
+                                {{ __('Переучеты склад') }}
+                            </flux:navlist.item>
+                        @endcan
                     </flux:navlist.group>
 
-                    <flux:navlist.group heading="Финансы" expandable :expanded="request()->routeIs('admin.cash-register.*')">
+                    <flux:navlist.group heading="Финансы" expandable :expanded="request()->routeIs('admin.cash-register.*') || request()->routeIs('admin.cash-recounts.*')">
                         <flux:navlist.item icon="banknotes" :href="route('admin.cash-register.index')" :current="request()->routeIs('admin.cash-register.index')" wire:navigate>
                             {{ __('Касса') }}
                         </flux:navlist.item>
+                        @can('cash_recounts.view')
+                            <flux:navlist.item icon="receipt-percent" :href="route('admin.cash-recounts.index')" :current="request()->routeIs('admin.cash-recounts.*')" wire:navigate>
+                                {{ __('Переучеты касс') }}
+                            </flux:navlist.item>
+                        @endcan
                     </flux:navlist.group>
 
                     @if(auth()->user()->hasAnyPermission(['users.view', 'roles.view', 'permissions.view', 'sections.view']))
@@ -108,19 +118,29 @@
                         </flux:navlist.item>
                     </flux:navlist.group>
 
-                    <flux:navlist.group heading="Склад" expandable :expanded="request()->routeIs('manager.warehouse.*') || request()->routeIs('manager.shipments.*')">
+                    <flux:navlist.group heading="Склад" expandable :expanded="request()->routeIs('manager.warehouse.*') || request()->routeIs('manager.shipments.*') || request()->routeIs('manager.recounts.*')">
                         <flux:navlist.item icon="building-storefront" :href="route('manager.warehouse.stock.index')" :current="request()->routeIs('manager.warehouse.stock.index')" wire:navigate>
                             {{ __('Остатки') }}
                         </flux:navlist.item>
                         <flux:navlist.item icon="truck" :href="route('manager.shipments.index')" :current="request()->routeIs('manager.shipments.*')" wire:navigate>
                             {{ __('Отгрузки') }}
                         </flux:navlist.item>
+                        @can('recounts.view')
+                            <flux:navlist.item icon="clipboard-document-check" :href="route('manager.recounts.index')" :current="request()->routeIs('manager.recounts.*')" wire:navigate>
+                                {{ __('Переучеты складских остатков') }}
+                            </flux:navlist.item>
+                        @endcan
                     </flux:navlist.group>
 
-                    <flux:navlist.group heading="Финансы" expandable :expanded="request()->routeIs('manager.cash-register.*')">
+                    <flux:navlist.group heading="Финансы" expandable :expanded="request()->routeIs('manager.cash-register.*') || request()->routeIs('manager.cash-recounts.*')">
                         <flux:navlist.item icon="banknotes" :href="route('manager.cash-register.index')" :current="request()->routeIs('manager.cash-register.index')" wire:navigate>
                             {{ __('Касса') }}
                         </flux:navlist.item>
+                        @can('cash_recounts.view')
+                            <flux:navlist.item icon="receipt-percent" :href="route('manager.cash-recounts.index')" :current="request()->routeIs('manager.cash-recounts.*')" wire:navigate>
+                                {{ __('Переучеты касс') }}
+                            </flux:navlist.item>
+                        @endcan
                     </flux:navlist.group>
                 @endif
             </flux:navlist>

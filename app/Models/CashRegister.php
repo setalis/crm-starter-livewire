@@ -58,4 +58,9 @@ class CashRegister extends Model
             'balance_after' => $this->balance,
         ]);
     }
+
+    public function cashRecounts()
+    {
+        return $this->hasMany(CashRecount::class);
+    }
 } 

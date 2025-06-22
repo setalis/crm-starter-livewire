@@ -20,6 +20,9 @@ class CashRegisterManager extends Component
     public $showCreateRegisterModal = false;
     public $showDeleteRegisterModal = false;
     
+    // Filter
+    public $transactionTypeFilter = 'all'; // 'all', 'income', 'expense', 'money_only'
+    
     // Form fields
     public $amount;
     public $description;
@@ -43,7 +46,14 @@ class CashRegisterManager extends Component
     public function selectRegister($registerId)
     {
         $this->selectedRegister = CashRegister::find($registerId);
+        $this->transactionTypeFilter = 'all'; // Сбрасываем фильтр при смене кассы
         $this->resetPage(); // Сбрасываем пагинацию при смене кассы
+    }
+
+    public function setTransactionFilter($filter)
+    {
+        $this->transactionTypeFilter = $filter;
+        $this->resetPage(); // Сбрасываем пагинацию при изменении фильтра
     }
 
     public function showAddMoneyModalAction()
@@ -198,9 +208,21 @@ class CashRegisterManager extends Component
             );
         }
 
-        return CashTransaction::where('cash_register_id', $this->selectedRegister->id)
-            ->with(['user', 'operation'])
-            ->orderBy('created_at', 'desc')
+        $query = CashTransaction::where('cash_register_id', $this->selectedRegister->id)
+            ->with(['user', 'operation']);
+
+        // Применяем фильтр по типу транзакции
+        if ($this->transactionTypeFilter === 'income') {
+            $query->where('type', 'income');
+        } elseif ($this->transactionTypeFilter === 'expense') {
+            $query->where('type', 'expense');
+        } elseif ($this->transactionTypeFilter === 'money_only') {
+            // Показываем только денежные операции (без связи с операциями продаж)
+            $query->whereNull('operation_id');
+        }
+        // Если 'all', то не добавляем условие where
+
+        return $query->orderBy('created_at', 'desc')
             ->paginate(15, ['*'], 'page', $this->getPage());
     }
 

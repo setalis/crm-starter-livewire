@@ -76,7 +76,49 @@
                         </div>
 
                         <!-- Transactions List - Mobile Responsive -->
-                        <h4 class="text-lg font-medium text-gray-900 mb-4">История операций</h4>
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 space-y-2 sm:space-y-0">
+                            <h4 class="text-lg font-medium text-gray-900">История операций</h4>
+                            
+                            <!-- Transaction Type Filter -->
+                            <div class="flex space-x-1 bg-gray-100 rounded-lg p-1">
+                                <button 
+                                    wire:click="setTransactionFilter('all')"
+                                    class="px-3 py-1 text-sm font-medium rounded-md transition-colors duration-200 flex items-center space-x-1
+                                        {{ $transactionTypeFilter === 'all' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900' }}">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                    </svg>
+                                    <span>Все</span>
+                                </button>
+                                <button 
+                                    wire:click="setTransactionFilter('money_only')"
+                                    class="px-3 py-1 text-sm font-medium rounded-md transition-colors duration-200 flex items-center space-x-1
+                                        {{ $transactionTypeFilter === 'money_only' ? 'bg-white text-blue-700 shadow-sm' : 'text-gray-600 hover:text-blue-600' }}">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <span>Деньги</span>
+                                </button>
+                                <button 
+                                    wire:click="setTransactionFilter('income')"
+                                    class="px-3 py-1 text-sm font-medium rounded-md transition-colors duration-200 flex items-center space-x-1
+                                        {{ $transactionTypeFilter === 'income' ? 'bg-white text-green-700 shadow-sm' : 'text-gray-600 hover:text-green-600' }}">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                    </svg>
+                                    <span>Пополнения</span>
+                                </button>
+                                <button 
+                                    wire:click="setTransactionFilter('expense')"
+                                    class="px-3 py-1 text-sm font-medium rounded-md transition-colors duration-200 flex items-center space-x-1
+                                        {{ $transactionTypeFilter === 'expense' ? 'bg-white text-red-700 shadow-sm' : 'text-gray-600 hover:text-red-600' }}">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                                    </svg>
+                                    <span>Снятия</span>
+                                </button>
+                            </div>
+                        </div>
                         
                         <!-- Desktop Table -->
                         <div class="hidden lg:block overflow-x-auto">

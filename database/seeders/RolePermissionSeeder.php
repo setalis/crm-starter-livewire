@@ -123,6 +123,22 @@ class RolePermissionSeeder extends Seeder
                 'conversions.edit' => 'Редактирование конверсий',
                 'conversions.delete' => 'Удаление конверсий',
             ],
+            // Переучеты
+            'recounts' => [
+                'recounts.view' => 'Просмотр переучетов',
+                'recounts.create' => 'Создание переучетов',
+                'recounts.edit' => 'Редактирование переучетов',
+                'recounts.start' => 'Начало переучетов',
+                'recounts.complete' => 'Завершение переучетов',
+                'recounts.cancel' => 'Отмена переучетов',
+                'recounts.delete' => 'Удаление переучетов',
+                'cash_recounts.view' => 'Просмотр переучетов кассы',
+                'cash_recounts.create' => 'Создание переучетов кассы',
+                'cash_recounts.edit' => 'Редактирование переучетов кассы',
+                'cash_recounts.complete' => 'Завершение переучетов кассы',
+                'cash_recounts.cancel' => 'Отмена переучетов кассы',
+                'cash_recounts.delete' => 'Удаление переучетов кассы',
+            ],
             // Аналитика
             'analytics' => [
                 'analytics.view' => 'Просмотр аналитики',
@@ -179,9 +195,9 @@ class RolePermissionSeeder extends Seeder
         })->get();
         $admin->syncPermissions($adminPermissions);
 
-        // Бухгалтер получает разрешения на финансовые операции, отгрузки, аналитику и комментарии
+        // Бухгалтер получает разрешения на финансовые операции, отгрузки, переучеты, аналитику и комментарии
         $accountantPermissions = Permission::whereHas('section', function ($query) {
-            $query->whereIn('name', ['operations', 'cash', 'shipments', 'analytics', 'settings', 'comments']);
+            $query->whereIn('name', ['operations', 'cash', 'shipments', 'recounts', 'analytics', 'settings', 'comments']);
         })->whereNotIn('name', ['settings.system', 'comments.all', 'comments.delete'])->get();
         $accountant->syncPermissions($accountantPermissions);
 
@@ -198,6 +214,10 @@ class RolePermissionSeeder extends Seeder
             'shipments.create',
             'shipments.edit',
             'shipments.confirm',
+            'recounts.view',
+            'recounts.create',
+            'recounts.edit',
+            'recounts.start',
             'comments.view',
             'comments.create',
             'comments.edit',

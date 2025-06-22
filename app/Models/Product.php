@@ -58,6 +58,11 @@ class Product extends Model
         return $this->hasMany(Conversion::class, 'target_product_id');
     }
 
+    public function recountItems()
+    {
+        return $this->morphMany(RecountItem::class, 'countable');
+    }
+
     public function getAveragePurchasePriceAttribute()
     {
         $purchaseItems = $this->operationItems()

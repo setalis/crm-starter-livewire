@@ -73,8 +73,19 @@
                                         @if($operation->type === 'conversion')
                                             <span class="text-sm text-gray-500 italic">Управляется в конвертациях</span>
                                         @else
-                                            <button wire:click="edit({{ $operation->id }})" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Изменить</button>
-                                            <button wire:click="delete({{ $operation->id }})" wire:confirm="Вы уверены, что хотите удалить эту операцию?" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Удалить</button>
+                                            <div class="space-x-1">
+                                                <flux:button size="sm" wire:click="showOperationDetails({{ $operation->id }})" variant="ghost" class="text-gray-500 hover:text-gray-700" title="Просмотр">
+                                                    <flux:icon name="eye" variant="outline" />
+                                                </flux:button>
+                                                <flux:button size="sm" wire:click="edit({{ $operation->id }})" variant="ghost" class="text-blue-500 hover:text-blue-700" title="Редактировать">
+                                                    <flux:icon name="pencil" variant="outline" />
+                                                </flux:button>
+                                                <flux:button size="sm" wire:click="delete({{ $operation->id }})" 
+                                                            wire:confirm="Вы уверены, что хотите удалить эту операцию?" 
+                                                            variant="ghost" class="text-red-500 hover:text-red-700" title="Удалить">
+                                                    <flux:icon name="trash" variant="outline" />
+                                                </flux:button>
+                                            </div>
                                         @endif
                                     </div>
                                 </td>

@@ -19,6 +19,8 @@ use App\Livewire\Admin\Roles\RoleManager;
 use App\Livewire\Admin\Permissions\PermissionManager;
 use App\Livewire\Admin\Sections\SectionManager;
 use App\Livewire\Admin\Comments\CommentManager;
+use App\Livewire\Admin\Recounts\RecountManager;
+use App\Livewire\Admin\Recounts\CashRecountManager;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -54,6 +56,8 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::get('warehouse/stock', StockManager::class)->name('warehouse.stock.index');
     Route::get('shipments', ShipmentManager::class)->name('shipments.index');
     Route::get('conversions', ConversionManager::class)->name('conversions.index');
+    Route::middleware('can:recounts.view')->get('recounts', RecountManager::class)->name('recounts.index');
+    Route::middleware('can:cash_recounts.view')->get('cash-recounts', CashRecountManager::class)->name('cash-recounts.index');
     Route::middleware('can:comments.view')->get('comments', CommentManager::class)->name('comments.index');
 });
 
@@ -68,6 +72,8 @@ Route::middleware(['auth', 'verified', 'manager'])->prefix('manager')->name('man
     Route::get('warehouse/stock', StockManager::class)->name('warehouse.stock.index');
     Route::get('cash-register', CashRegisterManager::class)->name('cash-register.index');
     Route::get('shipments', ShipmentManager::class)->name('shipments.index');
+    Route::middleware('can:recounts.view')->get('recounts', RecountManager::class)->name('recounts.index');
+    Route::middleware('can:cash_recounts.view')->get('cash-recounts', CashRecountManager::class)->name('cash-recounts.index');
 });
 
 Route::middleware(['auth'])->group(function () {

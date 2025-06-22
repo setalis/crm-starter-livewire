@@ -75,4 +75,9 @@ class Element extends Model
         // Возвращаем среднюю стоимость за 1% содержания
         return $totalPercentage > 0 ? $totalAmount / $totalPercentage : $this->price ?? 0;
     }
+
+    public function recountItems()
+    {
+        return $this->morphMany(RecountItem::class, 'countable');
+    }
 }

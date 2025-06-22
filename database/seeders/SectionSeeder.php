@@ -70,25 +70,32 @@ class SectionSeeder extends Seeder
                 'sort_order' => 8,
             ],
             [
+                'name' => 'recounts',
+                'display_name' => 'Переучеты',
+                'description' => 'Управление переучетами товаров и денежных средств',
+                'icon' => 'calculator',
+                'sort_order' => 9,
+            ],
+            [
                 'name' => 'analytics',
                 'display_name' => 'Аналитика',
                 'description' => 'Просмотр отчетов и аналитики',
                 'icon' => 'bar-chart',
-                'sort_order' => 9,
+                'sort_order' => 10,
             ],
             [
                 'name' => 'settings',
                 'display_name' => 'Настройки',
                 'description' => 'Системные настройки и конфигурация',
                 'icon' => 'settings',
-                'sort_order' => 10,
+                'sort_order' => 11,
             ],
             [
                 'name' => 'comments',
                 'display_name' => 'Комментарии',
                 'description' => 'Управление комментариями и системными сообщениями',
                 'icon' => 'message-circle',
-                'sort_order' => 11,
+                'sort_order' => 12,
             ],
         ];
 
