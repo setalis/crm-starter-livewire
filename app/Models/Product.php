@@ -84,17 +84,17 @@ class Product extends Model
     /**
      * Рассчитывает стоимость составного продукта за 1 кг на основе элементов
      */
-    public function getCompositeProductPricePerKg()
+    public function getCompositeProductPricePerKg(): float
     {
         if ($this->type !== 'composite') {
-            return 0;
+            return 0.0;
         }
 
-        $totalPrice = 0;
+        $totalPrice = 0.0;
         
         foreach ($this->elements as $element) {
             // Стоимость элемента = цена за 1% * процентное содержание
-            $elementPrice = $element->price * $element->pivot->percentage;
+            $elementPrice = ($element->price ?? 0) * ($element->pivot->percentage ?? 0);
             $totalPrice += $elementPrice;
         }
 
@@ -104,9 +104,9 @@ class Product extends Model
     /**
      * Рассчитывает общую стоимость составного продукта для указанного веса
      */
-    public function getCompositeProductTotalPrice($weight)
+    public function getCompositeProductTotalPrice($weight): float
     {
-        return $this->getCompositeProductPricePerKg() * $weight;
+        return $this->getCompositeProductPricePerKg() * (float)$weight;
     }
 
     /**
@@ -125,7 +125,7 @@ class Product extends Model
     /**
      * Получает цену для продукта в зависимости от веса (применяет ценовые шкалы)
      */
-    public function getPriceForWeight($weight, $operationType = 'purchase')
+    public function getPriceForWeight($weight, $operationType = 'purchase'): float
     {
         // Для составных продуктов используем расчетную цену
         if ($this->type === 'composite') {
@@ -133,11 +133,11 @@ class Product extends Model
         }
 
         // Для простых продуктов проверяем ценовые шкалы
-        $basePrice = $operationType === 'purchase' ? $this->purchase_price : $this->selling_price;
+        $basePrice = $operationType === 'purchase' ? ($this->purchase_price ?? 0) : ($this->selling_price ?? 0);
         
         // Если нет ценовых шкал, возвращаем базовую цену
         if ($this->priceScales->isEmpty()) {
-            return $basePrice;
+            return (float) $basePrice;
         }
 
         // Ищем подходящую ценовую шкалу
@@ -148,10 +148,10 @@ class Product extends Model
 
         // Если нашли подходящую шкалу, используем её цену
         if ($applicableScale) {
-            return $applicableScale->price;
+            return (float) $applicableScale->price;
         }
 
         // Если вес меньше минимального порога, используем базовую цену
-        return $basePrice;
+        return (float) $basePrice;
     }
 }

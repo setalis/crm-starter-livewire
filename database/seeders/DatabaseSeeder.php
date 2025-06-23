@@ -42,6 +42,6 @@ class DatabaseSeeder extends Seeder
         $this->call(ElementSeeder::class);
         $this->call(ProductSeeder::class);
         $this->call(CashRegisterSeeder::class);
-        $this->call(RecountSeeder::class);
+        // $this->call(RecountSeeder::class);
     }
 }

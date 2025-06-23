@@ -76,11 +76,11 @@
                             {{ $recount->user->name }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {{ number_format($recount->expected_balance, 2) }} ₽
+                            {{ \App\Helpers\Settings::formatPrice($recount->expected_balance) }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             @if($recount->actual_balance !== null)
-                                {{ number_format($recount->actual_balance, 2) }} ₽
+                                {{ \App\Helpers\Settings::formatPrice($recount->actual_balance) }}
                             @else
                                 <span class="text-gray-400">Не указан</span>
                             @endif
@@ -88,7 +88,7 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             @if($recount->actual_balance !== null && $recount->discrepancy != 0)
                                 <span class="@if($recount->discrepancy > 0) text-green-600 @else text-red-600 @endif">
-                                    {{ $recount->discrepancy > 0 ? '+' : '' }}{{ number_format($recount->discrepancy, 2) }} ₽
+                                    {{ $recount->discrepancy > 0 ? '+' : '' }}{{ \App\Helpers\Settings::formatPrice(abs($recount->discrepancy)) }}
                                     ({{ $recount->discrepancy_text }})
                                 </span>
                             @else
@@ -172,7 +172,7 @@
                         <option value="">Выберите кассу</option>
                         @foreach($cashRegisters as $register)
                             <option value="{{ $register->id }}">
-                                {{ $register->name }} ({{ number_format($register->balance, 2) }} ₽)
+                                {{ $register->name }} ({{ \App\Helpers\Settings::formatPrice($register->balance) }})
                             </option>
                         @endforeach
                     </flux:select>
@@ -243,13 +243,13 @@
                 <div class="grid grid-cols-3 gap-4 bg-gray-50 p-4 rounded-lg">
                     <div>
                         <flux:label>Ожидаемый баланс</flux:label>
-                        <p class="mt-1 text-lg font-semibold">{{ number_format($selectedRecount->expected_balance, 2) }} ₽</p>
+                        <p class="mt-1 text-lg font-semibold">{{ \App\Helpers\Settings::formatPrice($selectedRecount->expected_balance) }}</p>
                     </div>
                     <div>
                         <flux:label>Фактический баланс</flux:label>
                         <p class="mt-1 text-lg font-semibold">
                             @if($selectedRecount->actual_balance !== null)
-                                {{ number_format($selectedRecount->actual_balance, 2) }} ₽
+                                {{ \App\Helpers\Settings::formatPrice($selectedRecount->actual_balance) }}
                             @else
                                 <span class="text-gray-400">Не указан</span>
                             @endif
@@ -260,7 +260,7 @@
                         <p class="mt-1 text-lg font-semibold">
                             @if($selectedRecount->actual_balance !== null && $selectedRecount->discrepancy != 0)
                                 <span class="@if($selectedRecount->discrepancy > 0) text-green-600 @else text-red-600 @endif">
-                                    {{ $selectedRecount->discrepancy > 0 ? '+' : '' }}{{ number_format($selectedRecount->discrepancy, 2) }} ₽
+                                    {{ $selectedRecount->discrepancy > 0 ? '+' : '' }}{{ \App\Helpers\Settings::formatPrice(abs($selectedRecount->discrepancy)) }}
                                     <br><small>({{ $selectedRecount->discrepancy_text }})</small>
                                 </span>
                             @else
@@ -317,7 +317,7 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <flux:label>Ожидаемый баланс</flux:label>
-                            <p class="mt-1 text-lg font-semibold">{{ number_format($selectedRecount->expected_balance, 2) }} ₽</p>
+                            <p class="mt-1 text-lg font-semibold">{{ \App\Helpers\Settings::formatPrice($selectedRecount->expected_balance) }}</p>
                         </div>
                         <div>
                             <flux:label>Расчетное расхождение</flux:label>
@@ -325,7 +325,7 @@
                                 @if($completeForm['actual_balance'] !== null)
                                     @php $diff = $completeForm['actual_balance'] - $selectedRecount->expected_balance @endphp
                                     <span class="@if($diff > 0) text-green-600 @elseif($diff < 0) text-red-600 @else text-gray-600 @endif">
-                                        {{ $diff > 0 ? '+' : '' }}{{ number_format($diff, 2) }} ₽
+                                        {{ $diff > 0 ? '+' : '' }}{{ \App\Helpers\Settings::formatPrice(abs($diff)) }}
                                     </span>
                                 @else
                                     <span class="text-gray-400">-</span>

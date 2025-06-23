@@ -20,8 +20,8 @@
                 @endcan
                 @can('comments.create')
                     @if($activeTab === 'user')
-                        <button wire:click="openModal" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
-                            Добавить комментарий
+                        <button wire:click="openAddCommentModal" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+                            Добавить комментарий к объекту
                         </button>
                     @endif
                 @endcan
@@ -225,7 +225,7 @@
                 </h3>
                 <p class="text-gray-500">
                     @if($activeTab === 'user')
-                        Создайте первый комментарий для отслеживания важной информации.
+                        Комментарии создаются при работе с продуктами, элементами, операциями и другими объектами системы.
                     @else
                         Системные сообщения появятся автоматически при выполнении операций.
                     @endif
@@ -234,7 +234,97 @@
         @endif
     </div>
 
-    {{-- Модальное окно добавления комментария --}}
+    {{-- Модальное окно добавления комментария к выбранному объекту --}}
+    @if($showAddCommentModal)
+        <div class="fixed inset-0 z-50 overflow-y-auto">
+            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" wire:click="closeAddCommentModal"></div>
+
+                <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+                    <form wire:submit="addCommentToSelectedObject">
+                        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+                                Добавить комментарий к объекту
+                            </h3>
+
+                            <div class="space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Тип объекта</label>
+                                        <select wire:model.live="selectedObjectType" class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                            <option value="">Выберите тип объекта</option>
+                                            @foreach($this->getObjectTypeOptions() as $value => $label)
+                                                <option value="{{ $value }}">{{ $label }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('selectedObjectType') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Объект</label>
+                                        <select wire:model="selectedObjectId" class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" {{ !$selectedObjectType ? 'disabled' : '' }}>
+                                            <option value="">Выберите объект</option>
+                                            @if($selectedObjectType && isset($availableObjects[$selectedObjectType]))
+                                                @foreach($availableObjects[$selectedObjectType] as $object)
+                                                    <option value="{{ $object->id }}">
+                                                        @if($selectedObjectType === 'App\Models\Product' || $selectedObjectType === 'App\Models\Element')
+                                                            {{ $object->name }}
+                                                        @elseif($selectedObjectType === 'App\Models\Operation')
+                                                            {{ $object->operation_number }}
+                                                        @elseif($selectedObjectType === 'App\Models\Shipment')
+                                                            #{{ $object->id }} - {{ $object->company }}
+                                                        @endif
+                                                    </option>
+                                                @endforeach
+                                            @endif
+                                        </select>
+                                        @error('selectedObjectId') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Содержимое комментария</label>
+                                    <textarea wire:model="content" rows="4" 
+                                              class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                              placeholder="Введите комментарий..."></textarea>
+                                    @error('content') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Тип комментария</label>
+                                        <select wire:model="type" class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                            @foreach($this->getCommentTypeOptions() as $value => $label)
+                                                <option value="{{ $value }}">{{ $label }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('type') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                    </div>
+
+                                    <div class="flex items-center justify-center">
+                                        <input type="checkbox" wire:model="isImportant" id="isImportantAdd" 
+                                               class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                        <label for="isImportantAdd" class="ml-2 text-sm text-gray-700">Важный комментарий</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                            <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm">
+                                Добавить комментарий
+                            </button>
+                            <button type="button" wire:click="closeAddCommentModal" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                                Отмена
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- Модальное окно добавления комментария (старое) --}}
     @if($showModal)
         <div class="fixed inset-0 z-50 overflow-y-auto">
             <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
@@ -292,6 +382,12 @@
     @if (session()->has('message'))
         <div class="fixed top-4 right-4 z-50 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)">
             {{ session('message') }}
+        </div>
+    @endif
+    
+    @if (session()->has('error'))
+        <div class="fixed top-4 right-4 z-50 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)">
+            {{ session('error') }}
         </div>
     @endif
 </div>

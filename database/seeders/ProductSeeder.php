@@ -16,8 +16,8 @@ class ProductSeeder extends Seeder
                 'name' => 'Черный металл',
                 'type' => 'simple',
                 'unit_id' => 1, // кг
-                'purchase_price' => 1,
-                'selling_price' => 2,
+                'purchase_price' => 5,
+                'selling_price' => 7,
                 'clogging' => 0,
                 'image' => null,
                 'is_published' => true,

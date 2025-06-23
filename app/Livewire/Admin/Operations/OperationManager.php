@@ -246,7 +246,7 @@ class OperationManager extends Component
                 $newItem['elements'][] = [
                     'element_id' => $element->id,
                     'name' => $element->name,
-                    'price' => $element->price,
+                    'price' => $element->price ?? 0,
                     'unit' => $element->unit->short_name,
                     'percentage' => 0,
                 ];
@@ -342,7 +342,7 @@ class OperationManager extends Component
                     if ($product) {
                         $autoPricePerUnit = $product->getPriceForWeight($weight, $operationType);
                         // Если цена отличается от автоматической более чем на 0.01, считаем её пользовательской
-                        $item['custom_price_set'] = abs($currentPricePerUnit - $autoPricePerUnit) > 0.01;
+                        $item['custom_price_set'] = abs($currentPricePerUnit - (float)$autoPricePerUnit) > 0.01;
                     }
                 }
                 
@@ -747,7 +747,7 @@ class OperationManager extends Component
                     $cartItem['elements'][] = [
                         'element_id' => $productElement->id,
                         'name' => $productElement->name,
-                        'price' => $productElement->price,
+                        'price' => $productElement->price ?? 0,
                         'unit' => $productElement->unit->short_name,
                         'percentage' => $elementPercentage,
                     ];

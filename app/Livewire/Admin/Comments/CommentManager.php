@@ -12,11 +12,17 @@ class CommentManager extends Component
     use WithPagination;
 
     public $showModal = false;
+    public $showAddCommentModal = false;
+    public $commentableModel = null;
+    public $commentableId = null;
+    public $selectedObjectType = '';
+    public $selectedObjectId = '';
+    public $availableObjects = [];
+
+    // Форма комментария
     public $content = '';
     public $type = 'comment';
     public $isImportant = false;
-    public $commentableModel = null;
-    public $commentableId = null;
 
     // Фильтры
     public $filterType = '';
@@ -33,6 +39,8 @@ class CommentManager extends Component
         'content' => 'required|string|min:3|max:1000',
         'type' => 'required|in:comment,note,warning,info',
         'isImportant' => 'boolean',
+        'selectedObjectType' => 'required|string',
+        'selectedObjectId' => 'required|integer|min:1',
     ];
 
     public function render()
@@ -124,6 +132,12 @@ class CommentManager extends Component
 
     public function openModal($commentableType = null, $commentableId = null)
     {
+        // Проверяем, что указаны параметры для привязки комментария
+        if (!$commentableType || !$commentableId) {
+            session()->flash('error', 'Комментарии можно добавлять только к конкретным объектам');
+            return;
+        }
+        
         $this->commentableModel = $commentableType;
         $this->commentableId = $commentableId;
         $this->showModal = true;
@@ -164,20 +178,17 @@ class CommentManager extends Component
                     $this->type,
                     $this->isImportant
                 );
+                
+                $this->closeModal();
+                $this->dispatch('comment-added');
+                session()->flash('message', 'Комментарий успешно добавлен!');
+            } else {
+                session()->flash('error', 'Объект не найден');
             }
         } else {
-            // Создаем независимый комментарий
-            Comment::create([
-                'user_id' => auth()->id(),
-                'content' => $this->content,
-                'type' => $this->type,
-                'is_important' => $this->isImportant,
-            ]);
+            // Нельзя создавать независимые комментарии без привязки к объекту
+            session()->flash('error', 'Необходимо указать объект для комментария');
         }
-
-        $this->closeModal();
-        $this->dispatch('comment-added');
-        session()->flash('message', 'Комментарий успешно добавлен!');
     }
 
     public function markAsRead($commentId)
@@ -326,5 +337,112 @@ class CommentManager extends Component
             'App\Models\Conversion' => 'Конвертации',
             default => 'Неизвестно',
         };
+    }
+
+    public function openAddCommentModal()
+    {
+        $this->showAddCommentModal = true;
+        $this->loadAvailableObjects();
+        $this->resetAddCommentForm();
+    }
+
+    public function closeAddCommentModal()
+    {
+        $this->showAddCommentModal = false;
+        $this->resetAddCommentForm();
+    }
+
+    private function resetAddCommentForm()
+    {
+        $this->content = '';
+        $this->type = 'comment';
+        $this->isImportant = false;
+        $this->selectedObjectType = '';
+        $this->selectedObjectId = '';
+        $this->availableObjects = [];
+    }
+
+    public function updatedSelectedObjectType()
+    {
+        $this->selectedObjectId = '';
+        $this->loadObjectsByType();
+    }
+
+    private function loadAvailableObjects()
+    {
+        // Загружаем последние объекты для быстрого выбора
+        $this->availableObjects = [
+            'App\Models\Product' => \App\Models\Product::latest()->take(10)->get(['id', 'name']),
+            'App\Models\Element' => \App\Models\Element::latest()->take(10)->get(['id', 'name']),
+            'App\Models\Operation' => \App\Models\Operation::latest()->take(10)->get(['id', 'operation_number']),
+            'App\Models\Shipment' => \App\Models\Shipment::latest()->take(10)->get(['id', 'company']),
+        ];
+    }
+
+    private function loadObjectsByType()
+    {
+        if (!$this->selectedObjectType) {
+            return;
+        }
+
+        // Загружаем больше объектов выбранного типа
+        switch ($this->selectedObjectType) {
+            case 'App\Models\Product':
+                $this->availableObjects[$this->selectedObjectType] = \App\Models\Product::latest()->take(50)->get(['id', 'name']);
+                break;
+            case 'App\Models\Element':
+                $this->availableObjects[$this->selectedObjectType] = \App\Models\Element::latest()->take(50)->get(['id', 'name']);
+                break;
+            case 'App\Models\Operation':
+                $this->availableObjects[$this->selectedObjectType] = \App\Models\Operation::latest()->take(50)->get(['id', 'operation_number']);
+                break;
+            case 'App\Models\Shipment':
+                $this->availableObjects[$this->selectedObjectType] = \App\Models\Shipment::latest()->take(50)->get(['id', 'company']);
+                break;
+        }
+    }
+
+    public function addCommentToSelectedObject()
+    {
+        // Проверяем право создания комментариев
+        if (!auth()->user()->can('comments.create')) {
+            session()->flash('error', 'У вас нет прав на создание комментариев');
+            return;
+        }
+
+        $this->validate([
+            'content' => 'required|string|min:3|max:1000',
+            'type' => 'required|in:comment,note,warning,info',
+            'isImportant' => 'boolean',
+            'selectedObjectType' => 'required|string',
+            'selectedObjectId' => 'required|integer|min:1',
+        ]);
+
+        $modelClass = $this->selectedObjectType;
+        $model = $modelClass::find($this->selectedObjectId);
+
+        if ($model) {
+            $model->addComment(
+                $this->content,
+                $this->type,
+                $this->isImportant
+            );
+            
+            $this->closeAddCommentModal();
+            $this->dispatch('comment-added');
+            session()->flash('message', 'Комментарий успешно добавлен!');
+        } else {
+            session()->flash('error', 'Выбранный объект не найден');
+        }
+    }
+
+    public function getObjectTypeOptions()
+    {
+        return [
+            'App\Models\Product' => 'Продукты',
+            'App\Models\Element' => 'Элементы',
+            'App\Models\Operation' => 'Операции',
+            'App\Models\Shipment' => 'Отгрузки',
+        ];
     }
 }

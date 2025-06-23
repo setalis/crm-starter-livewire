@@ -54,7 +54,7 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             @if($recount->total_discrepancy_amount != 0)
                                 <span class="@if($recount->total_discrepancy_amount > 0) text-green-600 @else text-red-600 @endif">
-                                    {{ number_format($recount->total_discrepancy_amount, 2) }} ₽
+                                    {{ \App\Helpers\Settings::formatPrice($recount->total_discrepancy_amount) }}
                                 </span>
                             @else
                                 -
@@ -268,7 +268,7 @@
                                         <td class="px-3 py-2 text-sm">
                                             @if($item->discrepancy_amount != 0)
                                                 <span class="@if($item->discrepancy_amount > 0) text-green-600 @else text-red-600 @endif">
-                                                    {{ $item->discrepancy_amount > 0 ? '+' : '' }}{{ number_format($item->discrepancy_amount, 2) }} ₽
+                                                    {{ $item->discrepancy_amount > 0 ? '+' : '' }}{{ \App\Helpers\Settings::formatPrice(abs($item->discrepancy_amount)) }}
                                                 </span>
                                             @else
                                                 -
@@ -293,7 +293,7 @@
                         <div class="flex justify-between items-center">
                             <span class="font-medium">Общая сумма расхождений:</span>
                             <span class="text-lg font-bold @if($selectedRecount->total_discrepancy_amount > 0) text-green-600 @else text-red-600 @endif">
-                                {{ $selectedRecount->total_discrepancy_amount > 0 ? '+' : '' }}{{ number_format($selectedRecount->total_discrepancy_amount, 2) }} ₽
+                                {{ $selectedRecount->total_discrepancy_amount > 0 ? '+' : '' }}{{ \App\Helpers\Settings::formatPrice(abs($selectedRecount->total_discrepancy_amount)) }}
                             </span>
                         </div>
                     </div>
@@ -334,7 +334,7 @@
                         </div>
                         <div>
                             <flux:label>Цена за единицу</flux:label>
-                            <p class="mt-1 text-gray-600">{{ number_format($selectedItem->unit_price, 2) }} ₽</p>
+                            <p class="mt-1 text-gray-600">{{ \App\Helpers\Settings::formatPrice($selectedItem->unit_price) }}</p>
                         </div>
                     </div>
 

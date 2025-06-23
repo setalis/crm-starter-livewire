@@ -172,11 +172,11 @@
                                                     <div class="grid grid-cols-4 gap-2 items-center p-2 bg-gray-50 rounded" wire:key="element-{{ $activeOperationId }}-{{ $index }}-{{ $el_index }}">
                                                         <label class="text-sm flex-1 col-span-1 font-medium">{{ $element['name'] }}</label>
                                                         <div class="col-span-1 text-xs text-gray-600">
-                                                            {{ $element['price'] }} грн/1%
+                                                            {{ \App\Helpers\Settings::formatPrice($element['price'] ?? 0) }}/1%
                                                         </div>
                                                         <input type="number" step="0.0001" placeholder="%" wire:model.live.debounce.300ms="operations.{{ $activeOperationId }}.cartItems.{{ $index }}.elements.{{ $el_index }}.percentage" class="col-span-1 shadow-sm appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                                                         <div class="col-span-1 text-xs text-gray-600 font-medium">
-                                                            = {{ number_format(($element['price'] ?? 0) * ($element['percentage'] ?? 0), 2) }} грн/кг
+                                                            = {{ \App\Helpers\Settings::formatPrice(($element['price'] ?? 0) * ($element['percentage'] ?? 0)) }}/кг
                                                         </div>
                                                     </div>
                                                     @endforeach
@@ -198,11 +198,11 @@
                                                     </div>
                                                     <div class="flex justify-between items-center mt-1">
                                                         <span class="text-sm font-medium">Стоимость за 1 кг:</span>
-                                                        <span class="text-sm font-bold text-blue-600">{{ number_format($pricePerKg, 2) }} грн</span>
+                                                        <span class="text-sm font-bold text-blue-600">{{ \App\Helpers\Settings::formatPrice($pricePerKg) }}</span>
                                                     </div>
                                                     <div class="flex justify-between items-center mt-1">
                                                         <span class="text-sm font-medium">Общая стоимость ({{ $item['weight'] }} кг):</span>
-                                                        <span class="text-sm font-bold text-green-600">{{ number_format($pricePerKg * ($item['weight'] ?? 0), 2) }} грн</span>
+                                                        <span class="text-sm font-bold text-green-600">{{ \App\Helpers\Settings::formatPrice($pricePerKg * ($item['weight'] ?? 0)) }}</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -226,7 +226,7 @@
                                 @endcan
                                 
                                 <div class="mt-4 text-right">
-                                    <h4 class="text-lg font-bold">Total Amount: {{ number_format($operations[$activeOperationId]['totalAmount'] ?? 0, 2) }}</h4>
+                                    <h4 class="text-lg font-bold">Total Amount: {{ \App\Helpers\Settings::formatPrice($operations[$activeOperationId]['totalAmount'] ?? 0) }}</h4>
                                 </div>
                             </div>
                         @else
@@ -344,9 +344,9 @@
                                 
                                 <div class="text-xs text-gray-600 space-y-0.5">
                                     @if($operations[$activeOperationId]['type'] === 'purchase')
-                                        <p><span class="font-medium">Цена:</span> {{ number_format($product->purchase_price, 2) }}</p>
+                                        <p><span class="font-medium">Цена:</span> {{ \App\Helpers\Settings::formatPrice($product->purchase_price ?? 0) }}</p>
                                     @else
-                                        <p><span class="font-medium">Цена:</span> {{ number_format($product->selling_price, 2) }}</p>
+                                        <p><span class="font-medium">Цена:</span> {{ \App\Helpers\Settings::formatPrice($product->selling_price ?? 0) }}</p>
                                     @endif
                                     
                                     <p><span class="font-medium">Склад:</span> {{ number_format($product->stock, 2) }} {{ $product->unit->short_name }}</p>
