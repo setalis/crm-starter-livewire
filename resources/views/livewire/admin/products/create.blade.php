@@ -57,18 +57,108 @@
                         {{-- Column 3 --}}
                         <div class="space-y-4">
                             <div class="mb-4">
-                                 <label for="photo" class="block text-gray-700 text-sm font-bold mb-2">Image:</label>
-                                 <input type="file" id="photo" wire:model="photo">
-                                 @if ($photo)
-                                     <img src="{{ $photo->temporaryUrl() }}" width="100" class="mt-2">
-                                 @elseif ($image)
-                                     <img src="{{ asset('storage/' . $image) }}" width="100" class="mt-2">
-                                 @endif
-                                 @error('photo') <span class="text-red-500">{{ $message }}</span>@enderror
+                                <label for="photo" class="block text-gray-700 text-sm font-bold mb-2">Изображение:</label>
+                                
+                                <!-- Зона перетаскивания файлов -->
+                                <div class="relative" 
+                                     x-data="fileUploader()" 
+                                     x-init="init()">
+                                    <div 
+                                        class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-all duration-200 cursor-pointer"
+                                        :class="{ 
+                                            'border-blue-500 bg-blue-50': isDragging,
+                                            'border-green-500 bg-green-50': isUploading
+                                        }"
+                                        @dragover.prevent="isDragging = true"
+                                        @dragleave.prevent="isDragging = false"
+                                        @drop.prevent="handleDrop($event)"
+                                        @click="$refs.fileInput.click()"
+                                    >
+                                        @if ($photo)
+                                            <!-- Предварительный просмотр загруженного изображения -->
+                                            <div class="relative">
+                                                <img src="{{ $photo->temporaryUrl() }}" class="max-w-full h-32 mx-auto rounded-lg shadow-md object-cover">
+                                                <button 
+                                                    type="button" 
+                                                    wire:click="$set('photo', null)"
+                                                    class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
+                                                >
+                                                    ×
+                                                </button>
+                                                <div class="mt-2 text-sm text-gray-600">
+                                                    Нажмите для замены изображения
+                                                </div>
+                                            </div>
+                                        @elseif ($image)
+                                            <!-- Предварительный просмотр существующего изображения -->
+                                            <div class="relative">
+                                                <img src="{{ asset('storage/' . $image) }}" class="max-w-full h-32 mx-auto rounded-lg shadow-md object-cover">
+                                                <button 
+                                                    type="button" 
+                                                    wire:click="$set('image', null)"
+                                                    class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
+                                                >
+                                                    ×
+                                                </button>
+                                                <div class="mt-2 text-sm text-gray-600">
+                                                    Нажмите для замены изображения
+                                                </div>
+                                            </div>
+                                        @else
+                                            <!-- Область для загрузки -->
+                                            <div class="space-y-3" x-show="!isUploading">
+                                                <div class="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                                                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                                    </svg>
+                                                </div>
+                                                <div class="text-center">
+                                                    <p class="text-gray-600 mb-1">
+                                                        <span class="font-medium text-blue-600 hover:text-blue-700 cursor-pointer">
+                                                            Нажмите для выбора файла
+                                                        </span>
+                                                    </p>
+                                                    <p class="text-gray-500 mb-1">или перетащите изображение сюда</p>
+                                                    <p class="text-xs text-gray-400">PNG, JPG, GIF до 1MB</p>
+                                                </div>
+                                            </div>
+
+                                            <!-- Индикатор загрузки -->
+                                            <div x-show="isUploading" class="space-y-3 text-center">
+                                                <div class="mx-auto w-8 h-8">
+                                                    <svg class="animate-spin w-full h-full text-blue-600" fill="none" viewBox="0 0 24 24">
+                                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                    </svg>
+                                                </div>
+                                                <p class="text-sm text-blue-600">Загрузка...</p>
+                                            </div>
+                                        @endif
+                                    </div>
+                                    
+                                    <!-- Скрытое поле для загрузки файлов -->
+                                    <input 
+                                        type="file" 
+                                        x-ref="fileInput"
+                                        class="hidden" 
+                                        accept="image/*"
+                                        wire:model="photo"
+                                        @change="handleFileSelect($event)"
+                                    >
+                                </div>
+                                
+                                @error('photo') 
+                                    <div class="mt-1 text-sm text-red-600 flex items-center space-x-1">
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        <span>{{ $message }}</span>
+                                    </div>
+                                @enderror
                             </div>
 
                             <div class="mb-4">
-                                <label for="is_published" class="block text-gray-700 text-sm font-bold mb-2">Published:</label>
+                                <label for="is_published" class="block text-gray-700 text-sm font-bold mb-2">Опубликован:</label>
                                 <input type="checkbox" id="is_published" wire:model.live="is_published">
                             </div>
                         </div>
@@ -158,4 +248,65 @@
             </form>
         </div>
     </div>
-</div> 
+</div>
+
+<script>
+function fileUploader() {
+    return {
+        isDragging: false,
+        isUploading: false,
+        
+        init() {
+            // Инициализация компонента
+        },
+        
+        handleDrop(e) {
+            this.isDragging = false;
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                this.handleFile(files[0]);
+            }
+        },
+        
+        handleFileSelect(e) {
+            const files = e.target.files;
+            if (files.length > 0) {
+                this.handleFile(files[0]);
+            }
+        },
+        
+        handleFile(file) {
+            // Проверка типа файла
+            if (!file.type.startsWith('image/')) {
+                alert('Пожалуйста, выберите файл изображения');
+                return;
+            }
+            
+            // Проверка размера файла (1MB = 1024 * 1024 bytes)
+            if (file.size > 1024 * 1024) {
+                alert('Размер файла не должен превышать 1MB');
+                return;
+            }
+            
+            this.isUploading = true;
+            
+            // Livewire загрузка файла
+            @this.upload('photo', file, 
+                (uploadedFilename) => {
+                    // Успешная загрузка
+                    this.isUploading = false;
+                },
+                (error) => {
+                    // Ошибка загрузки
+                    this.isUploading = false;
+                    alert('Ошибка загрузки файла');
+                },
+                (event) => {
+                    // Прогресс загрузки (опционально)
+                    // console.log('Прогресс:', event.detail.progress);
+                }
+            );
+        }
+    }
+}
+</script>

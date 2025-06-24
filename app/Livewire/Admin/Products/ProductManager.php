@@ -28,8 +28,11 @@ class ProductManager extends Component
     public $image;
     public $element_id_to_add;
     public $element_percentage_to_add;
-    public $stock;
+    public $stock = 0;
     public $user_comment = '';
+
+    // Для обработки загрузки файлов
+    public $uploadProgress = 0;
 
     #[Session]
     public bool $is_published = false;
@@ -84,7 +87,7 @@ class ProductManager extends Component
         $this->selectedElements = [];
         $this->element_id_to_add = null;
         $this->element_percentage_to_add = null;
-        $this->stock = null;
+        $this->stock = 0;
         $this->user_comment = '';
     }
 
@@ -301,5 +304,11 @@ class ProductManager extends Component
     public function getTotalElementsPercentage()
     {
         return array_sum(array_column($this->selectedElements, 'percentage'));
+    }
+
+    public function updatedPhoto()
+    {
+        // Сбрасываем прогресс загрузки после успешной загрузки
+        $this->uploadProgress = 0;
     }
 }
