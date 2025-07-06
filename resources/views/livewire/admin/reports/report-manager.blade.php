@@ -126,6 +126,29 @@
                                                             <strong>Общий вес:</strong> {{ number_format($productData['total_weight'], 2) }} кг
                                                         </div>
                                                     @endif
+
+                                                    <!-- Общие суммы в деньгах -->
+                                                    @if($productData['purchase_amount'] > 0)
+                                                        <div class="text-red-600 dark:text-red-400">
+                                                            <strong>💰 Потрачено:</strong> {{ number_format($productData['purchase_amount'], 0, ',', ' ') }} {{ $this->currencySymbol }}
+                                                        </div>
+                                                    @endif
+                                                    @if($productData['sale_amount'] > 0)
+                                                        <div class="text-green-600 dark:text-green-400">
+                                                            <strong>💰 Получено:</strong> {{ number_format($productData['sale_amount'], 0, ',', ' ') }} {{ $this->currencySymbol }}
+                                                        </div>
+                                                    @endif
+                                                    
+                                                    <!-- Разница по металлу -->
+                                                    @if($productData['purchase_amount'] > 0 || $productData['sale_amount'] > 0)
+                                                        @php 
+                                                            $metalDifference = $productData['sale_amount'] - $productData['purchase_amount'];
+                                                        @endphp
+                                                        <div class="border-t pt-1 {{ $metalDifference >= 0 ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300' }}">
+                                                            <strong>📊 Результат:</strong><br>
+                                                            {{ $metalDifference >= 0 ? '+' : '' }}{{ number_format($metalDifference, 0, ',', ' ') }} {{ $this->currencySymbol }}
+                                                        </div>
+                                                    @endif
                                                     
                                                     <!-- Средние цены -->
                                                     @if($productData['purchase_avg_price'] > 0)
@@ -158,8 +181,39 @@
                                                         </div>
                                                     @endif
                                                     @if($productData['shipment_weight'] > 0)
-                                                        <div class="text-purple-600 dark:text-purple-400">
-                                                            Отгрузка: {{ number_format($productData['shipment_weight'], 2) }} кг
+                                                        <div class="text-purple-600 dark:text-purple-400 border-t pt-1">
+                                                            <strong>🚚 Отгрузка:</strong> {{ number_format($productData['shipment_weight'], 2) }} кг
+                                                            @if($productData['shipment_amount'] > 0)
+                                                                <br><strong>Сумма:</strong> {{ number_format($productData['shipment_amount'], 0, ',', ' ') }} {{ $this->currencySymbol }}
+                                                            @endif
+                                                            @if(!empty($productData['shipments_details']))
+                                                                @foreach($productData['shipments_details'] as $shipment)
+                                                                    <div class="mt-1 text-xs bg-purple-50 dark:bg-purple-900/20 p-2 rounded">
+                                                                        <div><strong>🏢 {{ $shipment['company'] }}</strong></div>
+                                                                        @if($shipment['car_number'])
+                                                                            <div>🚗 {{ $shipment['car_number'] }}</div>
+                                                                        @endif
+                                                                        @if($shipment['driver_name'])
+                                                                            <div>👤 {{ $shipment['driver_name'] }}</div>
+                                                                        @endif
+                                                                        <div>⚖️ Брутто: {{ number_format($shipment['weight'], 2) }} кг</div>
+                                                                        <div>🧽 Чистый: {{ number_format($shipment['clean_weight'], 2) }} кг</div>
+                                                                        @if($shipment['price_per_kg'] > 0)
+                                                                            <div>💵 Цена: {{ number_format($shipment['price_per_kg'], 0) }} {{ $this->currencySymbol }}/кг</div>
+                                                                        @endif
+                                                                        @if($shipment['total_amount'] > 0)
+                                                                            <div class="font-bold text-green-600">💰 Сумма: {{ number_format($shipment['total_amount'], 0, ',', ' ') }} {{ $this->currencySymbol }}</div>
+                                                                        @endif
+                                                                        @if($shipment['shipping_cost'] > 0)
+                                                                            <div>🚛 Доставка: {{ number_format($shipment['shipping_cost'], 0, ',', ' ') }} {{ $this->currencySymbol }}</div>
+                                                                        @endif
+                                                                        @if($shipment['actual_clogging'] > 0)
+                                                                            <div>🧹 Засор: {{ number_format($shipment['actual_clogging'], 1) }}%</div>
+                                                                        @endif
+                                                                        <div class="text-gray-500">🕐 {{ $shipment['created_at'] }}</div>
+                                                                    </div>
+                                                                @endforeach
+                                                            @endif
                                                         </div>
                                                     @endif
                                                 </div>
@@ -176,6 +230,29 @@
                                                 @if($productTotal['total_weight'] > 0)
                                                     <div class="font-bold text-gray-900 dark:text-gray-100">
                                                         <strong>Общий вес:</strong> {{ number_format($productTotal['total_weight'], 2) }} кг
+                                                    </div>
+                                                @endif
+
+                                                <!-- Общие суммы за период в деньгах -->
+                                                @if($productTotal['purchase_amount'] > 0)
+                                                    <div class="text-red-600 dark:text-red-400">
+                                                        <strong>💰 Всего потрачено:</strong> {{ number_format($productTotal['purchase_amount'], 0, ',', ' ') }} {{ $this->currencySymbol }}
+                                                    </div>
+                                                @endif
+                                                @if($productTotal['sale_amount'] > 0)
+                                                    <div class="text-green-600 dark:text-green-400">
+                                                        <strong>💰 Всего получено:</strong> {{ number_format($productTotal['sale_amount'], 0, ',', ' ') }} {{ $this->currencySymbol }}
+                                                    </div>
+                                                @endif
+                                                
+                                                <!-- Общая разница по металлу за период -->
+                                                @if($productTotal['purchase_amount'] > 0 || $productTotal['sale_amount'] > 0)
+                                                    @php 
+                                                        $totalMetalDifference = $productTotal['sale_amount'] - $productTotal['purchase_amount'];
+                                                    @endphp
+                                                    <div class="border-t pt-1 {{ $totalMetalDifference >= 0 ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300' }}">
+                                                        <strong>📊 Общий результат:</strong><br>
+                                                        {{ $totalMetalDifference >= 0 ? '+' : '' }}{{ number_format($totalMetalDifference, 0, ',', ' ') }} {{ $this->currencySymbol }}
                                                     </div>
                                                 @endif
                                                 
@@ -211,7 +288,16 @@
                                                 @endif
                                                 @if($productTotal['shipment_weight'] > 0)
                                                     <div class="text-purple-600 dark:text-purple-400">
-                                                        Всего отгрузок: {{ number_format($productTotal['shipment_weight'], 2) }} кг
+                                                        <strong>🚚 Всего отгрузок:</strong> {{ number_format($productTotal['shipment_weight'], 2) }} кг
+                                                        @php
+                                                            $totalShipmentAmount = 0;
+                                                            foreach($reportData['dates'] as $dateInfo) {
+                                                                $totalShipmentAmount += $reportData['products'][$productName][$dateInfo['date']]['shipment_amount'] ?? 0;
+                                                            }
+                                                        @endphp
+                                                        @if($totalShipmentAmount > 0)
+                                                            <br><strong>Общая сумма:</strong> {{ number_format($totalShipmentAmount, 0, ',', ' ') }} {{ $this->currencySymbol }}
+                                                        @endif
                                                     </div>
                                                 @endif
                                             </div>
@@ -339,3 +425,4 @@
         </div>
     @endif
 </div> 
+ 

@@ -137,16 +137,16 @@
 
                                             <div class="mt-2 grid grid-cols-1 md:grid-cols-4 gap-4">
                                                 <div>
-                                                    <label class="text-sm">Weight ({{ $item['unit'] }})</label>
-                                                    <input id="cart-item-weight-{{ $index }}" onfocus="this.select()" type="number" step="0.01" wire:model.live.debounce.300ms="operations.{{ $activeOperationId }}.cartItems.{{ $index }}.weight" class="shadow-sm appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                                    <label class="text-sm">Вес ({{ $item['unit'] }})</label>
+                                                    <input id="cart-item-weight-{{ $index }}" onfocus="this.select()" type="number" step="0.01" wire:model.live.debounce.700ms="operations.{{ $activeOperationId }}.cartItems.{{ $index }}.weight" class="shadow-sm appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                                                 </div>
                                                 <div>
-                                                    <label class="text-sm">Price per unit</label>
-                                                    <input type="number" step="0.01" wire:model.live.debounce.300ms="operations.{{ $activeOperationId }}.cartItems.{{ $index }}.price_per_unit" class="shadow-sm appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" @if($item['type'] === 'composite') disabled @endif>
+                                                    <label class="text-sm">Цена за ед.изм.</label>
+                                                    <input type="number" step="0.01" wire:model.live.debounce.700ms="operations.{{ $activeOperationId }}.cartItems.{{ $index }}.price_per_unit" class="shadow-sm appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" @if($item['type'] === 'composite') disabled @endif>
                                                 </div>
                                                 <div>
                                                     <label class="text-sm">Засор (%)</label>
-                                                    <input type="number" step="0.01" wire:model.live.debounce.300ms="operations.{{ $activeOperationId }}.cartItems.{{ $index }}.clogging" class="shadow-sm appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" @if($item['type'] === 'composite') disabled @endif>
+                                                    <input type="number" step="0.01" wire:model.live.debounce.700ms="operations.{{ $activeOperationId }}.cartItems.{{ $index }}.clogging" class="shadow-sm appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" @if($item['type'] === 'composite') disabled @endif>
                                                     @if($item['type'] === 'simple')
                                                         @php
                                                             $weight = (float)($item['weight'] ?? 0);
@@ -174,7 +174,7 @@
                                                         <div class="col-span-1 text-xs text-gray-600">
                                                             {{ \App\Helpers\Settings::formatPrice($element['price'] ?? 0) }}/1%
                                                         </div>
-                                                        <input type="number" step="0.0001" placeholder="%" wire:model.live.debounce.300ms="operations.{{ $activeOperationId }}.cartItems.{{ $index }}.elements.{{ $el_index }}.percentage" class="col-span-1 shadow-sm appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                                        <input type="number" step="0.0001" placeholder="%" wire:model.live.debounce.700ms="operations.{{ $activeOperationId }}.cartItems.{{ $index }}.elements.{{ $el_index }}.percentage" class="col-span-1 shadow-sm appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                                                         <div class="col-span-1 text-xs text-gray-600 font-medium">
                                                             = {{ \App\Helpers\Settings::formatPrice(($element['price'] ?? 0) * ($element['percentage'] ?? 0)) }}/кг
                                                         </div>

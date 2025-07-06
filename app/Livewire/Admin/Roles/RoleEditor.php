@@ -5,6 +5,8 @@ namespace App\Livewire\Admin\Roles;
 use App\Models\Permission;
 use Livewire\Component;
 use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class RoleEditor extends Component
 {
@@ -65,6 +67,14 @@ class RoleEditor extends Component
                     'name' => $this->name,
                 ]);
                 $role = $this->role;
+                
+                // Логируем старые разрешения
+                $oldPermissions = $role->permissions->pluck('name')->toArray();
+                Log::info('Обновление роли', [
+                    'role' => $role->name,
+                    'old_permissions' => $oldPermissions,
+                    'new_permissions' => $this->selectedPermissions
+                ]);
             } else {
                 // Создание новой роли
                 $role = Role::create([
@@ -73,13 +83,48 @@ class RoleEditor extends Component
                 ]);
                 $this->role = $role;
                 $this->isEditing = true;
+                
+                Log::info('Создание новой роли', [
+                    'role' => $role->name,
+                    'permissions' => $this->selectedPermissions
+                ]);
             }
 
             // Синхронизация разрешений
-            $role->syncPermissions($this->selectedPermissions);
+            $result = $role->syncPermissions($this->selectedPermissions);
             
-            session()->flash('success', $this->isEditing ? 'Роль успешно обновлена.' : 'Роль успешно создана.');
+            // Принудительная очистка кеша разрешений
+            \Artisan::call('permission:cache-reset');
+            Cache::forget('spatie.permission.cache');
+            
+            // Отмечаем время обновления разрешений для middleware
+            Cache::put('permissions_last_update', now()->timestamp, 3600);
+            
+            // Очищаем кеш всех пользователей с этой ролью
+            $usersWithRole = \App\Models\User::role($role->name)->get();
+            foreach ($usersWithRole as $user) {
+                $user->forgetCachedPermissions();
+                Cache::forget('user_permissions_cache_time_' . $user->id);
+            }
+            
+            // Логируем результат
+            Log::info('Синхронизация разрешений завершена', [
+                'role' => $role->name,
+                'permissions_count' => count($this->selectedPermissions),
+                'actual_permissions' => $role->fresh()->permissions->pluck('name')->toArray(),
+                'affected_users' => $usersWithRole->count()
+            ]);
+            
+            session()->flash('success', $this->isEditing ? 'Роль успешно обновлена. Пользователи с этой ролью получат обновленные разрешения при следующем запросе.' : 'Роль успешно создана.');
+            
+            // Принудительно обновляем компонент
+            $this->dispatch('role-permissions-updated', $role->name);
         } catch (\Exception $e) {
+            Log::error('Ошибка при сохранении роли', [
+                'error' => $e->getMessage(),
+                'role' => $this->name,
+                'permissions' => $this->selectedPermissions
+            ]);
             session()->flash('error', 'Произошла ошибка: ' . $e->getMessage());
         }
     }

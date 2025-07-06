@@ -15,6 +15,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => \App\Http\Middleware\CheckAdminAccess::class,
             'manager' => \App\Http\Middleware\CheckManagerAccess::class,
         ]);
+        
+        // Добавляем middleware для обновления разрешений во все веб-роуты
+        $middleware->web(append: [
+            \App\Http\Middleware\RefreshUserPermissions::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

@@ -62,20 +62,33 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::get('reports', \App\Livewire\Admin\Reports\ReportManager::class)->name('reports.index');
 });
 
-// Панель менеджера (упрощенная версия)
+// Панель менеджера (с проверкой разрешений)
 Route::middleware(['auth', 'verified', 'manager'])->prefix('manager')->name('manager.')->group(function () {
     Route::view('dashboard', 'manager.dashboard')->name('dashboard');
-    Route::get('products', ProductManager::class)->name('products.index');
-    Route::get('operations', OperationManager::class)->name('operations.index');
-    Route::get('operations/{type}', OperationManager::class)
+    
+    // Справочники
+    Route::middleware('can:units.view')->get('units', UnitManager::class)->name('units.index');
+    Route::middleware('can:elements.view')->get('elements', ElementManager::class)->name('elements.index');
+    Route::middleware('can:products.view')->get('products', ProductManager::class)->name('products.index');
+    
+    // Операции
+    Route::middleware('can:operations.view')->get('operations', OperationManager::class)->name('operations.index');
+    Route::middleware('can:operations.create')->get('operations/{type}', OperationManager::class)
         ->whereIn('type', ['purchase', 'sale'])
         ->name('operations.create');
-    Route::get('warehouse/stock', StockManager::class)->name('warehouse.stock.index');
-    Route::get('cash-register', CashRegisterManager::class)->name('cash-register.index');
-    Route::get('shipments', ShipmentManager::class)->name('shipments.index');
+    
+    // Склад
+    Route::middleware('can:warehouse.view')->get('warehouse/stock', StockManager::class)->name('warehouse.stock.index');
+    Route::middleware('can:shipments.view')->get('shipments', ShipmentManager::class)->name('shipments.index');
+    Route::middleware('can:conversions.view')->get('conversions', ConversionManager::class)->name('conversions.index');
     Route::middleware('can:recounts.view')->get('recounts', RecountManager::class)->name('recounts.index');
+    
+    // Финансы
+    Route::middleware('can:cash.view')->get('cash-register', CashRegisterManager::class)->name('cash-register.index');
     Route::middleware('can:cash_recounts.view')->get('cash-recounts', CashRecountManager::class)->name('cash-recounts.index');
-    Route::get('reports', \App\Livewire\Admin\Reports\ReportManager::class)->name('reports.index');
+    
+    // Отчеты
+    Route::middleware('can:analytics.view')->get('reports', \App\Livewire\Admin\Reports\ReportManager::class)->name('reports.index');
 });
 
 Route::middleware(['auth'])->group(function () {

@@ -91,7 +91,7 @@ class ReportManager extends Component
                 }
             }
             
-            // Данные по кассе за день
+            // Данные по кассе за день - только независимые транзакции (не связанные с операциями)
             $cashData = $this->getCashMovements($current);
             if ($cashData['income'] > 0 || $cashData['expense'] > 0) {
                 $dayHasData = true;
@@ -122,12 +122,14 @@ class ReportManager extends Component
             
             // Инициализируем итоги для продукта
             $totalPurchaseWeight = 0;
+            $totalPurchaseCleanWeight = 0; // Чистый вес для правильного расчета средней цены
             $totalPurchaseAmount = 0;
             $totalSaleWeight = 0;
+            $totalSaleCleanWeight = 0; // Чистый вес для правильного расчета средней цены
             $totalSaleAmount = 0;
             $totalShipmentWeight = 0;
-            $totalContamination = 0;
-            $totalContaminationWeight = 0;
+            $totalClogging = 0;
+            $totalCloggingWeight = 0;
             
             foreach ($activeDates as $dateInfo) {
                 $dayData = $allData[$dateInfo['date']]['products'][$product->name];
@@ -142,15 +144,26 @@ class ReportManager extends Component
                 
                 // Для средневзвешенного засора
                 if ($dayData['avg_contamination'] > 0) {
-                    $totalContamination += $dayData['avg_contamination'] * $dayData['purchase_weight'];
-                    $totalContaminationWeight += $dayData['purchase_weight'];
+                    $totalClogging += $dayData['avg_contamination'] * $dayData['purchase_weight'];
+                    $totalCloggingWeight += $dayData['purchase_weight'];
                 }
+                
+                // ИСПРАВЛЕНО: рассчитываем чистый вес для правильной средней цены
+                if ($dayData['avg_contamination'] > 0) {
+                    $purchaseCleanWeight = $dayData['purchase_weight'] * (1 - $dayData['avg_contamination'] / 100);
+                    $saleCleanWeight = $dayData['sale_weight'] * (1 - $dayData['avg_contamination'] / 100);
+                } else {
+                    $purchaseCleanWeight = $dayData['purchase_weight'];
+                    $saleCleanWeight = $dayData['sale_weight'];
+                }
+                $totalPurchaseCleanWeight += $purchaseCleanWeight;
+                $totalSaleCleanWeight += $saleCleanWeight;
             }
             
-            // Рассчитываем итоги за период для продукта
-            $avgPurchasePrice = $totalPurchaseWeight > 0 ? $totalPurchaseAmount / $totalPurchaseWeight : 0;
-            $avgSalePrice = $totalSaleWeight > 0 ? $totalSaleAmount / $totalSaleWeight : 0;
-            $avgContamination = $totalContaminationWeight > 0 ? $totalContamination / $totalContaminationWeight : 0;
+            // ИСПРАВЛЕНО: рассчитываем итоги за период для продукта на основе чистого веса
+            $avgPurchasePrice = $totalPurchaseCleanWeight > 0 ? $totalPurchaseAmount / $totalPurchaseCleanWeight : 0;
+            $avgSalePrice = $totalSaleCleanWeight > 0 ? $totalSaleAmount / $totalSaleCleanWeight : 0;
+            $avgContamination = $totalCloggingWeight > 0 ? $totalClogging / $totalCloggingWeight : 0;
             $totalWeight = $totalPurchaseWeight + $totalSaleWeight;
             
             $productTotals[$product->name] = [
@@ -175,7 +188,7 @@ class ReportManager extends Component
         foreach ($activeDates as $dateInfo) {
             $cashData[$dateInfo['date']] = $allData[$dateInfo['date']]['cash'];
             
-            // Суммируем движения по кассе за период
+            // Суммируем движения по кассе за период - только независимые транзакции
             $totalCashIncome += $allData[$dateInfo['date']]['cash']['income'];
             $totalCashExpense += $allData[$dateInfo['date']]['cash']['expense'];
             
@@ -237,17 +250,35 @@ class ReportManager extends Component
             $shipmentWeight = 0;
 
             foreach ($purchases as $purchase) {
-                $weight = $purchase->item->weight * ($purchase->percentage / 100);
-                $amount = $purchase->item->price * ($purchase->percentage / 100) * $purchase->item->weight;
-                $purchaseWeight += $weight;
-                $purchaseAmount += $amount;
+                $elementWeight = $purchase->item->weight * ($purchase->percentage / 100);
+                $purchaseWeight += $elementWeight;
+                
+                // Для расчета стоимости элемента нужно учитывать тип продукта
+                if ($purchase->item->product->type === 'composite') {
+                    // Для составного продукта берем цену элемента за 1% и умножаем на процент и вес
+                    $elementPrice = ($element->price ?? 0) * ($purchase->percentage / 100) * $purchase->item->weight;
+                } else {
+                    // Для простого продукта распределяем общую стоимость пропорционально
+                    $totalItemCost = $purchase->item->price * $purchase->item->weight;
+                    $elementPrice = $totalItemCost * ($purchase->percentage / 100);
+                }
+                
+                $purchaseAmount += $elementPrice;
             }
 
             foreach ($sales as $sale) {
-                $weight = $sale->item->weight * ($sale->percentage / 100);
-                $amount = $sale->item->price * ($sale->percentage / 100) * $sale->item->weight;
-                $saleWeight += $weight;
-                $saleAmount += $amount;
+                $elementWeight = $sale->item->weight * ($sale->percentage / 100);
+                $saleWeight += $elementWeight;
+                
+                // Аналогично для продаж
+                if ($sale->item->product->type === 'composite') {
+                    $elementPrice = ($element->price ?? 0) * ($sale->percentage / 100) * $sale->item->weight;
+                } else {
+                    $totalItemCost = $sale->item->price * $sale->item->weight;
+                    $elementPrice = $totalItemCost * ($sale->percentage / 100);
+                }
+                
+                $saleAmount += $elementPrice;
             }
 
             // Подсчет отгрузок
@@ -282,73 +313,117 @@ class ReportManager extends Component
     private function getProductDataForDate($product, $date)
     {
         // Получаем операции покупки за день
-        $purchases = OperationItem::whereHas('operation', function ($query) use ($date) {
-            $query->where('type', 'purchase')
-                  ->whereDate('created_at', $date);
-        })
-        ->where('product_id', $product->id)
-        ->with(['operation'])
-        ->get();
+        $purchaseOperations = Operation::where('type', 'purchase')
+            ->whereDate('created_at', $date)
+            ->whereHas('items', function($query) use ($product) {
+                $query->where('product_id', $product->id);
+            })
+            ->with(['items' => function($query) use ($product) {
+                $query->where('product_id', $product->id);
+            }])
+            ->get();
 
         // Получаем операции продажи за день
-        $sales = OperationItem::whereHas('operation', function ($query) use ($date) {
-            $query->where('type', 'sale')
-                  ->whereDate('created_at', $date);
-        })
-        ->where('product_id', $product->id)
-        ->with(['operation'])
-        ->get();
+        $saleOperations = Operation::where('type', 'sale')
+            ->whereDate('created_at', $date)
+            ->whereHas('items', function($query) use ($product) {
+                $query->where('product_id', $product->id);
+            })
+            ->with(['items' => function($query) use ($product) {
+                $query->where('product_id', $product->id);
+            }])
+            ->get();
 
-        // Получаем отгрузки за день для этого продукта
+        // Получаем отгрузки за день для этого продукта с подробной информацией
         $shipments = ShipmentItem::whereHas('shipment', function ($query) use ($date) {
             $query->whereDate('created_at', $date);
         })
         ->where('product_id', $product->id)
-        ->with(['shipment'])
+        ->with(['shipment', 'product'])
         ->get();
 
         $purchaseWeight = 0;
+        $purchaseCleanWeight = 0; // Чистый вес для правильного расчета цены
         $purchaseAmount = 0;
         $saleWeight = 0;
+        $saleCleanWeight = 0; // Чистый вес для правильного расчета цены
         $saleAmount = 0;
         $shipmentWeight = 0;
+        $shipmentAmount = 0;
+        $shipmentsDetails = [];
+        $totalClogging = 0;
+        $totalCloggingWeight = 0;
 
-        // Подсчет покупок
-        foreach ($purchases as $purchase) {
-            $purchaseWeight += $purchase->weight;
-            $purchaseAmount += $purchase->price * $purchase->weight;
+        // Подсчет покупок - используем данные из операций
+        foreach ($purchaseOperations as $operation) {
+            foreach ($operation->items as $item) {
+                $purchaseWeight += $item->weight;
+                $purchaseAmount += $item->price;
+                
+                // ИСПРАВЛЕНО: учитываем чистый вес для правильного расчета средней цены
+                $cleanWeight = $item->weight * (1 - $item->clogging / 100);
+                $purchaseCleanWeight += $cleanWeight;
+                
+                // Засор
+                if ($item->clogging > 0) {
+                    $totalClogging += $item->clogging * $item->weight;
+                    $totalCloggingWeight += $item->weight;
+                }
+            }
         }
 
         // Подсчет продаж
-        foreach ($sales as $sale) {
-            $saleWeight += $sale->weight;
-            $saleAmount += $sale->price * $sale->weight;
+        foreach ($saleOperations as $operation) {
+            foreach ($operation->items as $item) {
+                $saleWeight += $item->weight;
+                $saleAmount += $item->price;
+                
+                // ИСПРАВЛЕНО: учитываем чистый вес для правильного расчета средней цены
+                $cleanWeight = $item->weight * (1 - $item->clogging / 100);
+                $saleCleanWeight += $cleanWeight;
+            }
         }
 
-        // Подсчет отгрузок
-        foreach ($shipments as $shipment) {
-            $shipmentWeight += $shipment->actual_weight ?? $shipment->weight;
+        // Подсчет отгрузок с детальной информацией
+        foreach ($shipments as $shipmentItem) {
+            $weight = $shipmentItem->actual_weight ?? $shipmentItem->weight;
+            $pricePerKg = $shipmentItem->actual_price ?? 0;
+            $clogging = $shipmentItem->actual_clogging ?? 0;
+            $shipment = $shipmentItem->shipment;
+            
+            // ИСПРАВЛЕНО: рассчитываем чистый вес и общую сумму
+            $cleanWeight = $weight * (1 - $clogging / 100);
+            $totalAmount = $cleanWeight * $pricePerKg; // Сумма = чистый вес × цена за кг
+            
+            $shipmentWeight += $weight;
+            $shipmentAmount += $totalAmount; // Теперь это правильная сумма
+            
+            // Собираем детальную информацию об отгрузке
+            $shipmentDetail = [
+                'weight' => $weight,
+                'clean_weight' => $cleanWeight,
+                'price_per_kg' => $pricePerKg,
+                'total_amount' => $totalAmount,
+                'company' => $shipment->company ?? 'Не указано',
+                'car_number' => $shipment->car_number ?? '',
+                'driver_name' => $shipment->driver_name ?? '',
+                'shipping_cost' => $shipment->shipping_cost ?? 0,
+                'actual_clogging' => $clogging,
+                'created_at' => $shipment->created_at->format('H:i')
+            ];
+            
+            $shipmentsDetails[] = $shipmentDetail;
         }
 
-        // Рассчитываем средние цены
-        $avgPurchasePrice = $purchaseWeight > 0 ? $purchaseAmount / $purchaseWeight : 0;
-        $avgSalePrice = $saleWeight > 0 ? $saleAmount / $saleWeight : 0;
+        // ИСПРАВЛЕНО: рассчитываем средние цены на основе чистого веса
+        $avgPurchasePrice = $purchaseCleanWeight > 0 ? $purchaseAmount / $purchaseCleanWeight : 0;
+        $avgSalePrice = $saleCleanWeight > 0 ? $saleAmount / $saleCleanWeight : 0;
         
         // Общий вес за день = покупки + продажи (отгрузки не считаем, так как это уже купленный металл)
         $totalWeight = $purchaseWeight + $saleWeight;
         
-        // Средний засор (берем из OperationItem, предполагаем что есть поле contamination)
-        $avgContamination = 0;
-        if ($purchases->count() > 0) {
-            $totalContamination = 0;
-            $totalPurchaseWeight = 0;
-            foreach ($purchases as $purchase) {
-                $contamination = $purchase->contamination ?? 0; // Поле засора в операции
-                $totalContamination += $contamination * $purchase->weight;
-                $totalPurchaseWeight += $purchase->weight;
-            }
-            $avgContamination = $totalPurchaseWeight > 0 ? $totalContamination / $totalPurchaseWeight : 0;
-        }
+        // Средний засор
+        $avgClogging = $totalCloggingWeight > 0 ? $totalClogging / $totalCloggingWeight : 0;
 
         return [
             'purchase_weight' => $purchaseWeight,
@@ -358,8 +433,10 @@ class ReportManager extends Component
             'sale_amount' => $saleAmount,
             'sale_avg_price' => $avgSalePrice,
             'shipment_weight' => $shipmentWeight,
+            'shipment_amount' => $shipmentAmount,
+            'shipments_details' => $shipmentsDetails,
             'total_weight' => $totalWeight,
-            'avg_contamination' => $avgContamination,
+            'avg_contamination' => $avgClogging,
             'has_data' => $purchaseWeight > 0 || $saleWeight > 0 || $shipmentWeight > 0
         ];
     }
@@ -397,18 +474,36 @@ class ReportManager extends Component
 
         // Подсчет покупок
         foreach ($purchases as $purchase) {
-            $weight = $purchase->item->weight * ($purchase->percentage / 100);
-            $amount = $purchase->item->price * ($purchase->percentage / 100) * $purchase->item->weight;
-            $purchaseWeight += $weight;
-            $purchaseAmount += $amount;
+            $elementWeight = $purchase->item->weight * ($purchase->percentage / 100);
+            $purchaseWeight += $elementWeight;
+            
+            // Для расчета стоимости элемента нужно учитывать тип продукта
+            if ($purchase->item->product->type === 'composite') {
+                // Для составного продукта берем цену элемента за 1% и умножаем на процент и вес
+                $elementPrice = ($element->price ?? 0) * ($purchase->percentage / 100) * $purchase->item->weight;
+            } else {
+                // Для простого продукта распределяем общую стоимость пропорционально
+                $totalItemCost = $purchase->item->price * $purchase->item->weight;
+                $elementPrice = $totalItemCost * ($purchase->percentage / 100);
+            }
+            
+            $purchaseAmount += $elementPrice;
         }
 
         // Подсчет продаж
         foreach ($sales as $sale) {
-            $weight = $sale->item->weight * ($sale->percentage / 100);
-            $amount = $sale->item->price * ($sale->percentage / 100) * $sale->item->weight;
-            $saleWeight += $weight;
-            $saleAmount += $amount;
+            $elementWeight = $sale->item->weight * ($sale->percentage / 100);
+            $saleWeight += $elementWeight;
+            
+            // Аналогично для продаж
+            if ($sale->item->product->type === 'composite') {
+                $elementPrice = ($element->price ?? 0) * ($sale->percentage / 100) * $sale->item->weight;
+            } else {
+                $totalItemCost = $sale->item->price * $sale->item->weight;
+                $elementPrice = $totalItemCost * ($sale->percentage / 100);
+            }
+            
+            $saleAmount += $elementPrice;
         }
 
         // Подсчет отгрузок
@@ -453,8 +548,8 @@ class ReportManager extends Component
         return [
             'expenses' => $totalPurchases,  // Расход = покупка металла
             'income' => $totalSales,        // Приход = продажа металла
-            'cash_income' => $cashIncome,   // Пополнение кассы
-            'cash_expense' => $cashExpense, // Снятие с кассы
+            'cash_income' => $cashIncome,   // Пополнение кассы (независимые транзакции)
+            'cash_expense' => $cashExpense, // Снятие с кассы (независимые транзакции)
             'day_result' => $dayResult
         ];
     }
@@ -486,8 +581,10 @@ class ReportManager extends Component
 
     private function getCashMovements($date)
     {
+        // ИСПРАВЛЕНО: берем только независимые транзакции кассы (не связанные с операциями)
         $transactions = CashTransaction::whereDate('created_at', $date)
-            ->with(['operation', 'cashRegister'])
+            ->whereNull('operation_id') // Только независимые транзакции, не связанные с операциями
+            ->with(['cashRegister'])
             ->orderBy('created_at')
             ->get();
 

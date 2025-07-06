@@ -29,6 +29,11 @@ class ConversionManager extends Component
 
     // Элементы для составного продукта (автоматически рассчитываются)
     public $calculatedElements = [];
+    
+    // Флаг для отслеживания ручного изменения target_quantity
+    public $targetQuantityManuallyChanged = false;
+    
+
 
     public function mount()
     {
@@ -68,41 +73,83 @@ class ConversionManager extends Component
         $this->notes = null;
         $this->user_comment = '';
         $this->calculatedElements = [];
+        $this->targetQuantityManuallyChanged = false;
     }
 
-    public function updatedTargetProductId()
+    public function sourceProductChanged()
     {
-        $this->calculateElements();
+        // Метод вызывается при изменении исходного продукта
+        // Никаких дополнительных действий не требуется
     }
 
-    public function updatedTargetQuantity()
+    public function targetProductChanged()
     {
+        // Метод вызывается при изменении целевого продукта
+        // Расчеты будут обновлены по кнопке или при сохранении
+    }
+
+    public function sourceQuantityChanged()
+    {
+        // Автоматически синхронизируем target_quantity с source_quantity, 
+        // если пользователь не изменял target_quantity вручную
+        if ($this->source_quantity && !$this->targetQuantityManuallyChanged) {
+            $this->target_quantity = $this->source_quantity;
+        }
+    }
+
+    public function targetQuantityChanged()
+    {
+        // Отмечаем, что пользователь вручную изменил target_quantity
+        $this->targetQuantityManuallyChanged = true;
+    }
+
+    public function refreshCalculatedElements()
+    {
+        // Простая функция для обновления расчетных элементов
         $this->calculateElements();
     }
 
     private function calculateElements()
     {
-        $this->calculatedElements = [];
-        
-        if ($this->target_product_id && $this->target_quantity) {
-            // Получаем продукт с элементами из базы данных для актуальных данных
+        try {
+            // Сброс по умолчанию
+            $this->calculatedElements = [];
+            
+            // Проверяем базовые условия
+            if (empty($this->target_product_id) || empty($this->target_quantity)) {
+                return;
+            }
+            
+            // Получаем продукт напрямую без кэша для избежания циклов
             $targetProduct = Product::with(['elements.unit'])->find($this->target_product_id);
             
-            if ($targetProduct && $targetProduct->type === 'composite') {
-                foreach ($targetProduct->elements as $element) {
-                    // Рассчитываем количество элемента на основе процентного содержания
-                    $elementQuantity = ($this->target_quantity * $element->pivot->percentage) / 100;
-                    
-                    $this->calculatedElements[$element->id] = [
-                        'name' => $element->name,
-                        'quantity' => $elementQuantity,
-                        'unit' => $element->unit->name ?? 'кг',
-                        'percentage' => $element->pivot->percentage
-                    ];
-                }
+            // Проверяем что продукт найден и составной
+            if (!$targetProduct || $targetProduct->type !== 'composite' || $targetProduct->elements->isEmpty()) {
+                return;
             }
+            
+            // Рассчитываем элементы
+            $elements = [];
+            foreach ($targetProduct->elements as $element) {
+                $elementQuantity = (floatval($this->target_quantity) * floatval($element->pivot->percentage ?? 0)) / 100;
+                
+                $elements[$element->id] = [
+                    'name' => $element->name ?? 'Неизвестный элемент',
+                    'quantity' => $elementQuantity,
+                    'unit' => $element->unit->name ?? 'кг',
+                    'percentage' => floatval($element->pivot->percentage ?? 0)
+                ];
+            }
+            
+            $this->calculatedElements = $elements;
+            
+        } catch (\Exception $e) {
+            // В случае ошибки просто очищаем элементы
+            $this->calculatedElements = [];
         }
     }
+    
+
 
 
 

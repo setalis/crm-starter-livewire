@@ -204,25 +204,37 @@ class RolePermissionSeeder extends Seeder
 
         // Менеджер получает ограниченные разрешения для торговых операций и базовые комментарии
         $managerPermissions = Permission::whereIn('name', [
+            // Справочники
+            'units.view',
+            'elements.view', 
             'products.view',
+            // Операции
             'operations.view',
             'operations.create',
             'operations.edit',
+            // Склад
             'warehouse.view',
-            'cash.view',
-            'cash.create',
             'shipments.view',
             'shipments.create',
             'shipments.edit',
             'shipments.confirm',
+            'conversions.view',
             'recounts.view',
             'recounts.create',
             'recounts.edit',
             'recounts.start',
+            // Финансы  
+            'cash.view',
+            'cash.create',
+            // Аналитика
+            'analytics.view',
+            // Комментарии
             'comments.view',
             'comments.create',
             'comments.edit',
             'comments.manage',
+            // Дополнительные для совместимости
+            'users.view',
         ])->get();
         $manager->syncPermissions($managerPermissions);
     }

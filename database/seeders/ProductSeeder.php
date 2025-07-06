@@ -28,6 +28,126 @@ class ProductSeeder extends Seeder
             ],
             [
                 'user_id' => 1, // системный пользователь
+                'name' => 'Медь',
+                'type' => 'simple',
+                'unit_id' => 1, // кг
+                'purchase_price' => 325,
+                'selling_price' => 350,
+                'clogging' => 0,
+                'image' => null,
+                'is_published' => true,
+                'position' => 1,
+                'stock' => 0,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'user_id' => 1, // системный пользователь
+                'name' => 'Аллюминий',
+                'type' => 'simple',
+                'unit_id' => 1, // кг
+                'purchase_price' => 53,
+                'selling_price' => 65,
+                'clogging' => 0,
+                'image' => null,
+                'is_published' => true,
+                'position' => 1,
+                'stock' => 0,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'user_id' => 1, // системный пользователь
+                'name' => 'Латунь',
+                'type' => 'simple',
+                'unit_id' => 1, // кг
+                'purchase_price' => 200,
+                'selling_price' => 210,
+                'clogging' => 0,
+                'image' => null,
+                'is_published' => true,
+                'position' => 1,
+                'stock' => 0,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'user_id' => 1, // системный пользователь
+                'name' => 'Нержавейка',
+                'type' => 'simple',
+                'unit_id' => 1, // кг
+                'purchase_price' => 40,
+                'selling_price' => 45,
+                'clogging' => 0,
+                'image' => null,
+                'is_published' => true,
+                'position' => 1,
+                'stock' => 0,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'user_id' => 1, // системный пользователь
+                'name' => 'Аккумуляторы (слитый)',
+                'type' => 'simple',
+                'unit_id' => 1, // кг
+                'purchase_price' => 20,
+                'selling_price' => 25,
+                'clogging' => 0,
+                'image' => null,
+                'is_published' => true,
+                'position' => 1,
+                'stock' => 0,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'user_id' => 1, // системный пользователь
+                'name' => 'Аккумуляторы (залитый)',
+                'type' => 'simple',
+                'unit_id' => 1, // кг
+                'purchase_price' => 20,
+                'selling_price' => 25,
+                'clogging' => 0,
+                'image' => null,
+                'is_published' => true,
+                'position' => 1,
+                'stock' => 0,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'user_id' => 1, // системный пользователь
+                'name' => 'Аккумуляторы (черный)',
+                'type' => 'simple',
+                'unit_id' => 1, // кг
+                'purchase_price' => 13,
+                'selling_price' => 15,
+                'clogging' => 0,
+                'image' => null,
+                'is_published' => true,
+                'position' => 1,
+                'stock' => 0,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'user_id' => 1, // системный пользователь
+                'name' => 'Свинец',
+                'type' => 'simple',
+                'unit_id' => 1, // кг
+                'purchase_price' => 55,
+                'selling_price' => 60,
+                'clogging' => 0,
+                'image' => null,
+                'is_published' => true,
+                'position' => 1,
+                'stock' => 0,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],            
+            [
+                'user_id' => 1, // системный пользователь
                 'name' => 'Нержавеющая сталь 304',
                 'type' => 'composite',
                 'unit_id' => 1, // кг
