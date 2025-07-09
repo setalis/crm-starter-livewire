@@ -34,6 +34,16 @@ Route::get('dashboard', [\App\Http\Controllers\DashboardController::class, 'inde
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
+// Тестовый маршрут для проверки Chart.js
+Route::get('/test-chart', function () {
+    return view('test-chart');
+});
+
+// Отладочная страница для графиков
+Route::get('/debug-charts', function () {
+    return view('debug-charts');
+});
+
 // Админская панель (для супер админов, админов и бухгалтеров)
 Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     // Управление пользователями и правами доступа
