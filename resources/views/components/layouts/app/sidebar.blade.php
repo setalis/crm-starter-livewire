@@ -342,11 +342,12 @@
                 </flux:navbar>
             </flux:header>
 
-            {{ $slot }}
+            <div class="flex-1">
+                {{ $slot }}
+            </div>
         </div>
 
         @livewireScripts
         @fluxScripts
-        <script src="https://cdn.jsdelivr.net/gh/livewire/sortable@v1.x.x/dist/livewire-sortable.js"></script>
     </body>
 </html>

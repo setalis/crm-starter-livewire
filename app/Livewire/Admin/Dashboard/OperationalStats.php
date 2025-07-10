@@ -5,12 +5,15 @@ namespace App\Livewire\Admin\Dashboard;
 use App\Models\Operation;
 use App\Models\User;
 use Livewire\Component;
+use Carbon\Carbon;
 
 class OperationalStats extends Component
 {
-    protected $listeners = ['period-changed' => 'handlePeriodChange'];
-
-    public $periodData = [];
+    public $period = 'month';
+    public $periodLabel = 'За месяц';
+    public $startDate;
+    public $endDate;
+    
     public $totalOperations = 0;
     public $salesCount = 0;
     public $purchasesCount = 0;
@@ -18,21 +21,13 @@ class OperationalStats extends Component
     public $averageSaleCheck = 0;
     public $averagePurchaseCheck = 0;
     public $topUsers = [];
-    public $operationsChange = 0;
 
     public function mount()
     {
-        // Если нет данных периода - устанавливаем день по умолчанию
-        if (empty($this->periodData)) {
-            $now = now();
-            $this->periodData = [
-                'start' => $now->copy()->startOfDay(),
-                'end' => $now->copy()->endOfDay(),
-                'label' => 'За сегодня',
-                'period' => 'day'
-            ];
-        }
+        // Читаем период из URL параметров или используем по умолчанию
+        $this->period = request('period', 'month');
         
+        $this->setPeriodDates();
         $this->loadData();
     }
 
@@ -41,50 +36,38 @@ class OperationalStats extends Component
         return view('livewire.admin.dashboard.operational-stats');
     }
 
-    public function handlePeriodChange($data)
+    private function setPeriodDates()
     {
-        \Log::info('OperationalStats: получено событие period-changed', $data);
+        $lastOperation = Operation::latest()->first();
+        $now = $lastOperation ? Carbon::parse($lastOperation->created_at) : Carbon::now();
         
-        // Сохраняем и период и данные периода
-        if (isset($data['periodData']) && is_array($data['periodData'])) {
-            $this->periodData = $data['periodData'];
-            $this->periodData['period'] = $data['period'] ?? 'unknown'; // Добавляем период
-        } else {
-            $this->periodData = ['period' => $data['period'] ?? 'unknown'];
+        switch ($this->period) {
+            case 'day':
+                $this->startDate = $now->copy()->startOfDay();
+                $this->endDate = $now->copy()->endOfDay();
+                $this->periodLabel = 'За день';
+                break;
+                
+            case 'week':
+                $this->startDate = $now->copy()->startOfWeek();
+                $this->endDate = $now->copy()->endOfWeek();
+                $this->periodLabel = 'За неделю';
+                break;
+                
+            case 'month':
+            default:
+                $this->startDate = $now->copy()->startOfMonth();
+                $this->endDate = $now->copy()->endOfMonth();
+                $this->periodLabel = 'За месяц';
+                break;
         }
-        
-        $this->loadData();
     }
 
-    protected function getPeriodDates()
+    private function loadData()
     {
-        // Если есть данные от центрального селектора - используем их
-        if (!empty($this->periodData) && is_array($this->periodData) && 
-            isset($this->periodData['start']) && isset($this->periodData['end']) && isset($this->periodData['label'])) {
-            return [
-                'start' => \Carbon\Carbon::parse($this->periodData['start']),
-                'end' => \Carbon\Carbon::parse($this->periodData['end']),
-                'label' => $this->periodData['label']
-            ];
-        }
-        
-        // Если данных нет - возвращаем null, не загружаем данные
-        return null;
-    }
-
-    protected function loadData()
-    {
-        $period = $this->getPeriodDates();
-        
-        // Если нет данных периода - не загружаем
-        if (!$period) {
-            \Log::info('OperationalStats: нет данных периода, пропускаем загрузку');
-            return;
-        }
-        
-        // Получаем операции за выбранный период
+        // Получаем операции за период
         $operations = Operation::with('user')
-            ->whereBetween('created_at', [$period['start'], $period['end']])
+            ->whereBetween('created_at', [$this->startDate, $this->endDate])
             ->get();
 
         $sales = $operations->where('type', 'sale');
@@ -96,47 +79,23 @@ class OperationalStats extends Component
         $this->purchasesCount = $purchases->count();
 
         // Средние чеки
-        $totalAmount = $operations->sum('total_amount');
-        $this->averageCheck = $this->totalOperations > 0 ? $totalAmount / $this->totalOperations : 0;
-        
-        $salesAmount = $sales->sum('total_amount');
-        $this->averageSaleCheck = $this->salesCount > 0 ? $salesAmount / $this->salesCount : 0;
-        
-        $purchasesAmount = $purchases->sum('total_amount');
-        $this->averagePurchaseCheck = $this->purchasesCount > 0 ? $purchasesAmount / $this->purchasesCount : 0;
+        $this->averageCheck = $this->totalOperations > 0 ? $operations->sum('total_amount') / $this->totalOperations : 0;
+        $this->averageSaleCheck = $this->salesCount > 0 ? $sales->sum('total_amount') / $this->salesCount : 0;
+        $this->averagePurchaseCheck = $this->purchasesCount > 0 ? $purchases->sum('total_amount') / $this->purchasesCount : 0;
 
-        // Топ пользователи по количеству операций
+        // Топ пользователи
         $this->topUsers = $operations->groupBy('user_id')
             ->map(function ($userOperations) {
                 $user = $userOperations->first()->user;
                 return [
                     'name' => $user->name,
-                    'operations_count' => $userOperations->count(),
-                    'total_amount' => $userOperations->sum('total_amount')
+                    'count' => $userOperations->count(),
+                    'amount' => $userOperations->sum('total_amount')
                 ];
             })
-            ->sortByDesc('operations_count')
-            ->take(5)
+            ->sortByDesc('amount')
+            ->take(3)
             ->values()
             ->toArray();
-
-        // Изменение количества операций
-        $this->calculateOperationsChange($period);
-    }
-
-    private function calculateOperationsChange($currentPeriod)
-    {
-        // Рассчитываем предыдущий период
-        $duration = $currentPeriod['end']->diff($currentPeriod['start']);
-        $prevStart = $currentPeriod['start']->copy()->sub($duration);
-        $prevEnd = $currentPeriod['start']->copy()->subSecond();
-
-        $prevOperationsCount = Operation::whereBetween('created_at', [$prevStart, $prevEnd])->count();
-
-        if ($prevOperationsCount > 0) {
-            $this->operationsChange = (($this->totalOperations - $prevOperationsCount) / $prevOperationsCount) * 100;
-        } else {
-            $this->operationsChange = $this->totalOperations > 0 ? 100 : 0;
-        }
     }
 } 

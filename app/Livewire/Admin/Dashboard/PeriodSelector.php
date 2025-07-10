@@ -2,19 +2,24 @@
 
 namespace App\Livewire\Admin\Dashboard;
 
+use App\Models\Operation;
 use Livewire\Component;
+use Carbon\Carbon;
 
 class PeriodSelector extends Component
 {
-    public $selectedPeriod = 'day';
+    public $period = 'month';
+    public $periodLabel = '';
+    public $dateRange = '';
+    public $startDate;
+    public $endDate;
 
     public function mount()
     {
-        // Отправляем начальный период при загрузке
-        $this->dispatch('period-changed', [
-            'period' => $this->selectedPeriod,
-            'periodData' => $this->getPeriodDates()
-        ]);
+        // Читаем период из URL параметров или используем по умолчанию
+        $this->period = request('period', 'month');
+        
+        $this->updatePeriod();
     }
 
     public function render()
@@ -22,64 +27,55 @@ class PeriodSelector extends Component
         return view('livewire.admin.dashboard.period-selector');
     }
 
-    public function updatedSelectedPeriod()
+    public function updatedPeriod()
     {
-        $periodData = $this->getPeriodDates();
+        \Log::info('PERIOD SELECTOR: Период изменен на', ['period' => $this->period]);
         
-        // Отладка
-        \Log::info('PeriodSelector: отправляем событие period-changed', [
-            'period' => $this->selectedPeriod,
-            'periodData' => $periodData
-        ]);
-        
-        // Отправляем событие всем виджетам о смене периода
-        $this->dispatch('period-changed', [
-            'period' => $this->selectedPeriod,
-            'periodData' => $periodData
-        ]);
+        // Перенаправляем с новым периодом - полная перезагрузка страницы
+        return redirect()->route('dashboard', ['period' => $this->period]);
     }
 
-    protected function getPeriodDates()
+    private function updatePeriod()
     {
-        $now = now();
+        // Отталкиваемся от даты последней операции, чтобы всегда были релевантные данные
+        $lastOperation = Operation::latest()->first();
+        $now = $lastOperation ? Carbon::parse($lastOperation->created_at) : Carbon::now();
         
-        switch ($this->selectedPeriod) {
+        // Устанавливаем русскую локаль
+        $now->locale('ru');
+        
+        switch ($this->period) {
             case 'day':
-                return [
-                    'start' => $now->copy()->startOfDay(),
-                    'end' => $now->copy()->endOfDay(),
-                    'label' => 'За сегодня'
-                ];
-            
-            case 'week':
-                return [
-                    'start' => $now->copy()->startOfWeek(),
-                    'end' => $now->copy()->endOfWeek(),
-                    'label' => 'За неделю'
-                ];
-            
-            case 'month':
-                return [
-                    'start' => $now->copy()->startOfMonth(),
-                    'end' => $now->copy()->endOfMonth(),
-                    'label' => 'За месяц'
-                ];
+                $this->startDate = $now->copy()->startOfDay();
+                $this->endDate = $now->copy()->endOfDay();
+                $this->periodLabel = 'За день';
+                $this->dateRange = $now->format('d') . ' ' . $now->translatedFormat('F');
+                break;
                 
+            case 'week':
+                $this->startDate = $now->copy()->startOfWeek();
+                $this->endDate = $now->copy()->endOfWeek();
+                $this->periodLabel = 'За неделю';
+                $this->dateRange = $this->startDate->format('d.m') . ' - ' . $this->endDate->format('d.m');
+                break;
+                
+            case 'month':
             default:
-                return [
-                    'start' => $now->copy()->startOfDay(),
-                    'end' => $now->copy()->endOfDay(),
-                    'label' => 'За сегодня'
-                ];
+                $this->startDate = $now->copy()->startOfMonth();
+                $this->endDate = $now->copy()->endOfMonth();
+                $this->periodLabel = 'За месяц';
+                $this->dateRange = $now->translatedFormat('F Y');
+                break;
         }
     }
 
-    protected function getPeriodOptions()
+    private function dispatchPeriodChange()
     {
-        return [
-            'day' => 'День',
-            'week' => 'Неделя', 
-            'month' => 'Месяц'
-        ];
+        $this->dispatch('period-changed', [
+            'period' => $this->period,
+            'start' => $this->startDate->toDateTimeString(),
+            'end' => $this->endDate->toDateTimeString(),
+            'label' => $this->periodLabel
+        ]);
     }
 } 

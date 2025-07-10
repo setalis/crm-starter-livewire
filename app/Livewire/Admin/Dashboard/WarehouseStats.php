@@ -8,6 +8,9 @@ use Livewire\Component;
 
 class WarehouseStats extends Component
 {
+    public $period = 'month';
+    public $periodLabel = 'Текущее состояние';
+    
     public $totalProducts = 0;
     public $totalElements = 0;
     public $lowStockProducts = 0;
@@ -19,6 +22,23 @@ class WarehouseStats extends Component
 
     public function mount()
     {
+        // Читаем период из URL параметров для консистентности интерфейса
+        $this->period = request('period', 'month');
+        
+        // Для складских данных период не влияет на данные, только на заголовок
+        switch ($this->period) {
+            case 'day':
+                $this->periodLabel = 'Состояние на день';
+                break;
+            case 'week':
+                $this->periodLabel = 'Состояние на неделю';
+                break;
+            case 'month':
+            default:
+                $this->periodLabel = 'Состояние на месяц';
+                break;
+        }
+        
         $this->loadData();
     }
 
