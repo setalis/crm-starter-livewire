@@ -35,7 +35,7 @@
         <div class="hidden lg:block overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
-                    <tr>
+                <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Раздел</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Имя</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Описание</th>
@@ -43,21 +43,21 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Порядок</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Статус</th>
                         <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
-                    </tr>
-                </thead>
+                </tr>
+            </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                    @forelse ($sections as $section)
+                @forelse ($sections as $section)
                         <tr class="hover:bg-gray-50 transition-colors duration-150">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center space-x-3">
-                                    @if($section->icon)
-                                        <div class="h-5 w-5 text-gray-400">
-                                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                                                <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
-                                            </svg>
-                                        </div>
-                                    @endif
-                                    <div>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center space-x-3">
+                                @if($section->icon)
+                                    <div class="h-5 w-5 text-gray-400">
+                                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
+                                        </svg>
+                                    </div>
+                                @endif
+                                <div>
                                         <div class="font-medium text-gray-900">{{ $section->display_name }}</div>
                                         <div class="text-sm text-gray-500">{{ $section->name }}</div>
                                     </div>
@@ -69,15 +69,15 @@
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="max-w-xs truncate text-gray-900" title="{{ $section->description }}">
                                     {{ $section->description }}
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                                     {{ $section->permissions_count }}
                                 </span>
-                            </td>
+                        </td>
                             <td class="px-6 py-4 whitespace-nowrap text-gray-900">{{ $section->sort_order }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="px-6 py-4 whitespace-nowrap">
                                 @can('sections.edit')
                                     <button wire:click="toggleStatus({{ $section->id }})" 
                                         class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $section->is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">

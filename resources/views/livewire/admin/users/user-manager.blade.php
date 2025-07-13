@@ -42,70 +42,70 @@
     <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
         <!-- Десктопная версия -->
         <div class="hidden md:block">
-            <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
-                <thead class="bg-gray-50 dark:bg-gray-800">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Имя</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Email</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Роли</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Создан</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Действия</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                    @forelse ($users as $user)
-                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center space-x-3">
-                                    <div class="h-8 w-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                                        {{ $user->initials() }}
-                                    </div>
-                                    <div>
-                                        <div class="font-medium text-gray-900 dark:text-gray-100">{{ $user->name }}</div>
-                                    </div>
+        <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
+            <thead class="bg-gray-50 dark:bg-gray-800">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Имя</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Email</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Роли</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Создан</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Действия</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                @forelse ($users as $user)
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center space-x-3">
+                                <div class="h-8 w-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                                    {{ $user->initials() }}
                                 </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">{{ $user->email }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex flex-wrap gap-1">
-                                    @foreach ($user->roles as $role)
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                                            {{ $role->name }}
-                                        </span>
-                                    @endforeach
+                                <div>
+                                    <div class="font-medium text-gray-900 dark:text-gray-100">{{ $user->name }}</div>
                                 </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">{{ \App\Helpers\Settings::formatDateTime($user->created_at) }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <div class="flex space-x-2">
-                                    @can('users.edit')
-                                        <button wire:click="edit({{ $user->id }})" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
-                                            Редактировать
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">{{ $user->email }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex flex-wrap gap-1">
+                                @foreach ($user->roles as $role)
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                        {{ $role->name }}
+                                    </span>
+                                @endforeach
+                            </div>
+                        </td>
+                                                        <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">{{ \App\Helpers\Settings::formatDateTime($user->created_at) }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div class="flex space-x-2">
+                                @can('users.edit')
+                                    <button wire:click="edit({{ $user->id }})" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
+                                        Редактировать
+                                    </button>
+                                @endcan
+                                @can('users.delete')
+                                    @if ($user->id !== auth()->id())
+                                        <button 
+                                            wire:click="delete({{ $user->id }})" 
+                                            class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+                                            wire:confirm="Вы уверены, что хотите удалить этого пользователя?"
+                                        >
+                                            Удалить
                                         </button>
-                                    @endcan
-                                    @can('users.delete')
-                                        @if ($user->id !== auth()->id())
-                                            <button 
-                                                wire:click="delete({{ $user->id }})" 
-                                                class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-                                                wire:confirm="Вы уверены, что хотите удалить этого пользователя?"
-                                            >
-                                                Удалить
-                                            </button>
-                                        @endif
-                                    @endcan
-                                </div>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-                                Пользователи не найдены
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                                    @endif
+                                @endcan
+                            </div>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="5" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                            Пользователи не найдены
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
         </div>
 
         <!-- Мобильная версия (карточки) -->

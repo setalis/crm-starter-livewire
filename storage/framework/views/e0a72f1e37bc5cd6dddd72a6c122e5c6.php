@@ -294,7 +294,7 @@
                                                     <!-- Общий вес за день -->
                                                     <!--[if BLOCK]><![endif]--><?php if($productData['total_weight'] > 0): ?>
                                                         <div class="font-bold text-gray-900 dark:text-gray-100">
-                                                            <strong>Общий вес:</strong> <?php echo e(number_format($productData['total_weight'], 2)); ?> кг
+                                                            <strong>Общий вес:</strong> <?php echo e(number_format($productData['total_weight'], 3)); ?> кг
                                                         </div>
                                                     <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 
@@ -327,12 +327,12 @@
                                                     <!-- Средние цены -->
                                                     <!--[if BLOCK]><![endif]--><?php if($productData['purchase_avg_price'] > 0): ?>
                                                         <div class="text-blue-600 dark:text-blue-400">
-                                                            <strong>Ср. цена покупки:</strong> <?php echo e(number_format($productData['purchase_avg_price'], 0)); ?> <?php echo e($this->currencySymbol); ?>/кг
+                                                            <strong>Ср. цена покупки:</strong> <?php echo e(number_format($productData['purchase_avg_price'], 2)); ?> <?php echo e($this->currencySymbol); ?>/кг
                                                         </div>
                                                     <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                                     <!--[if BLOCK]><![endif]--><?php if($productData['sale_avg_price'] > 0): ?>
                                                         <div class="text-green-600 dark:text-green-400">
-                                                            <strong>Ср. цена продажи:</strong> <?php echo e(number_format($productData['sale_avg_price'], 0)); ?> <?php echo e($this->currencySymbol); ?>/кг
+                                                            <strong>Ср. цена продажи:</strong> <?php echo e(number_format($productData['sale_avg_price'], 2)); ?> <?php echo e($this->currencySymbol); ?>/кг
                                                         </div>
                                                     <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                                     
@@ -346,17 +346,17 @@
                                                     <!-- Операции -->
                                                     <!--[if BLOCK]><![endif]--><?php if($productData['purchase_weight'] > 0): ?>
                                                         <div class="text-red-600 dark:text-red-400">
-                                                            Покупка: <?php echo e(number_format($productData['purchase_weight'], 2)); ?> кг
+                                                            Покупка: <?php echo e(number_format($productData['purchase_weight'], 3)); ?> кг
                                                         </div>
                                                     <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                                     <!--[if BLOCK]><![endif]--><?php if($productData['sale_weight'] > 0): ?>
                                                         <div class="text-green-600 dark:text-green-400">
-                                                            Продажа: <?php echo e(number_format($productData['sale_weight'], 2)); ?> кг
+                                                            Продажа: <?php echo e(number_format($productData['sale_weight'], 3)); ?> кг
                                                         </div>
                                                     <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                                     <!--[if BLOCK]><![endif]--><?php if($productData['shipment_weight'] > 0): ?>
                                                         <div class="text-purple-600 dark:text-purple-400 border-t pt-1">
-                                                            <strong>🚚 Отгрузка:</strong> <?php echo e(number_format($productData['shipment_weight'], 2)); ?> кг
+                                                            <strong>🚚 Отгрузка:</strong> <?php echo e(number_format($productData['shipment_weight'], 3)); ?> кг
                                                             <!--[if BLOCK]><![endif]--><?php if($productData['shipment_amount'] > 0): ?>
                                                                 <br><strong>Сумма:</strong> <?php echo e(number_format($productData['shipment_amount'], 0, ',', ' ')); ?> <?php echo e($this->currencySymbol); ?>
 
@@ -371,10 +371,10 @@
                                                                         <!--[if BLOCK]><![endif]--><?php if($shipment['driver_name']): ?>
                                                                             <div>👤 <?php echo e($shipment['driver_name']); ?></div>
                                                                         <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
-                                                                        <div>⚖️ Брутто: <?php echo e(number_format($shipment['weight'], 2)); ?> кг</div>
-                                                                        <div>🧽 Чистый: <?php echo e(number_format($shipment['clean_weight'], 2)); ?> кг</div>
+                                                                        <div>⚖️ Брутто: <?php echo e(number_format($shipment['weight'], 3)); ?> кг</div>
+                                                                        <div>🧽 Чистый: <?php echo e(number_format($shipment['clean_weight'], 3)); ?> кг</div>
                                                                         <!--[if BLOCK]><![endif]--><?php if($shipment['price_per_kg'] > 0): ?>
-                                                                            <div>💵 Цена: <?php echo e(number_format($shipment['price_per_kg'], 0)); ?> <?php echo e($this->currencySymbol); ?>/кг</div>
+                                                                            <div>💵 Цена: <?php echo e(number_format($shipment['price_per_kg'], 2)); ?> <?php echo e($this->currencySymbol); ?>/кг</div>
                                                                         <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                                                         <!--[if BLOCK]><![endif]--><?php if($shipment['total_amount'] > 0): ?>
                                                                             <div class="font-bold text-green-600">💰 Сумма: <?php echo e(number_format($shipment['total_amount'], 0, ',', ' ')); ?> <?php echo e($this->currencySymbol); ?></div>
@@ -404,7 +404,7 @@
                                                 <!-- Общий вес за период -->
                                                 <!--[if BLOCK]><![endif]--><?php if($productTotal['total_weight'] > 0): ?>
                                                     <div class="font-bold text-gray-900 dark:text-gray-100">
-                                                        <strong>Общий вес:</strong> <?php echo e(number_format($productTotal['total_weight'], 2)); ?> кг
+                                                        <strong>Общий вес:</strong> <?php echo e(number_format($productTotal['total_weight'], 3)); ?> кг
                                                     </div>
                                                 <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 
@@ -437,12 +437,12 @@
                                                 <!-- Средние цены за период -->
                                                 <!--[if BLOCK]><![endif]--><?php if($productTotal['purchase_avg_price'] > 0): ?>
                                                     <div class="text-blue-600 dark:text-blue-400">
-                                                        <strong>Ср. цена покупки:</strong> <?php echo e(number_format($productTotal['purchase_avg_price'], 0)); ?> <?php echo e($this->currencySymbol); ?>/кг
+                                                        <strong>Ср. цена покупки:</strong> <?php echo e(number_format($productTotal['purchase_avg_price'], 2)); ?> <?php echo e($this->currencySymbol); ?>/кг
                                                     </div>
                                                 <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                                 <!--[if BLOCK]><![endif]--><?php if($productTotal['sale_avg_price'] > 0): ?>
                                                     <div class="text-green-600 dark:text-green-400">
-                                                        <strong>Ср. цена продажи:</strong> <?php echo e(number_format($productTotal['sale_avg_price'], 0)); ?> <?php echo e($this->currencySymbol); ?>/кг
+                                                        <strong>Ср. цена продажи:</strong> <?php echo e(number_format($productTotal['sale_avg_price'], 2)); ?> <?php echo e($this->currencySymbol); ?>/кг
                                                     </div>
                                                 <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                                 
@@ -456,17 +456,17 @@
                                                 <!-- Итоги операций -->
                                                 <!--[if BLOCK]><![endif]--><?php if($productTotal['purchase_weight'] > 0): ?>
                                                     <div class="text-red-600 dark:text-red-400">
-                                                        Всего покупок: <?php echo e(number_format($productTotal['purchase_weight'], 2)); ?> кг
+                                                        Всего покупок: <?php echo e(number_format($productTotal['purchase_weight'], 3)); ?> кг
                                                     </div>
                                                 <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                                 <!--[if BLOCK]><![endif]--><?php if($productTotal['sale_weight'] > 0): ?>
                                                     <div class="text-green-600 dark:text-green-400">
-                                                        Всего продаж: <?php echo e(number_format($productTotal['sale_weight'], 2)); ?> кг
+                                                        Всего продаж: <?php echo e(number_format($productTotal['sale_weight'], 3)); ?> кг
                                                     </div>
                                                 <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                                 <!--[if BLOCK]><![endif]--><?php if($productTotal['shipment_weight'] > 0): ?>
                                                     <div class="text-purple-600 dark:text-purple-400">
-                                                        <strong>🚚 Всего отгрузок:</strong> <?php echo e(number_format($productTotal['shipment_weight'], 2)); ?> кг
+                                                        <strong>🚚 Всего отгрузок:</strong> <?php echo e(number_format($productTotal['shipment_weight'], 3)); ?> кг
                                                         <?php
                                                             $totalShipmentAmount = 0;
                                                             foreach($reportData['dates'] as $dateInfo) {

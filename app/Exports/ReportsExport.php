@@ -125,9 +125,9 @@ class ReportsExport implements FromArray, WithHeadings, WithStyles, WithTitle, W
             $weightRow = ['  📏 Общий вес (кг)'];
             foreach ($this->reportData['dates'] as $dateInfo) {
                 $productData = $productDates[$dateInfo['date']];
-                $weightRow[] = $productData['total_weight'] > 0 ? number_format($productData['total_weight'], 2) : '-';
+                $weightRow[] = $productData['total_weight'] > 0 ? number_format($productData['total_weight'], 3) : '-';
             }
-            $weightRow[] = $productTotal['total_weight'] > 0 ? number_format($productTotal['total_weight'], 2) : '-';
+            $weightRow[] = $productTotal['total_weight'] > 0 ? number_format($productTotal['total_weight'], 3) : '-';
             $data[] = $weightRow;
             
             // Потрачено (покупка)
@@ -164,9 +164,9 @@ class ReportsExport implements FromArray, WithHeadings, WithStyles, WithTitle, W
                 $avgPurchaseRow = ['  💵 Ср. цена покупки (' . $currency . '/кг)'];
                 foreach ($this->reportData['dates'] as $dateInfo) {
                     $productData = $productDates[$dateInfo['date']];
-                    $avgPurchaseRow[] = $productData['purchase_avg_price'] > 0 ? number_format($productData['purchase_avg_price'], 0) : '-';
+                    $avgPurchaseRow[] = $productData['purchase_avg_price'] > 0 ? number_format($productData['purchase_avg_price'], 2) : '-';
                 }
-                $avgPurchaseRow[] = number_format($productTotal['purchase_avg_price'], 0);
+                $avgPurchaseRow[] = number_format($productTotal['purchase_avg_price'], 2);
                 $data[] = $avgPurchaseRow;
             }
             
@@ -175,9 +175,9 @@ class ReportsExport implements FromArray, WithHeadings, WithStyles, WithTitle, W
                 $avgSaleRow = ['  💶 Ср. цена продажи (' . $currency . '/кг)'];
                 foreach ($this->reportData['dates'] as $dateInfo) {
                     $productData = $productDates[$dateInfo['date']];
-                    $avgSaleRow[] = $productData['sale_avg_price'] > 0 ? number_format($productData['sale_avg_price'], 0) : '-';
+                    $avgSaleRow[] = $productData['sale_avg_price'] > 0 ? number_format($productData['sale_avg_price'], 2) : '-';
                 }
-                $avgSaleRow[] = number_format($productTotal['sale_avg_price'], 0);
+                $avgSaleRow[] = number_format($productTotal['sale_avg_price'], 2);
                 $data[] = $avgSaleRow;
             }
             
@@ -223,10 +223,10 @@ class ReportsExport implements FromArray, WithHeadings, WithStyles, WithTitle, W
                             if ($shipmentDetail['driver_name']) {
                                 $details[] = '👤 ' . $shipmentDetail['driver_name'];
                             }
-                                                         $details[] = '⚖️ Брутто: ' . number_format($shipmentDetail['weight'], 2) . ' кг';
-                             $details[] = '🧽 Чистый: ' . number_format($shipmentDetail['clean_weight'], 2) . ' кг';
+                                                         $details[] = '⚖️ Брутто: ' . number_format($shipmentDetail['weight'], 3) . ' кг';
+                             $details[] = '🧽 Чистый: ' . number_format($shipmentDetail['clean_weight'], 3) . ' кг';
                              if ($shipmentDetail['price_per_kg'] > 0) {
-                                 $details[] = '💵 Цена: ' . number_format($shipmentDetail['price_per_kg'], 0) . ' ' . $currency . '/кг';
+                                 $details[] = '💵 Цена: ' . number_format($shipmentDetail['price_per_kg'], 2) . ' ' . $currency . '/кг';
                              }
                              if ($shipmentDetail['total_amount'] > 0) {
                                  $details[] = '💰 СУММА: ' . number_format($shipmentDetail['total_amount'], 0, ',', ' ') . ' ' . $currency;

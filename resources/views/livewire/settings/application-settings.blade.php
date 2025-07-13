@@ -144,10 +144,13 @@
                             variant="primary" 
                             type="submit" 
                             class="w-full md:w-auto"
-                            wire:loading.attr="disabled"
+                            :disabled="$saving"
                         >
-                            <span wire:loading.remove wire:target="save">{{ __('Сохранить настройки') }}</span>
-                            <span wire:loading wire:target="save">{{ __('Сохранение...') }}</span>
+                            @if($saving)
+                                {{ __('Сохранение...') }}
+                            @else
+                                {{ __('Сохранить настройки') }}
+                            @endif
                         </flux:button>
 
                         <x-action-message class="ml-3" on="settings-updated">

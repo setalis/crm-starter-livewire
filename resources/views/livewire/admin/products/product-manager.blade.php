@@ -254,7 +254,7 @@
                                                 class="w-full border rounded-lg py-2 px-3 text-sm">
                                         </div>
                                         <div class="w-1/4 text-sm text-gray-600">
-                                            = {{ \App\Helpers\Settings::formatPrice(round($elements->find($elementId)->price * $data['percentage'], 2)) }}/кг
+                                            = {{ \App\Helpers\Settings::formatPrice(round($elements->find($elementId)->price * (is_numeric($data['percentage']) ? (float)$data['percentage'] : 0), 2)) }}/кг
                                         </div>
                                         <flux:button flat color="danger" wire:click="removeElement({{ $elementId }})">
                                             <i class="bi bi-trash-fill"></i>

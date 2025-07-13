@@ -12,7 +12,7 @@ class Settings
      */
     public static function companyName(): string
     {
-        return Setting::get('company_name', 'CRM Starter Kit');
+        return Setting::get('company_name', 'Metal CRM');
     }
 
     /**
@@ -20,7 +20,7 @@ class Settings
      */
     public static function currency(): string
     {
-        return Setting::get('currency', 'RUB');
+        return Setting::get('currency', 'UAH');
     }
 
     /**
@@ -46,7 +46,7 @@ class Settings
      */
     public static function timezone(): string
     {
-        return Setting::get('timezone', 'Europe/Moscow');
+        return Setting::get('timezone', 'Europe/Kiev');
     }
 
     /**

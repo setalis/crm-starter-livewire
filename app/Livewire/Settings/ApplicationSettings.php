@@ -17,6 +17,7 @@ class ApplicationSettings extends Component
     public string $timezone = '';
     public $company_logo;
     public ?string $current_logo = null;
+    public bool $saving = false;
 
     protected array $rules = [
         'company_name' => 'required|string|max:255',
@@ -42,14 +43,15 @@ class ApplicationSettings extends Component
 
     private function loadSettings(): void
     {
-        $this->company_name = Setting::get('company_name', 'Моя Компания');
-        $this->currency = Setting::get('currency', 'RUB');
-        $this->timezone = Setting::get('timezone', 'Europe/Moscow');
+        $this->company_name = Setting::get('company_name', 'Metal CRM');
+        $this->currency = Setting::get('currency', 'UAH');
+        $this->timezone = Setting::get('timezone', 'Europe/Kiev');
         $this->current_logo = Setting::get('company_logo');
     }
 
     public function save(): void
     {
+        $this->saving = true;
         $this->validate();
 
         try {
@@ -75,11 +77,17 @@ class ApplicationSettings extends Component
             // Очищаем кеш группы
             Setting::clearGroupCache('company');
 
+            // Отправляем события
             $this->dispatch('settings-updated');
+            $this->dispatch('refresh-clock');
+            
+            // Флеш-сообщение
             session()->flash('success', 'Настройки успешно сохранены');
 
         } catch (\Exception $e) {
             session()->flash('error', 'Произошла ошибка при сохранении настроек: ' . $e->getMessage());
+        } finally {
+            $this->saving = false;
         }
     }
 
@@ -99,16 +107,17 @@ class ApplicationSettings extends Component
     public function getTimezones(): array
     {
         return [
-            'Europe/Moscow' => 'Москва (UTC+3)',
             'Europe/Kiev' => 'Киев (UTC+2)',
             'Europe/Minsk' => 'Минск (UTC+3)',
+            'Europe/Warsaw' => 'Варшава (UTC+1)',
+            'Europe/Berlin' => 'Берлин (UTC+1)',
+            'Europe/Paris' => 'Париж (UTC+1)',
+            'Europe/London' => 'Лондон (UTC+0)',
+            'Europe/Istanbul' => 'Стамбул (UTC+3)',
+            'Asia/Dubai' => 'Дубай (UTC+4)',
             'Asia/Almaty' => 'Алматы (UTC+6)',
             'Asia/Tashkent' => 'Ташкент (UTC+5)',
-            'Asia/Yekaterinburg' => 'Екатеринбург (UTC+5)',
-            'Asia/Novosibirsk' => 'Новосибирск (UTC+7)',
-            'Asia/Krasnoyarsk' => 'Красноярск (UTC+7)',
-            'Asia/Irkutsk' => 'Иркутск (UTC+8)',
-            'Asia/Vladivostok' => 'Владивосток (UTC+10)',
+            'UTC' => 'UTC (UTC+0)',
         ];
     }
 

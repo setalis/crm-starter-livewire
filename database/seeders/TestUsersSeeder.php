@@ -16,19 +16,19 @@ class TestUsersSeeder extends Seeder
         $testUsers = [
             [
                 'name' => 'Тестовый Админ',
-                'email' => 'admin@test.ru',
+                'email' => 'admin@test.ua',
                 'password' => Hash::make('password'),
                 'role' => 'admin'
             ],
             [
                 'name' => 'Тестовый Бухгалтер',
-                'email' => 'accountant@test.ru',
+                'email' => 'accountant@test.ua',
                 'password' => Hash::make('password'),
                 'role' => 'accountant'
             ],
             [
                 'name' => 'Тестовый Менеджер',
-                'email' => 'manager@test.ru',
+                'email' => 'manager@test.ua',
                 'password' => Hash::make('password'),
                 'role' => 'manager'
             ],

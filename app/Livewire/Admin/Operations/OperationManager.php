@@ -51,7 +51,11 @@ class OperationManager extends Component
             }
         } else {
             // This is for /operations index route
-            $this->isModal = false;
+            // НЕ принудительно закрываем модальное окно, если есть сохраненные операции
+            if (empty($this->operations)) {
+                $this->isModal = false;
+            }
+            // Если есть операции, оставляем isModal в текущем состоянии
         }
 
         // Ensure an active tab is set if there are any in the session
@@ -86,6 +90,11 @@ class OperationManager extends Component
     {
         if (!empty($this->operations)) {
             $this->isModal = true;
+            
+            // Убеждаемся, что activeOperationId установлен на существующую операцию
+            if (!$this->activeOperationId || !isset($this->operations[$this->activeOperationId])) {
+                $this->activeOperationId = array_key_first($this->operations);
+            }
         } else {
             // Fallback in case button is shown incorrectly
             $this->addNewOperation('purchase');
@@ -129,19 +138,32 @@ class OperationManager extends Component
         return $this->operations[$this->activeOperationId] ?? null;
     }
 
+    public function smartCloseModal()
+    {
+        // Если операция только одна - удаляем её полностью
+        if (count($this->operations) === 1) {
+            $this->closeCurrentOperation();
+        } else {
+            // Если операций несколько - просто скрываем модальное окно
+            $this->closeModal();
+        }
+    }
+
     public function closeModal()
     {
         // Сбрасываем комментарий
         $this->operationComment = '';
         
-        // Проверяем, есть ли другие операции в сессии
+        // Всегда закрываем модальное окно при закрытии
+        $this->isModal = false;
+        
+        // Если есть операции в сессии, оставляем их для возможности продолжения работы
         if (!empty($this->operations)) {
-            // Если есть операции, остаемся в модальном окне и переключаемся на первую доступную
+            // Устанавливаем активную операцию на первую доступную для последующего открытия
             $this->activeOperationId = array_key_first($this->operations);
         } else {
-            // Если операций нет, закрываем модальное окно и переходим к списку
-            $this->isModal = false;
-            return $this->redirect(route('admin.operations.index'), navigate: true);
+            // Если операций нет, сбрасываем активную операцию
+            $this->activeOperationId = null;
         }
     }
 
@@ -238,6 +260,7 @@ class OperationManager extends Component
             'price_per_unit' => $initialPricePerUnit,
             'price' => 0,
             'custom_price_set' => false,
+            'user_is_editing_price' => false,
             'elements' => [],
         ];
 
@@ -261,6 +284,48 @@ class OperationManager extends Component
         $this->product_to_add = null;
         $this->calculateTotals();
         $this->dispatch('focus-on-weight-input', index: count($this->operations[$this->activeOperationId]['cartItems']) - 1);
+    }
+
+    public function resetPriceToAuto($itemIndex)
+    {
+        if (!$this->activeOperationId || !isset($this->operations[$this->activeOperationId]['cartItems'][$itemIndex])) {
+            return;
+        }
+
+        $item = &$this->operations[$this->activeOperationId]['cartItems'][$itemIndex];
+        
+        if ($item['type'] === 'simple') {
+            $product = Product::with('priceScales')->find($item['product_id']);
+            if ($product) {
+                $weight = (float)($item['weight'] ?? 0);
+                $operationType = $this->operations[$this->activeOperationId]['type'] ?? 'purchase';
+                
+                $autoPricePerUnit = $product->getPriceForWeight($weight, $operationType);
+                $item['price_per_unit'] = $autoPricePerUnit;
+                $item['custom_price_set'] = false;
+                $item['user_is_editing_price'] = false;
+                
+                $this->calculateTotals();
+            }
+        }
+    }
+
+    public function startEditingPrice($itemIndex)
+    {
+        if (!$this->activeOperationId || !isset($this->operations[$this->activeOperationId]['cartItems'][$itemIndex])) {
+            return;
+        }
+
+        $this->operations[$this->activeOperationId]['cartItems'][$itemIndex]['user_is_editing_price'] = true;
+    }
+
+    public function stopEditingPrice($itemIndex)
+    {
+        if (!$this->activeOperationId || !isset($this->operations[$this->activeOperationId]['cartItems'][$itemIndex])) {
+            return;
+        }
+
+        $this->operations[$this->activeOperationId]['cartItems'][$itemIndex]['user_is_editing_price'] = false;
     }
 
     public function removeCartItem($index)
@@ -288,9 +353,15 @@ class OperationManager extends Component
 
             // Round price fields to 2 decimal places upon input
             if ($propertyPath === 'price_per_unit') {
-                data_set($this, $name, round($value, 2));
+                $numericValue = is_numeric($value) ? (float)$value : 0;
+                data_set($this, $name, round($numericValue, 2));
+                
+                // Помечаем, что пользователь начал вводить кастомную цену
+                $this->operations[$operationId]['cartItems'][$itemIndex]['custom_price_set'] = true;
+                $this->operations[$operationId]['cartItems'][$itemIndex]['user_is_editing_price'] = true;
             } elseif (preg_match('/elements\.(\d+)\.price$/', $propertyPath)) {
-                data_set($this, $name, round($value, 2));
+                $numericValue = is_numeric($value) ? (float)$value : 0;
+                data_set($this, $name, round($numericValue, 2));
             }
 
             $this->calculateTotals($operationId, $itemIndex, $propertyPath);
@@ -318,32 +389,37 @@ class OperationManager extends Component
                 $effectiveWeight = $weight - ($weight * $clogging / 100);
                 $currentPricePerUnit = (float)($item['price_per_unit'] ?? 0);
                 
-                // Если изменился вес или засорённость этого товара, проверяем нужно ли обновить цену
-                // ВАЖНО: цена за единицу НЕ меняется от засора, меняется только эффективный вес
-                if ($index == $changedItemIndex && $changedProperty === 'weight') {
+                // Логика обновления цены при изменении веса
+                if ($index == $changedItemIndex && ($changedProperty === 'weight' || $changedProperty === 'clogging')) {
                     // Получаем автоматическую цену для полного веса (без засора)
                     $product = Product::with('priceScales')->find($item['product_id']);
                     if ($product) {
                         $autoPricePerUnit = $product->getPriceForWeight($weight, $operationType);
                         
-                        // Если текущая цена равна старой автоматической цене или это первоначальная загрузка,
-                        // обновляем цену на новую автоматическую
-                        if (!isset($item['custom_price_set']) || $item['custom_price_set'] === false) {
+                        // Обновляем цену ТОЛЬКО если:
+                        // 1. Цена не была установлена пользователем вручную
+                        // 2. Пользователь не редактирует цену в данный момент
+                        // 3. Текущая цена равна старой автоматической цене (с погрешностью)
+                        $isCustomPrice = isset($item['custom_price_set']) && $item['custom_price_set'] === true;
+                        $isUserEditing = isset($item['user_is_editing_price']) && $item['user_is_editing_price'] === true;
+                        
+                        if (!$isCustomPrice && !$isUserEditing) {
                             $item['price_per_unit'] = $autoPricePerUnit;
                             $currentPricePerUnit = $autoPricePerUnit;
                         }
                     }
                 }
                 
-                // Если изменилась цена этого товара, помечаем что цена задана пользователем
+                // Если пользователь изменил цену, помечаем как кастомную
                 if ($index == $changedItemIndex && $changedProperty === 'price_per_unit') {
-                    // Проверяем, отличается ли введенная цена от автоматической
                     $product = Product::with('priceScales')->find($item['product_id']);
                     if ($product) {
                         $autoPricePerUnit = $product->getPriceForWeight($weight, $operationType);
                         // Если цена отличается от автоматической более чем на 0.01, считаем её пользовательской
                         $item['custom_price_set'] = abs($currentPricePerUnit - (float)$autoPricePerUnit) > 0.01;
                     }
+                    // Сбрасываем флаг редактирования после обработки
+                    $item['user_is_editing_price'] = false;
                 }
                 
                 // ИСПРАВЛЕННАЯ ФОРМУЛА: чистый_вес * цена_за_единицу = итоговая_сумма
@@ -400,8 +476,9 @@ class OperationManager extends Component
                 // Возвращаем товары на склад (обратная операция)
                 $this->revertStockChanges($operation);
 
-                // Возвращаем деньги в кассу (обратная операция)
-                $this->revertCashChanges($operation);
+                // Сохраняем старую сумму для расчета разницы
+                $oldAmount = $operation->total_amount;
+                $newAmount = $this->operations[$this->activeOperationId]['totalAmount'];
 
                 // Удаляем старые элементы операции
                 foreach($operation->items as $item) {
@@ -413,8 +490,11 @@ class OperationManager extends Component
                 $operation->update([
                     'user_id' => $activeOp['user_id'],
                     'type' => $activeOp['type'],
-                    'total_amount' => $this->operations[$this->activeOperationId]['totalAmount'],
+                    'total_amount' => $newAmount,
                 ]);
+
+                // Обрабатываем изменения в кассе на основе разницы
+                $this->handleCashChangesForEdit($operation, $oldAmount, $newAmount);
             } else {
                 // Создание новой операции
                 $operation = Operation::create([
@@ -430,37 +510,33 @@ class OperationManager extends Component
                 $operation->save();
             }
 
-            // Создаем транзакцию в кассе
-            $transactionDescription = $operation->type === 'purchase' 
-                ? "Покупка металла (операция {$operation->operation_number})" 
-                : "Продажа металла (операция {$operation->operation_number})";
-
-            if ($isEditing) {
+            // Создаем транзакцию в кассе только для новых операций
+            if (!$isEditing) {
                 $transactionDescription = $operation->type === 'purchase' 
-                    ? "Редактирование покупки металла (операция {$operation->operation_number})" 
-                    : "Редактирование продажи металла (операция {$operation->operation_number})";
-            }
+                    ? "Покупка металла (операция {$operation->operation_number})" 
+                    : "Продажа металла (операция {$operation->operation_number})";
 
-            $transaction = null;
-            if ($operation->type === 'purchase') {
-                // При покупке - снимаем деньги из кассы
-                $transaction = $cashRegister->withdrawMoney(
-                    $operation->total_amount,
-                    $transactionDescription,
-                    $operation->user_id
-                );
-            } else {
-                // При продаже - добавляем деньги в кассу
-                $transaction = $cashRegister->addMoney(
-                    $operation->total_amount,
-                    $transactionDescription,
-                    $operation->user_id
-                );
-            }
+                $transaction = null;
+                if ($operation->type === 'purchase') {
+                    // При покупке - снимаем деньги из кассы
+                    $transaction = $cashRegister->withdrawMoney(
+                        $operation->total_amount,
+                        $transactionDescription,
+                        $operation->user_id
+                    );
+                } else {
+                    // При продаже - добавляем деньги в кассу
+                    $transaction = $cashRegister->addMoney(
+                        $operation->total_amount,
+                        $transactionDescription,
+                        $operation->user_id
+                    );
+                }
 
-            // Привязываем транзакцию к операции
-            if ($transaction) {
-                $transaction->update(['operation_id' => $operation->id]);
+                // Привязываем транзакцию к операции
+                if ($transaction) {
+                    $transaction->update(['operation_id' => $operation->id]);
+                }
             }
 
             foreach ($activeOp['cartItems'] as $cartItem) {
@@ -659,32 +735,66 @@ class OperationManager extends Component
     /**
      * Восстанавливает изменения в кассе
      */
-    private function revertCashChanges(Operation $operation)
+
+
+    /**
+     * Обрабатывает изменения в кассе при редактировании операции
+     */
+    private function handleCashChangesForEdit(Operation $operation, $oldAmount, $newAmount)
     {
         if (!$operation->cashRegister) return;
 
-        $reverseDescription = $operation->type === 'purchase' 
-            ? "Возврат средств при редактировании покупки (операция {$operation->operation_number})" 
-            : "Списание средств при редактировании продажи (операция {$operation->operation_number})";
+        // НЕ удаляем старые транзакции операции, чтобы сохранить историю
+        // Рассчитываем разницу
+        $difference = $newAmount - $oldAmount;
 
-        if ($operation->type === 'purchase') {
-            // При отмене покупки - возвращаем деньги в кассу
-            $operation->cashRegister->addMoney(
-                $operation->total_amount,
-                $reverseDescription,
-                auth()->id()
-            );
-                        } else {
-                    // При отмене продажи - снимаем деньги из кассы
-                    $operation->cashRegister->withdrawMoney(
-                        $operation->total_amount,
-                        $reverseDescription,
+        // Создаем корректировочную транзакцию только на разницу (если есть)
+        if (abs($difference) > 0.01) { // Если есть существенная разница
+            $transaction = null;
+            
+            if ($difference > 0) {
+                // Сумма увеличилась
+                if ($operation->type === 'purchase') {
+                    // Покупка стала дороже - снимаем дополнительные деньги
+                    $transaction = $operation->cashRegister->withdrawMoney(
+                        $difference,
+                        "Доплата при редактировании покупки (операция {$operation->operation_number})",
+                        auth()->id()
+                    );
+                } else {
+                    // Продажа стала дороже - добавляем дополнительные деньги
+                    $transaction = $operation->cashRegister->addMoney(
+                        $difference,
+                        "Доплата при редактировании продажи (операция {$operation->operation_number})",
                         auth()->id()
                     );
                 }
-
-        // Удаляем старые транзакции, связанные с этой операцией
-        $operation->transactions()->delete();
+            } else {
+                // Сумма уменьшилась
+                $difference = abs($difference);
+                if ($operation->type === 'purchase') {
+                    // Покупка стала дешевле - возвращаем лишние деньги
+                    $transaction = $operation->cashRegister->addMoney(
+                        $difference,
+                        "Возврат при редактировании покупки (операция {$operation->operation_number})",
+                        auth()->id()
+                    );
+                } else {
+                    // Продажа стала дешевле - снимаем лишние деньги
+                    $transaction = $operation->cashRegister->withdrawMoney(
+                        $difference,
+                        "Возврат при редактировании продажи (операция {$operation->operation_number})",
+                        auth()->id()
+                    );
+                }
+            }
+            
+            // Привязываем транзакцию к операции
+            if ($transaction) {
+                $transaction->update(['operation_id' => $operation->id]);
+            }
+        }
+        // Если разницы нет, не создаем дополнительную транзакцию
     }
 
     public function edit($id)
@@ -730,6 +840,7 @@ class OperationManager extends Component
                 'price_per_unit' => $pricePerUnit,
                 'price' => $item->price,
                 'custom_price_set' => $customPriceSet,
+                'user_is_editing_price' => false,
                 'elements' => [],
             ];
 
@@ -822,22 +933,31 @@ class OperationManager extends Component
                     ? "Возврат средств при отмене покупки (операция {$operation->operation_number})" 
                     : "Списание средств при отмене продажи (операция {$operation->operation_number})";
 
+                $transaction = null;
                 if ($operation->type === 'purchase') {
                     // При отмене покупки - возвращаем деньги в кассу
-                    $operation->cashRegister->addMoney(
+                    $transaction = $operation->cashRegister->addMoney(
                         $operation->total_amount,
                         $reverseDescription,
                         auth()->id()
                     );
                 } else {
                     // При отмене продажи - снимаем деньги из кассы
-                    $operation->cashRegister->withdrawMoney(
+                    $transaction = $operation->cashRegister->withdrawMoney(
                         $operation->total_amount,
                         $reverseDescription,
                         auth()->id()
                     );
                 }
+                
+                // Привязываем возвратную транзакцию к операции
+                if ($transaction) {
+                    $transaction->update(['operation_id' => $operation->id]);
+                }
             }
+            
+            // НЕ удаляем связанные транзакции кассы, чтобы сохранить историю
+            // Вместо этого создаем возвратную транзакцию выше
             
             // Manually delete related items to be safe
             foreach($operation->items as $item) {
@@ -856,9 +976,7 @@ class OperationManager extends Component
                 ]
             );
             
-            // Удаляем связанные транзакции кассы
-            $operation->transactions()->delete();
-            
+            // Удаляем операцию (каскадно удалятся и транзакции)
             $operation->delete();
         });
 

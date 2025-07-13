@@ -484,7 +484,7 @@
                                         </div>
                                         <div class="text-right">
                                             <span class="font-semibold text-purple-600 dark:text-purple-400 text-lg">
-                                                {{ round($data['quantity'], 3) }}
+                                                {{ round(is_numeric($data['quantity']) ? (float)$data['quantity'] : 0, 3) }}
                                             </span>
                                             <div class="text-xs text-gray-500 dark:text-gray-400">{{ $data['unit'] }}</div>
                                         </div>

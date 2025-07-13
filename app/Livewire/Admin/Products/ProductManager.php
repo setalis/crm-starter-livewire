@@ -290,7 +290,8 @@ class ProductManager extends Component
             $element = $this->elements->find($elementId);
             if ($element) {
                 // Стоимость элемента = цена за 1% * процентное содержание
-                $elementPrice = $element->price * $data['percentage'];
+                $percentage = is_numeric($data['percentage']) ? (float)$data['percentage'] : 0;
+                $elementPrice = $element->price * $percentage;
                 $totalPrice += $elementPrice;
             }
         }

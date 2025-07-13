@@ -18,7 +18,7 @@
 
                 <!--[if BLOCK]><![endif]--><?php if(empty($operations)): ?>
                     <button wire:click="addNewOperation('purchase')" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded my-3">
-                        Create New Operation
+                        Новая операция
                     </button>
                 <?php else: ?>
                     <button wire:click="showOperationsCart" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded my-3">
@@ -608,7 +608,7 @@
 
     <!-- Operation Details Modal -->
     <!--[if BLOCK]><![endif]--><?php if($showOperationDetailsModal && $selectedOperation): ?>
-    <div class="fixed z-30 inset-0 overflow-y-auto ease-out duration-400">
+    <div class="fixed z-50 inset-0 overflow-y-auto ease-out duration-400">
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div class="fixed inset-0 transition-opacity">
                 <div class="absolute inset-0 bg-gray-500 opacity-75"></div>

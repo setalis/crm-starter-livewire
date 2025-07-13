@@ -39,9 +39,9 @@ class DatabaseSeeder extends Seeder
         // Остальные сидеры
         $this->call(SettingsSeeder::class);
         $this->call(UnitSeeder::class);
-        $this->call(ElementSeeder::class);
-        $this->call(ProductSeeder::class);
-        $this->call(CashRegisterSeeder::class);
+        // $this->call(ElementSeeder::class);
+        // $this->call(ProductSeeder::class);
+        // $this->call(CashRegisterSeeder::class);
         // $this->call(RecountSeeder::class);
     }
 }

@@ -123,7 +123,7 @@
                                                     <!-- Общий вес за день -->
                                                     @if($productData['total_weight'] > 0)
                                                         <div class="font-bold text-gray-900 dark:text-gray-100">
-                                                            <strong>Общий вес:</strong> {{ number_format($productData['total_weight'], 2) }} кг
+                                                            <strong>Общий вес:</strong> {{ number_format($productData['total_weight'], 3) }} кг
                                                         </div>
                                                     @endif
 
@@ -153,12 +153,12 @@
                                                     <!-- Средние цены -->
                                                     @if($productData['purchase_avg_price'] > 0)
                                                         <div class="text-blue-600 dark:text-blue-400">
-                                                            <strong>Ср. цена покупки:</strong> {{ number_format($productData['purchase_avg_price'], 0) }} {{ $this->currencySymbol }}/кг
+                                                            <strong>Ср. цена покупки:</strong> {{ number_format($productData['purchase_avg_price'], 2) }} {{ $this->currencySymbol }}/кг
                                                         </div>
                                                     @endif
                                                     @if($productData['sale_avg_price'] > 0)
                                                         <div class="text-green-600 dark:text-green-400">
-                                                            <strong>Ср. цена продажи:</strong> {{ number_format($productData['sale_avg_price'], 0) }} {{ $this->currencySymbol }}/кг
+                                                            <strong>Ср. цена продажи:</strong> {{ number_format($productData['sale_avg_price'], 2) }} {{ $this->currencySymbol }}/кг
                                                         </div>
                                                     @endif
                                                     
@@ -172,17 +172,17 @@
                                                     <!-- Операции -->
                                                     @if($productData['purchase_weight'] > 0)
                                                         <div class="text-red-600 dark:text-red-400">
-                                                            Покупка: {{ number_format($productData['purchase_weight'], 2) }} кг
+                                                            Покупка: {{ number_format($productData['purchase_weight'], 3) }} кг
                                                         </div>
                                                     @endif
                                                     @if($productData['sale_weight'] > 0)
                                                         <div class="text-green-600 dark:text-green-400">
-                                                            Продажа: {{ number_format($productData['sale_weight'], 2) }} кг
+                                                            Продажа: {{ number_format($productData['sale_weight'], 3) }} кг
                                                         </div>
                                                     @endif
                                                     @if($productData['shipment_weight'] > 0)
                                                         <div class="text-purple-600 dark:text-purple-400 border-t pt-1">
-                                                            <strong>🚚 Отгрузка:</strong> {{ number_format($productData['shipment_weight'], 2) }} кг
+                                                            <strong>🚚 Отгрузка:</strong> {{ number_format($productData['shipment_weight'], 3) }} кг
                                                             @if($productData['shipment_amount'] > 0)
                                                                 <br><strong>Сумма:</strong> {{ number_format($productData['shipment_amount'], 0, ',', ' ') }} {{ $this->currencySymbol }}
                                                             @endif
@@ -196,10 +196,10 @@
                                                                         @if($shipment['driver_name'])
                                                                             <div>👤 {{ $shipment['driver_name'] }}</div>
                                                                         @endif
-                                                                        <div>⚖️ Брутто: {{ number_format($shipment['weight'], 2) }} кг</div>
-                                                                        <div>🧽 Чистый: {{ number_format($shipment['clean_weight'], 2) }} кг</div>
+                                                                        <div>⚖️ Брутто: {{ number_format($shipment['weight'], 3) }} кг</div>
+                                                                        <div>🧽 Чистый: {{ number_format($shipment['clean_weight'], 3) }} кг</div>
                                                                         @if($shipment['price_per_kg'] > 0)
-                                                                            <div>💵 Цена: {{ number_format($shipment['price_per_kg'], 0) }} {{ $this->currencySymbol }}/кг</div>
+                                                                            <div>💵 Цена: {{ number_format($shipment['price_per_kg'], 2) }} {{ $this->currencySymbol }}/кг</div>
                                                                         @endif
                                                                         @if($shipment['total_amount'] > 0)
                                                                             <div class="font-bold text-green-600">💰 Сумма: {{ number_format($shipment['total_amount'], 0, ',', ' ') }} {{ $this->currencySymbol }}</div>
@@ -229,7 +229,7 @@
                                                 <!-- Общий вес за период -->
                                                 @if($productTotal['total_weight'] > 0)
                                                     <div class="font-bold text-gray-900 dark:text-gray-100">
-                                                        <strong>Общий вес:</strong> {{ number_format($productTotal['total_weight'], 2) }} кг
+                                                        <strong>Общий вес:</strong> {{ number_format($productTotal['total_weight'], 3) }} кг
                                                     </div>
                                                 @endif
 
@@ -259,12 +259,12 @@
                                                 <!-- Средние цены за период -->
                                                 @if($productTotal['purchase_avg_price'] > 0)
                                                     <div class="text-blue-600 dark:text-blue-400">
-                                                        <strong>Ср. цена покупки:</strong> {{ number_format($productTotal['purchase_avg_price'], 0) }} {{ $this->currencySymbol }}/кг
+                                                        <strong>Ср. цена покупки:</strong> {{ number_format($productTotal['purchase_avg_price'], 2) }} {{ $this->currencySymbol }}/кг
                                                     </div>
                                                 @endif
                                                 @if($productTotal['sale_avg_price'] > 0)
                                                     <div class="text-green-600 dark:text-green-400">
-                                                        <strong>Ср. цена продажи:</strong> {{ number_format($productTotal['sale_avg_price'], 0) }} {{ $this->currencySymbol }}/кг
+                                                        <strong>Ср. цена продажи:</strong> {{ number_format($productTotal['sale_avg_price'], 2) }} {{ $this->currencySymbol }}/кг
                                                     </div>
                                                 @endif
                                                 
@@ -278,17 +278,17 @@
                                                 <!-- Итоги операций -->
                                                 @if($productTotal['purchase_weight'] > 0)
                                                     <div class="text-red-600 dark:text-red-400">
-                                                        Всего покупок: {{ number_format($productTotal['purchase_weight'], 2) }} кг
+                                                        Всего покупок: {{ number_format($productTotal['purchase_weight'], 3) }} кг
                                                     </div>
                                                 @endif
                                                 @if($productTotal['sale_weight'] > 0)
                                                     <div class="text-green-600 dark:text-green-400">
-                                                        Всего продаж: {{ number_format($productTotal['sale_weight'], 2) }} кг
+                                                        Всего продаж: {{ number_format($productTotal['sale_weight'], 3) }} кг
                                                     </div>
                                                 @endif
                                                 @if($productTotal['shipment_weight'] > 0)
                                                     <div class="text-purple-600 dark:text-purple-400">
-                                                        <strong>🚚 Всего отгрузок:</strong> {{ number_format($productTotal['shipment_weight'], 2) }} кг
+                                                        <strong>🚚 Всего отгрузок:</strong> {{ number_format($productTotal['shipment_weight'], 3) }} кг
                                                         @php
                                                             $totalShipmentAmount = 0;
                                                             foreach($reportData['dates'] as $dateInfo) {

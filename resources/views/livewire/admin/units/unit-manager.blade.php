@@ -17,14 +17,14 @@
             <div class="hidden lg:block overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
-                        <tr>
+                    <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Наименование</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Краткое наименование</th>
                             <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
-                        </tr>
+                    </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        @forelse($units as $unit)
+                    @forelse($units as $unit)
                         <tr class="hover:bg-gray-50 transition-colors duration-150" wire:key="{{ $unit->id }}">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-medium text-gray-900">{{ $unit->name }}</div>
@@ -47,7 +47,7 @@
                                 </div>
                             </td>
                         </tr>
-                        @empty
+                    @empty
                         <tr>
                             <td colspan="3" class="py-12 text-center">
                                 <div class="space-y-4">
@@ -63,7 +63,7 @@
                                 </div>
                             </td>
                         </tr>
-                        @endforelse
+                    @endforelse
                     </tbody>
                 </table>
             </div>
@@ -75,10 +75,10 @@
                         <div>Наименование</div>
                         <div>Краткое название</div>
                         <div class="text-center">Действия</div>
-                    </div>
-                </div>
+            </div>
+        </div>
                 <div class="divide-y divide-gray-200">
-                    @forelse($units as $unit)
+            @forelse($units as $unit)
                     <div class="px-4 py-4 hover:bg-gray-50 transition-colors duration-150" wire:key="tablet-{{ $unit->id }}">
                         <div class="grid grid-cols-3 gap-4 items-center">
                             <div class="text-sm font-medium text-gray-900">{{ $unit->name }}</div>
@@ -91,12 +91,12 @@
                                 <div class="flex items-center justify-center space-x-1">
                                     <flux:button size="sm" wire:click="edit({{ $unit->id }})" variant="ghost" class="text-blue-400 hover:text-blue-600" title="Редактировать">
                                         <flux:icon name="pencil" variant="outline" />
-                                    </flux:button>
+                            </flux:button>
                                     <flux:button size="sm" wire:click="delete({{ $unit->id }})" 
                                                 wire:confirm="Вы уверены, что хотите удалить эту единицу измерения?" 
                                                 variant="ghost" class="text-red-400 hover:text-red-600" title="Удалить">
                                         <flux:icon name="trash" variant="outline" />
-                                    </flux:button>
+                            </flux:button>
                                 </div>
                             </div>
                         </div>
@@ -156,9 +156,9 @@
                                 <svg class="h-12 w-12" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
                                 </svg>
-                            </div>
-                            <div class="space-y-1">
-                                <p class="text-lg font-semibold">{{ __('No units found') }}</p>
+                        </div>
+                        <div class="space-y-1">
+                            <p class="text-lg font-semibold">{{ __('No units found') }}</p>
                                 <p class="text-sm text-zinc-500">{{ __('Please create a new unit to get started.') }}</p>
                             </div>
                         </div>

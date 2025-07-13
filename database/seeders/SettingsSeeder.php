@@ -17,19 +17,19 @@ class SettingsSeeder extends Seeder
             // Настройки компании
             [
                 'key' => 'company_name',
-                'value' => 'CRM Starter Kit',
+                'value' => 'Metal CRM',
                 'type' => 'string',
                 'group' => 'company'
             ],
             [
                 'key' => 'currency',
-                'value' => 'RUB',
+                'value' => 'UAH',
                 'type' => 'string',
                 'group' => 'company'
             ],
             [
                 'key' => 'timezone',
-                'value' => 'Europe/Moscow',
+                'value' => 'Europe/Kiev',
                 'type' => 'string',
                 'group' => 'company'
             ],

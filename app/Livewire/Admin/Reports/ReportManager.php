@@ -122,10 +122,10 @@ class ReportManager extends Component
             
             // Инициализируем итоги для продукта
             $totalPurchaseWeight = 0;
-            $totalPurchaseCleanWeight = 0; // Чистый вес для правильного расчета средней цены
+            $totalPurchaseCleanWeight = 0;
             $totalPurchaseAmount = 0;
             $totalSaleWeight = 0;
-            $totalSaleCleanWeight = 0; // Чистый вес для правильного расчета средней цены
+            $totalSaleCleanWeight = 0;
             $totalSaleAmount = 0;
             $totalShipmentWeight = 0;
             $totalClogging = 0;
@@ -137,8 +137,10 @@ class ReportManager extends Component
                 
                 // Суммируем для итогов
                 $totalPurchaseWeight += $dayData['purchase_weight'];
+                $totalPurchaseCleanWeight += $dayData['purchase_clean_weight'];
                 $totalPurchaseAmount += $dayData['purchase_amount'];
                 $totalSaleWeight += $dayData['sale_weight'];
+                $totalSaleCleanWeight += $dayData['sale_clean_weight'];
                 $totalSaleAmount += $dayData['sale_amount'];
                 $totalShipmentWeight += $dayData['shipment_weight'];
                 
@@ -147,20 +149,9 @@ class ReportManager extends Component
                     $totalClogging += $dayData['avg_contamination'] * $dayData['purchase_weight'];
                     $totalCloggingWeight += $dayData['purchase_weight'];
                 }
-                
-                // ИСПРАВЛЕНО: рассчитываем чистый вес для правильной средней цены
-                if ($dayData['avg_contamination'] > 0) {
-                    $purchaseCleanWeight = $dayData['purchase_weight'] * (1 - $dayData['avg_contamination'] / 100);
-                    $saleCleanWeight = $dayData['sale_weight'] * (1 - $dayData['avg_contamination'] / 100);
-                } else {
-                    $purchaseCleanWeight = $dayData['purchase_weight'];
-                    $saleCleanWeight = $dayData['sale_weight'];
-                }
-                $totalPurchaseCleanWeight += $purchaseCleanWeight;
-                $totalSaleCleanWeight += $saleCleanWeight;
             }
             
-            // ИСПРАВЛЕНО: рассчитываем итоги за период для продукта на основе чистого веса
+            // ИСПРАВЛЕНО: рассчитываем средние цены за период на основе чистого веса
             $avgPurchasePrice = $totalPurchaseCleanWeight > 0 ? $totalPurchaseAmount / $totalPurchaseCleanWeight : 0;
             $avgSalePrice = $totalSaleCleanWeight > 0 ? $totalSaleAmount / $totalSaleCleanWeight : 0;
             $avgContamination = $totalCloggingWeight > 0 ? $totalClogging / $totalCloggingWeight : 0;
@@ -427,9 +418,11 @@ class ReportManager extends Component
 
         return [
             'purchase_weight' => $purchaseWeight,
+            'purchase_clean_weight' => $purchaseCleanWeight,
             'purchase_amount' => $purchaseAmount,
             'purchase_avg_price' => $avgPurchasePrice,
             'sale_weight' => $saleWeight,
+            'sale_clean_weight' => $saleCleanWeight,
             'sale_amount' => $saleAmount,
             'sale_avg_price' => $avgSalePrice,
             'shipment_weight' => $shipmentWeight,
