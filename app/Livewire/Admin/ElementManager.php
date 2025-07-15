@@ -27,7 +27,7 @@ class ElementManager extends Component
 
     public ?string $unit_price = null;
 
-    public ?string $stock = null;
+    public ?string $stock = '0';
 
     public string $user_comment = '';
 
@@ -51,6 +51,9 @@ class ElementManager extends Component
         $this->resetErrorBag();
         $this->resetExcept('units');
         $this->user_comment = '';
+        $this->stock = '0'; // Set default stock value
+        $this->price = null;
+        $this->unit_price = null;
         $this->isModal = true;
     }
 
@@ -64,9 +67,20 @@ class ElementManager extends Component
         $this->unit_id = $element->unit_id;
         $this->price = $element->price;
         $this->unit_price = $element->unit_price;
-        $this->stock = $element->stock ?? 0;
+        $this->stock = $element->stock ?? '0';
         $this->user_comment = '';
         $this->isModal = true;
+    }
+
+    public function updatedPrice(): void
+    {
+        // Dynamically calculate unit_price when price changes
+        if ($this->price && is_numeric($this->price)) {
+            // Assuming 100% contains the full element, so unit price = price * 100
+            $this->unit_price = number_format((float)$this->price * 100, 2, '.', '');
+        } else {
+            $this->unit_price = '0.00';
+        }
     }
 
     public function save(): void

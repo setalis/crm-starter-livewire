@@ -204,33 +204,119 @@
             </div>
         </div>
 
-        <flux:modal wire:model="isModal" max-width="lg">
-            <div class="p-4 sm:p-6">
-                <flux:heading class="mb-6">{{ $id ? __('Edit element') : __('Create element') }}</flux:heading>
-                <div class="grid grid-cols-1 gap-4">
-                    <flux:input :label="__('Наименование')" wire:model="name" />
-                    <flux:select :label="__('Единица измерения')" wire:model="unit_id">
-                        @foreach($units as $unit)
-                            <flux:select.option value="{{ $unit->id }}">{{ $unit->name }}</flux:select.option>
-                        @endforeach
-                    </flux:select>
-                    <flux:input :label="__('Стоимость за 1% содержания')" wire:model="price" type="number" step="0.01" />
-                    <flux:input :label="__('Стоимость за единицу измерения')" wire:model="unit_price" type="number" step="0.01" />
-                    <flux:input :label="__('Начальный остаток')" wire:model="stock" type="number" step="0.001" />
-                    
-                    <!-- Комментарий -->
-                    @can('comments.create')
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Комментарий</label>
-                        <textarea wire:model="user_comment" rows="2" placeholder="Добавьте комментарий к элементу..." 
-                                  class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
+                <flux:modal wire:model="isModal" class="!max-w-none w-[90vw] lg:w-[60vw] max-h-[90vh] overflow-auto bg-white dark:bg-zinc-800 border border-transparent dark:border-zinc-700 shadow-lg rounded-xl" variant="bare">
+            <!-- Компактная шапка формы -->
+            <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 sm:px-8 mt-4 mx-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                        <h1 class="text-xl font-bold text-white sm:text-2xl">
+                            @if($id)
+                                Редактирование элемента
+                            @else
+                                Создание элемента
+                            @endif
+                        </h1>
+                        @if($id && $name)
+                            <p class="mt-1 text-blue-100 text-sm">{{ $name }}</p>
+                        @endif
                     </div>
-                    @endcan
+                    <button 
+                        type="button" 
+                        wire:click="$set('isModal', false)"
+                        class="rounded-lg bg-white/10 p-2 text-white hover:bg-white/20 transition-colors duration-200"
+                        title="Закрыть"
+                    >
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
                 </div>
             </div>
-            <div class="flex justify-end gap-x-4 bg-zinc-50 px-4 py-3 dark:bg-zinc-800 sm:px-6">
-                <flux:button flat x-on:click="$wire.isModal = false">{{ __('Cancel') }}</flux:button>
-                <flux:button primary wire:click="save">{{ __('Save') }}</flux:button>
+            
+            <!-- Контент формы -->
+            <div class="mx-4 p-6 bg-white dark:bg-zinc-800">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Left column -->
+                    <div class="space-y-4">
+                        <flux:input :label="__('Наименование')" wire:model="name" />
+                        
+                        <flux:select :label="__('Единица измерения')" wire:model="unit_id">
+                            <flux:select.option value="">-- Выберите единицу измерения --</flux:select.option>
+                            @foreach($units as $unit)
+                                <flux:select.option value="{{ $unit->id }}">{{ $unit->name }}</flux:select.option>
+                            @endforeach
+                        </flux:select>
+
+                        <flux:input 
+                            :label="__('Начальный остаток')" 
+                            wire:model="stock" 
+                            type="number" 
+                            step="0.001" 
+                            min="0"
+                            placeholder="0.000" />                       
+                        
+                    </div>
+                    
+                    <!-- Right column -->
+                    <div class="space-y-4">
+
+                        <flux:field>
+                            <flux:label>{{ __('Стоимость за 1% содержания') }}</flux:label>
+                            <input 
+                                wire:model.live="price" 
+                                type="number" 
+                                step="0.01" 
+                                min="0"
+                                placeholder="0.00"
+                                class="w-full border rounded-lg block disabled:shadow-none dark:shadow-none appearance-none text-base sm:text-sm py-2 h-10 leading-[1.375rem] ps-3 pe-3 bg-white dark:bg-white/10 dark:disabled:bg-white/[7%] text-zinc-700 disabled:text-zinc-500 placeholder-zinc-400 disabled:placeholder-zinc-400/70 dark:text-zinc-300 dark:disabled:text-zinc-400 dark:placeholder-zinc-400 dark:disabled:placeholder-zinc-500 shadow-xs border-zinc-200 border-b-zinc-300/80 disabled:border-b-zinc-200 dark:border-white/10 dark:disabled:border-white/5"
+                                data-flux-control />
+                        </flux:field>
+                        <flux:input 
+                            :label="__('Стоимость за единицу измерения')" 
+                            wire:model="unit_price" 
+                            type="number" 
+                            step="0.01" 
+                            min="0"
+                            placeholder="0.00"
+                            readonly
+                            class="bg-gray-50" />
+                        
+                        
+                        
+                        <!-- Комментарий -->
+                        @can('comments.create')
+                        <flux:field>
+                            <flux:label>{{ __('Комментарий') }}</flux:label>
+                            <flux:textarea 
+                                wire:model="user_comment" 
+                                rows="3" 
+                                placeholder="Добавьте комментарий к элементу..." />
+                        </flux:field>
+                        @endcan
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Футер с кнопками -->
+            <div class="bg-white dark:bg-zinc-800 mx-4 mb-4 px-6 py-3 border-t border-gray-200 dark:border-zinc-700 rounded-b-xl flex items-center justify-end space-x-3">
+                <button 
+                    type="button"
+                    wire:click="$set('isModal', false)"
+                    class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                >
+                    Отменить
+                </button>
+                <button 
+                    type="button"
+                    wire:click="save"
+                    class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                >
+                    @if($id)
+                        Сохранить
+                    @else
+                        Создать
+                    @endif
+                </button>
             </div>
         </flux:modal>
     </div>

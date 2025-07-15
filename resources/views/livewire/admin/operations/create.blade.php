@@ -26,7 +26,7 @@
                 </button>
             </div>
 
-            <form>
+            <form onsubmit="return false;">
                 <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                     @if ($notification)
                         <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4" role="alert">
@@ -81,14 +81,18 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label for="type" class="block text-gray-700 text-sm font-bold mb-2">Type:</label>
-                                        <select wire:model.live="operations.{{ $activeOperationId }}.type" id="type" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                        <select wire:model.live="operations.{{ $activeOperationId }}.type" 
+                                                id="type" 
+                                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                                             <option value="purchase">Purchase</option>
                                             <option value="sale">Sale</option>
                                         </select>
                                     </div>
                                     <div>
                                         <label for="user_id" class="block text-gray-700 text-sm font-bold mb-2">User:</label>
-                                        <select wire:model.live="operations.{{ $activeOperationId }}.user_id" id="user_id" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                        <select wire:model.live="operations.{{ $activeOperationId }}.user_id" 
+                                                id="user_id" 
+                                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                                             <option value="">Select User</option>
                                             @foreach($users as $user)
                                             <option value="{{ $user->id }}">{{ $user->name }}</option>
@@ -147,7 +151,12 @@
                                             <div class="mt-2 grid grid-cols-1 md:grid-cols-4 gap-4">
                                                 <div>
                                                     <label class="text-sm">Вес ({{ $item['unit'] }})</label>
-                                                    <input id="cart-item-weight-{{ $index }}" onfocus="this.select()" type="number" step="0.01" wire:model.live.debounce.700ms="operations.{{ $activeOperationId }}.cartItems.{{ $index }}.weight" class="shadow-sm appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                                    <input id="cart-item-weight-{{ $index }}" 
+                                                           onfocus="this.select()" 
+                                                           type="number" 
+                                                           step="0.01" 
+                                                           wire:model.live.debounce.700ms="operations.{{ $activeOperationId }}.cartItems.{{ $index }}.weight" 
+                                                           class="shadow-sm appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                                                 </div>
                                                 <div>
                                                     <label class="text-sm flex items-center justify-between">
@@ -161,7 +170,8 @@
                                                         @endif
                                                     </label>
                                                     <div class="flex">
-                                                        <input type="number" step="0.01" 
+                                                        <input type="number" 
+                                                               step="0.01" 
                                                                wire:model.live.debounce.1000ms="operations.{{ $activeOperationId }}.cartItems.{{ $index }}.price_per_unit" 
                                                                class="shadow-sm appearance-none border rounded-l w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline @if(isset($item['custom_price_set']) && $item['custom_price_set']) bg-orange-50 border-orange-300 @endif" 
                                                                @if($item['type'] === 'composite') disabled @endif
@@ -191,7 +201,11 @@
                                                 </div>
                                                 <div>
                                                     <label class="text-sm">Засор (%)</label>
-                                                    <input type="number" step="0.01" wire:model.live.debounce.700ms="operations.{{ $activeOperationId }}.cartItems.{{ $index }}.clogging" class="shadow-sm appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" @if($item['type'] === 'composite') disabled @endif>
+                                                    <input type="number" 
+                                                           step="0.01" 
+                                                           wire:model.live.debounce.700ms="operations.{{ $activeOperationId }}.cartItems.{{ $index }}.clogging" 
+                                                           class="shadow-sm appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+                                                           @if($item['type'] === 'composite') disabled @endif>
                                                     @if($item['type'] === 'simple')
                                                         @php
                                                             $weight = (float)($item['weight'] ?? 0);
@@ -219,7 +233,11 @@
                                                         <div class="col-span-1 text-xs text-gray-600">
                                                             {{ \App\Helpers\Settings::formatPrice($element['price'] ?? 0) }}/1%
                                                         </div>
-                                                        <input type="number" step="0.0001" placeholder="%" wire:model.live.debounce.700ms="operations.{{ $activeOperationId }}.cartItems.{{ $index }}.elements.{{ $el_index }}.percentage" class="col-span-1 shadow-sm appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                                        <input type="number" 
+                                                               step="0.0001" 
+                                                               placeholder="%" 
+                                                               wire:model.live.debounce.700ms="operations.{{ $activeOperationId }}.cartItems.{{ $index }}.elements.{{ $el_index }}.percentage" 
+                                                               class="col-span-1 shadow-sm appearance-none border rounded w-full py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                                                         <div class="col-span-1 text-xs text-gray-600 font-medium">
                                                             = {{ \App\Helpers\Settings::formatPrice(($element['price'] ?? 0) * (float)($element['percentage'] ?? 0)) }}/кг
                                                         </div>
@@ -297,7 +315,8 @@
                         <div class="flex flex-col md:flex-row gap-2">
                             <span class="flex w-full rounded-md shadow-sm sm:w-auto">
                                 <button wire:click.prevent="store()" type="button" @if(!isset($operations[$activeOperationId]) || empty($operations[$activeOperationId]['cartItems'])) disabled @endif
-                                    class="inline-flex justify-center w-full rounded-md border border-transparent px-4 py-2 bg-green-600 text-base leading-6 font-medium text-white shadow-sm hover:bg-green-500 focus:outline-none focus:border-green-700 focus:shadow-outline-green transition ease-in-out duration-150 sm:text-sm sm:leading-5 disabled:opacity-50 disabled:cursor-not-allowed">
+                                    class="inline-flex justify-center w-full rounded-md border border-transparent px-4 py-2 bg-green-600 text-base leading-6 font-medium text-white shadow-sm hover:bg-green-500 focus:outline-none focus:border-green-700 focus:shadow-outline-green transition ease-in-out duration-150 sm:text-sm sm:leading-5 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    tabindex="-1">
                                     Save
                                 </button>
                             </span>
@@ -441,4 +460,7 @@
         </div>
     </div>
     @endif
+
+
+
 </div> 

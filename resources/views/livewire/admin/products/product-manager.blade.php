@@ -211,7 +211,11 @@
                             <flux:input :label="__('Засор, %')" wire:model="clogging" type="number" step="0.01" />
                         @endif
                         
-                        <flux:input :label="__('Стоимость продажи')" wire:model="selling_price" type="number" step="0.01" />
+                        @if($type === 'composite')
+                            <flux:input :label="__('Стоимость продажи (необязательно)')" wire:model="selling_price" type="number" step="0.01" />
+                        @else
+                            <flux:input :label="__('Стоимость продажи')" wire:model="selling_price" type="number" step="0.01" />
+                        @endif
                         <flux:input :label="__('Начальный остаток')" wire:model="stock" type="number" step="0.001" />
                         
                         <div class="sm:col-span-2">

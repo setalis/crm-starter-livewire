@@ -141,7 +141,7 @@ class ProductManager extends Component
             'name' => 'required|string|max:255',
             'type' => 'required|in:simple,composite',
             'unit_id' => 'required|exists:units,id',
-            'selling_price' => 'required|numeric',
+            'selling_price' => 'nullable|numeric',
             'photo' => 'nullable|image|max:1024',
             'is_published' => 'boolean',
             'priceScales.*.threshold_kg' => 'required|numeric',
@@ -151,6 +151,7 @@ class ProductManager extends Component
 
         if ($this->type === 'simple') {
             $rules['purchase_price'] = 'required|numeric';
+            $rules['selling_price'] = 'required|numeric'; // Для простых продуктов стоимость продажи обязательна
             $rules['clogging'] = 'nullable|numeric|min:0|max:100';
         }
 

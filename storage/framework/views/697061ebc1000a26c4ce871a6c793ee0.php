@@ -1,12 +1,93 @@
 <div class="space-y-6 p-6">
-    <flux:header class="flex-wrap justify-between gap-4 mb-4">
-        <flux:breadcrumbs>
-            <flux:breadcrumbs.item :href="route('dashboard')">Главная</flux:breadcrumbs.item>
-            <flux:breadcrumbs.item :href="route('admin.warehouse.stock.index')">Склад</flux:breadcrumbs.item>
-            <flux:breadcrumbs.item>Отгрузки</flux:breadcrumbs.item>
-        </flux:breadcrumbs>
+    <?php if (isset($component)) { $__componentOriginale96c14d638c792103c11b984a4ed1896 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginale96c14d638c792103c11b984a4ed1896 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'e60dd9d2c3a62d619c9acb38f20d5aa5::header','data' => ['class' => 'flex-wrap justify-between gap-4 mb-4']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('flux::header'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['class' => 'flex-wrap justify-between gap-4 mb-4']); ?>
+        <?php if (isset($component)) { $__componentOriginalbbbea167ab072e3e3621cf7b736152aa = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalbbbea167ab072e3e3621cf7b736152aa = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'e60dd9d2c3a62d619c9acb38f20d5aa5::breadcrumbs.index','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('flux::breadcrumbs'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+            <?php if (isset($component)) { $__componentOriginalced986e8ff6641d3797206c3198c2b83 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalced986e8ff6641d3797206c3198c2b83 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'e60dd9d2c3a62d619c9acb38f20d5aa5::breadcrumbs.item','data' => ['href' => route('dashboard')]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('flux::breadcrumbs.item'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['href' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(route('dashboard'))]); ?>Главная <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginalced986e8ff6641d3797206c3198c2b83)): ?>
+<?php $attributes = $__attributesOriginalced986e8ff6641d3797206c3198c2b83; ?>
+<?php unset($__attributesOriginalced986e8ff6641d3797206c3198c2b83); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalced986e8ff6641d3797206c3198c2b83)): ?>
+<?php $component = $__componentOriginalced986e8ff6641d3797206c3198c2b83; ?>
+<?php unset($__componentOriginalced986e8ff6641d3797206c3198c2b83); ?>
+<?php endif; ?>
+            <?php if (isset($component)) { $__componentOriginalced986e8ff6641d3797206c3198c2b83 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalced986e8ff6641d3797206c3198c2b83 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'e60dd9d2c3a62d619c9acb38f20d5aa5::breadcrumbs.item','data' => ['href' => route('admin.warehouse.stock.index')]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('flux::breadcrumbs.item'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['href' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(route('admin.warehouse.stock.index'))]); ?>Склад <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginalced986e8ff6641d3797206c3198c2b83)): ?>
+<?php $attributes = $__attributesOriginalced986e8ff6641d3797206c3198c2b83; ?>
+<?php unset($__attributesOriginalced986e8ff6641d3797206c3198c2b83); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalced986e8ff6641d3797206c3198c2b83)): ?>
+<?php $component = $__componentOriginalced986e8ff6641d3797206c3198c2b83; ?>
+<?php unset($__componentOriginalced986e8ff6641d3797206c3198c2b83); ?>
+<?php endif; ?>
+            <?php if (isset($component)) { $__componentOriginalced986e8ff6641d3797206c3198c2b83 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalced986e8ff6641d3797206c3198c2b83 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'e60dd9d2c3a62d619c9acb38f20d5aa5::breadcrumbs.item','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('flux::breadcrumbs.item'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>Отгрузки <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginalced986e8ff6641d3797206c3198c2b83)): ?>
+<?php $attributes = $__attributesOriginalced986e8ff6641d3797206c3198c2b83; ?>
+<?php unset($__attributesOriginalced986e8ff6641d3797206c3198c2b83); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalced986e8ff6641d3797206c3198c2b83)): ?>
+<?php $component = $__componentOriginalced986e8ff6641d3797206c3198c2b83; ?>
+<?php unset($__componentOriginalced986e8ff6641d3797206c3198c2b83); ?>
+<?php endif; ?>
+         <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginalbbbea167ab072e3e3621cf7b736152aa)): ?>
+<?php $attributes = $__attributesOriginalbbbea167ab072e3e3621cf7b736152aa; ?>
+<?php unset($__attributesOriginalbbbea167ab072e3e3621cf7b736152aa); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalbbbea167ab072e3e3621cf7b736152aa)): ?>
+<?php $component = $__componentOriginalbbbea167ab072e3e3621cf7b736152aa; ?>
+<?php unset($__componentOriginalbbbea167ab072e3e3621cf7b736152aa); ?>
+<?php endif; ?>
         <div class="flex justify-end w-full mt-4 gap-2">
-            @can('shipments.export')
+            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('shipments.export')): ?>
             <div class="relative inline-block text-left" x-data="{ open: false }">
                 <button type="button" @click="open = !open" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm leading-5 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                     <svg class="-ml-1 mr-2 h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
@@ -46,15 +127,24 @@
                     </div>
                 </div>
             </div>
-            @endcan
-            @can('shipments.create')
+            <?php endif; ?>
+            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('shipments.create')): ?>
             <button type="button" wire:click="openModal" class="inline-flex items-center px-6 py-2 border border-transparent text-base leading-6 font-semibold rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                 <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
                 Создать отгрузку
             </button>
-            @endcan
+            <?php endif; ?>
         </div>
-    </flux:header>
+     <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginale96c14d638c792103c11b984a4ed1896)): ?>
+<?php $attributes = $__attributesOriginale96c14d638c792103c11b984a4ed1896; ?>
+<?php unset($__attributesOriginale96c14d638c792103c11b984a4ed1896); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginale96c14d638c792103c11b984a4ed1896)): ?>
+<?php $component = $__componentOriginale96c14d638c792103c11b984a4ed1896; ?>
+<?php unset($__componentOriginale96c14d638c792103c11b984a4ed1896); ?>
+<?php endif; ?>
 
     <!-- Фильтры -->
     <div class="flex flex-wrap gap-4 mb-4">
@@ -93,84 +183,87 @@
                 </tr>
             </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                @forelse($shipments as $shipment)
+                <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $shipments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $shipment): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                         <tr class="hover:bg-gray-50 transition-colors duration-150">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#{{ $shipment->id }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#<?php echo e($shipment->id); ?></td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            <div>{{ $shipment->created_at->format('d.m.Y') }}</div>
-                            <div class="text-xs text-gray-500">{{ $shipment->created_at->format('H:i') }}</div>
+                            <div><?php echo e($shipment->created_at->format('d.m.Y')); ?></div>
+                            <div class="text-xs text-gray-500"><?php echo e($shipment->created_at->format('H:i')); ?></div>
                         </td>
                             <td class="px-6 py-4 text-sm text-gray-900">
-                            <div class="font-medium">{{ $shipment->company ?: 'Не указано' }}</div>
-                            @if($shipment->car_number)
-                                <div class="text-xs text-gray-500">{{ $shipment->car_number }}</div>
-                            @endif
+                            <div class="font-medium"><?php echo e($shipment->company ?: 'Не указано'); ?></div>
+                            <!--[if BLOCK]><![endif]--><?php if($shipment->car_number): ?>
+                                <div class="text-xs text-gray-500"><?php echo e($shipment->car_number); ?></div>
+                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                         </td>
                             <td class="px-6 py-4 text-sm">
                             <div class="flex flex-wrap gap-1">
-                                @foreach($shipment->items as $item)
+                                <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $shipment->items; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <span class="inline-block bg-blue-100 text-blue-800 rounded px-2 py-0.5 text-xs">
-                                        {{ $products->find($item->product_id)->name ?? '' }} ({{ $item->weight }} кг)
+                                        <?php echo e($products->find($item->product_id)->name ?? ''); ?> (<?php echo e($item->weight); ?> кг)
                                     </span>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                             </div>
                         </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm">
-                            @if($shipment->stage === 'confirmed')
-                                @php $revenue = $this->getShipmentRevenue($shipment); @endphp
+                            <!--[if BLOCK]><![endif]--><?php if($shipment->stage === 'confirmed'): ?>
+                                <?php $revenue = $this->getShipmentRevenue($shipment); ?>
                                 <span class="font-semibold text-blue-600">
-                                        {{ \App\Helpers\Settings::formatPrice($revenue) }}
+                                        <?php echo e(\App\Helpers\Settings::formatPrice($revenue)); ?>
+
                                 </span>
-                            @else
+                            <?php else: ?>
                                 <span class="text-gray-400">—</span>
-                            @endif
+                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                         </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm">
-                            @if($shipment->stage === 'confirmed')
-                                @php $profit = $this->getShipmentProfit($shipment); @endphp
-                                <span class="font-semibold {{ $profit >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                        {{ \App\Helpers\Settings::formatPrice($profit) }}
+                            <!--[if BLOCK]><![endif]--><?php if($shipment->stage === 'confirmed'): ?>
+                                <?php $profit = $this->getShipmentProfit($shipment); ?>
+                                <span class="font-semibold <?php echo e($profit >= 0 ? 'text-green-600' : 'text-red-600'); ?>">
+                                        <?php echo e(\App\Helpers\Settings::formatPrice($profit)); ?>
+
                                 </span>
-                            @else
+                            <?php else: ?>
                                 <span class="text-gray-400">—</span>
-                            @endif
+                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                         </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm">
                             <div class="flex flex-col gap-1">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $shipment->stage === 'draft' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800' }}">
-                                    {{ $shipment->stage === 'draft' ? 'Черновик' : 'Подтверждено' }}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <?php echo e($shipment->stage === 'draft' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'); ?>">
+                                    <?php echo e($shipment->stage === 'draft' ? 'Черновик' : 'Подтверждено'); ?>
+
                                 </span>
-                                @if($shipment->stage === 'draft')
-                                    @can('shipments.confirm')
-                                    <button type="button" wire:click="openConfirmModal({{ $shipment->id }})" class="inline-flex items-center px-2 py-1 border border-transparent text-xs leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" title="Внести фактические данные">
+                                <!--[if BLOCK]><![endif]--><?php if($shipment->stage === 'draft'): ?>
+                                    <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('shipments.confirm')): ?>
+                                    <button type="button" wire:click="openConfirmModal(<?php echo e($shipment->id); ?>)" class="inline-flex items-center px-2 py-1 border border-transparent text-xs leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" title="Внести фактические данные">
                                         <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
                                         Внести факт
                                     </button>
-                                    @endcan
-                                @endif
+                                    <?php endif; ?>
+                                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                             </div>
                         </td>
                             <td class="px-6 py-4 whitespace-nowrap text-center">
                                 <div class="flex items-center justify-center gap-1">
-                                    <button type="button" wire:click="openDetailsModal({{ $shipment->id }})" class="inline-flex items-center justify-center w-8 h-8 rounded-full text-blue-600 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500 transition-colors duration-150" title="Подробнее">
+                                    <button type="button" wire:click="openDetailsModal(<?php echo e($shipment->id); ?>)" class="inline-flex items-center justify-center w-8 h-8 rounded-full text-blue-600 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500 transition-colors duration-150" title="Подробнее">
                                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                                 </button>
-                                @can('shipments.edit')
-                                    <button type="button" wire:click="openModal({{ $shipment->id }})" class="inline-flex items-center justify-center w-8 h-8 rounded-full text-yellow-600 bg-yellow-100 hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-yellow-500 transition-colors duration-150" title="Редактировать">
+                                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('shipments.edit')): ?>
+                                    <button type="button" wire:click="openModal(<?php echo e($shipment->id); ?>)" class="inline-flex items-center justify-center w-8 h-8 rounded-full text-yellow-600 bg-yellow-100 hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-yellow-500 transition-colors duration-150" title="Редактировать">
                                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                                 </button>
-                                @endcan
-                                @if($shipment->stage === 'confirmed')
-                                    @can('shipments.confirm')
-                                        <button type="button" wire:click="openConfirmModal({{ $shipment->id }})" class="inline-flex items-center justify-center w-8 h-8 rounded-full text-green-600 bg-green-100 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-green-500 transition-colors duration-150" title="Редактировать фактические данные">
+                                <?php endif; ?>
+                                <!--[if BLOCK]><![endif]--><?php if($shipment->stage === 'confirmed'): ?>
+                                    <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('shipments.confirm')): ?>
+                                        <button type="button" wire:click="openConfirmModal(<?php echo e($shipment->id); ?>)" class="inline-flex items-center justify-center w-8 h-8 rounded-full text-green-600 bg-green-100 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-green-500 transition-colors duration-150" title="Редактировать фактические данные">
                                         <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                                     </button>
-                                    @endcan
-                                @endif
+                                    <?php endif; ?>
+                                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                             </div>
                         </td>
                     </tr>
-                @empty
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>
                         <td colspan="8" class="py-8 text-center text-zinc-400 dark:text-zinc-500">
                             <div class="flex flex-col items-center">
@@ -182,7 +275,7 @@
                             </div>
                         </td>
                     </tr>
-                @endforelse
+                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
             </tbody>
         </table>
         </div>
@@ -199,66 +292,67 @@
                 </div>
             </div>
             <div class="divide-y divide-gray-200">
-                @forelse($shipments as $shipment)
+                <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $shipments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $shipment): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                 <div class="px-4 py-4 hover:bg-gray-50 transition-colors duration-150">
                     <div class="grid grid-cols-5 gap-4 items-center">
                         <div>
-                            <div class="text-sm font-medium text-gray-900">#{{ $shipment->id }}</div>
-                            <div class="text-xs text-gray-500">{{ $shipment->created_at->format('d.m.Y H:i') }}</div>
+                            <div class="text-sm font-medium text-gray-900">#<?php echo e($shipment->id); ?></div>
+                            <div class="text-xs text-gray-500"><?php echo e($shipment->created_at->format('d.m.Y H:i')); ?></div>
                         </div>
                         <div>
-                            <div class="text-sm font-medium text-gray-900">{{ $shipment->company ?: 'Не указано' }}</div>
-                            @if($shipment->car_number)
-                                <div class="text-xs text-gray-500">{{ $shipment->car_number }}</div>
-                            @endif
-                            <div class="text-xs text-blue-600 mt-1">{{ $shipment->items->count() }} поз.</div>
+                            <div class="text-sm font-medium text-gray-900"><?php echo e($shipment->company ?: 'Не указано'); ?></div>
+                            <!--[if BLOCK]><![endif]--><?php if($shipment->car_number): ?>
+                                <div class="text-xs text-gray-500"><?php echo e($shipment->car_number); ?></div>
+                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                            <div class="text-xs text-blue-600 mt-1"><?php echo e($shipment->items->count()); ?> поз.</div>
                         </div>
                         <div>
-                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $shipment->stage === 'draft' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800' }}">
-                                {{ $shipment->stage === 'draft' ? 'Черновик' : 'Подтверждено' }}
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium <?php echo e($shipment->stage === 'draft' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'); ?>">
+                                <?php echo e($shipment->stage === 'draft' ? 'Черновик' : 'Подтверждено'); ?>
+
                             </span>
-                            @if($shipment->stage === 'draft')
-                                @can('shipments.confirm')
-                                <button type="button" wire:click="openConfirmModal({{ $shipment->id }})" class="mt-1 text-xs text-blue-600 hover:text-blue-800">
+                            <!--[if BLOCK]><![endif]--><?php if($shipment->stage === 'draft'): ?>
+                                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('shipments.confirm')): ?>
+                                <button type="button" wire:click="openConfirmModal(<?php echo e($shipment->id); ?>)" class="mt-1 text-xs text-blue-600 hover:text-blue-800">
                                     Внести факт
                                 </button>
-                                @endcan
-                            @endif
+                                <?php endif; ?>
+                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                         </div>
                         <div class="text-right">
-                            @if($shipment->stage === 'confirmed')
-                                @php 
+                            <!--[if BLOCK]><![endif]--><?php if($shipment->stage === 'confirmed'): ?>
+                                <?php 
                                     $revenue = $this->getShipmentRevenue($shipment);
                                     $profit = $this->getShipmentProfit($shipment);
-                                @endphp
-                                <div class="text-sm font-medium text-blue-600">{{ \App\Helpers\Settings::formatPrice($revenue) }}</div>
-                                <div class="text-xs {{ $profit >= 0 ? 'text-green-600' : 'text-red-600' }}">{{ \App\Helpers\Settings::formatPrice($profit) }}</div>
-                            @else
+                                ?>
+                                <div class="text-sm font-medium text-blue-600"><?php echo e(\App\Helpers\Settings::formatPrice($revenue)); ?></div>
+                                <div class="text-xs <?php echo e($profit >= 0 ? 'text-green-600' : 'text-red-600'); ?>"><?php echo e(\App\Helpers\Settings::formatPrice($profit)); ?></div>
+                            <?php else: ?>
                                 <span class="text-gray-400 text-sm">—</span>
-                            @endif
+                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                         </div>
                         <div class="text-center">
                             <div class="flex items-center justify-center gap-1">
-                                <button type="button" wire:click="openDetailsModal({{ $shipment->id }})" class="inline-flex items-center justify-center w-7 h-7 rounded-full text-blue-600 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500" title="Подробнее">
+                                <button type="button" wire:click="openDetailsModal(<?php echo e($shipment->id); ?>)" class="inline-flex items-center justify-center w-7 h-7 rounded-full text-blue-600 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500" title="Подробнее">
                                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                                 </button>
-                                @can('shipments.edit')
-                                <button type="button" wire:click="openModal({{ $shipment->id }})" class="inline-flex items-center justify-center w-7 h-7 rounded-full text-yellow-600 bg-yellow-100 hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-yellow-500" title="Редактировать">
+                                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('shipments.edit')): ?>
+                                <button type="button" wire:click="openModal(<?php echo e($shipment->id); ?>)" class="inline-flex items-center justify-center w-7 h-7 rounded-full text-yellow-600 bg-yellow-100 hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-yellow-500" title="Редактировать">
                                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                                 </button>
-                                @endcan
-                                @if($shipment->stage === 'confirmed')
-                                    @can('shipments.confirm')
-                                    <button type="button" wire:click="openConfirmModal({{ $shipment->id }})" class="inline-flex items-center justify-center w-7 h-7 rounded-full text-green-600 bg-green-100 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-green-500" title="Редактировать фактические данные">
+                                <?php endif; ?>
+                                <!--[if BLOCK]><![endif]--><?php if($shipment->stage === 'confirmed'): ?>
+                                    <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('shipments.confirm')): ?>
+                                    <button type="button" wire:click="openConfirmModal(<?php echo e($shipment->id); ?>)" class="inline-flex items-center justify-center w-7 h-7 rounded-full text-green-600 bg-green-100 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-green-500" title="Редактировать фактические данные">
                                         <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                                     </button>
-                                    @endcan
-                                @endif
+                                    <?php endif; ?>
+                                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                             </div>
                         </div>
                     </div>
                 </div>
-                @empty
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                 <div class="px-4 py-8 text-center text-zinc-400">
                     <div class="flex flex-col items-center">
                         <svg class="h-12 w-12 text-zinc-300 mb-2" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24">
@@ -268,23 +362,24 @@
                         <p class="text-xs">Создайте первую отгрузку</p>
                     </div>
                 </div>
-                @endforelse
+                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
             </div>
         </div>
 
         <!-- Мобильная версия (карточки) -->
         <div class="md:hidden">
             <div class="divide-y divide-gray-200">
-                @forelse($shipments as $shipment)
+                <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $shipments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $shipment): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                 <div class="p-4 space-y-3">
                     <!-- Заголовок карточки -->
                     <div class="flex items-center justify-between">
                         <div>
-                            <div class="text-sm font-medium text-gray-900">#{{ $shipment->id }}</div>
-                            <div class="text-xs text-gray-500">{{ $shipment->created_at->format('d.m.Y H:i') }}</div>
+                            <div class="text-sm font-medium text-gray-900">#<?php echo e($shipment->id); ?></div>
+                            <div class="text-xs text-gray-500"><?php echo e($shipment->created_at->format('d.m.Y H:i')); ?></div>
                         </div>
-                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $shipment->stage === 'draft' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800' }}">
-                            {{ $shipment->stage === 'draft' ? 'Черновик' : 'Подтверждено' }}
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium <?php echo e($shipment->stage === 'draft' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'); ?>">
+                            <?php echo e($shipment->stage === 'draft' ? 'Черновик' : 'Подтверждено'); ?>
+
                         </span>
                     </div>
 
@@ -292,20 +387,20 @@
                     <div class="space-y-2">
                         <div>
                             <span class="text-gray-500 text-sm">Предприятие:</span>
-                            <div class="font-medium text-gray-900">{{ $shipment->company ?: 'Не указано' }}</div>
-                            @if($shipment->car_number)
-                                <div class="text-xs text-gray-500">{{ $shipment->car_number }}</div>
-                            @endif
+                            <div class="font-medium text-gray-900"><?php echo e($shipment->company ?: 'Не указано'); ?></div>
+                            <!--[if BLOCK]><![endif]--><?php if($shipment->car_number): ?>
+                                <div class="text-xs text-gray-500"><?php echo e($shipment->car_number); ?></div>
+                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                         </div>
                         
                         <div>
-                            <span class="text-gray-500 text-sm">Позиции ({{ $shipment->items->count() }}):</span>
+                            <span class="text-gray-500 text-sm">Позиции (<?php echo e($shipment->items->count()); ?>):</span>
                             <div class="flex flex-wrap gap-1 mt-1">
-                                @foreach($shipment->items as $item)
+                                <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $shipment->items; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <span class="inline-block bg-blue-100 text-blue-800 rounded px-2 py-0.5 text-xs">
-                                        {{ $products->find($item->product_id)->name ?? '' }} ({{ $item->weight }} кг)
+                                        <?php echo e($products->find($item->product_id)->name ?? ''); ?> (<?php echo e($item->weight); ?> кг)
                                     </span>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                             </div>
                         </div>
                     </div>
@@ -313,44 +408,44 @@
                     <!-- Финансы и действия -->
                     <div class="flex items-center justify-between pt-2 border-t border-gray-100">
                         <div>
-                            @if($shipment->stage === 'confirmed')
-                                @php 
+                            <!--[if BLOCK]><![endif]--><?php if($shipment->stage === 'confirmed'): ?>
+                                <?php 
                                     $revenue = $this->getShipmentRevenue($shipment);
                                     $profit = $this->getShipmentProfit($shipment);
-                                @endphp
-                                <div class="text-sm font-medium text-blue-600">{{ \App\Helpers\Settings::formatPrice($revenue) }}</div>
-                                <div class="text-xs {{ $profit >= 0 ? 'text-green-600' : 'text-red-600' }}">{{ \App\Helpers\Settings::formatPrice($profit) }}</div>
-                            @else
+                                ?>
+                                <div class="text-sm font-medium text-blue-600"><?php echo e(\App\Helpers\Settings::formatPrice($revenue)); ?></div>
+                                <div class="text-xs <?php echo e($profit >= 0 ? 'text-green-600' : 'text-red-600'); ?>"><?php echo e(\App\Helpers\Settings::formatPrice($profit)); ?></div>
+                            <?php else: ?>
                                 <span class="text-gray-400 text-sm">Финансы не рассчитаны</span>
-                            @endif
+                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                         </div>
                         <div class="flex items-center space-x-2">
-                            @if($shipment->stage === 'draft')
-                                @can('shipments.confirm')
-                                <button type="button" wire:click="openConfirmModal({{ $shipment->id }})" class="text-xs text-blue-600 hover:text-blue-800 px-2 py-1 border border-blue-200 rounded">
+                            <!--[if BLOCK]><![endif]--><?php if($shipment->stage === 'draft'): ?>
+                                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('shipments.confirm')): ?>
+                                <button type="button" wire:click="openConfirmModal(<?php echo e($shipment->id); ?>)" class="text-xs text-blue-600 hover:text-blue-800 px-2 py-1 border border-blue-200 rounded">
                                     Внести факт
                                 </button>
-                                @endcan
-                            @endif
-                            <button type="button" wire:click="openDetailsModal({{ $shipment->id }})" class="inline-flex items-center justify-center w-8 h-8 rounded-full text-blue-600 bg-blue-100 hover:bg-blue-200" title="Подробнее">
+                                <?php endif; ?>
+                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                            <button type="button" wire:click="openDetailsModal(<?php echo e($shipment->id); ?>)" class="inline-flex items-center justify-center w-8 h-8 rounded-full text-blue-600 bg-blue-100 hover:bg-blue-200" title="Подробнее">
                                 <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                             </button>
-                            @can('shipments.edit')
-                            <button type="button" wire:click="openModal({{ $shipment->id }})" class="inline-flex items-center justify-center w-8 h-8 rounded-full text-yellow-600 bg-yellow-100 hover:bg-yellow-200" title="Редактировать">
+                            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('shipments.edit')): ?>
+                            <button type="button" wire:click="openModal(<?php echo e($shipment->id); ?>)" class="inline-flex items-center justify-center w-8 h-8 rounded-full text-yellow-600 bg-yellow-100 hover:bg-yellow-200" title="Редактировать">
                                 <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                             </button>
-                            @endcan
-                            @if($shipment->stage === 'confirmed')
-                                @can('shipments.confirm')
-                                <button type="button" wire:click="openConfirmModal({{ $shipment->id }})" class="inline-flex items-center justify-center w-8 h-8 rounded-full text-green-600 bg-green-100 hover:bg-green-200" title="Редактировать фактические данные">
+                            <?php endif; ?>
+                            <!--[if BLOCK]><![endif]--><?php if($shipment->stage === 'confirmed'): ?>
+                                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('shipments.confirm')): ?>
+                                <button type="button" wire:click="openConfirmModal(<?php echo e($shipment->id); ?>)" class="inline-flex items-center justify-center w-8 h-8 rounded-full text-green-600 bg-green-100 hover:bg-green-200" title="Редактировать фактические данные">
                                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                                 </button>
-                                @endcan
-                            @endif
+                                <?php endif; ?>
+                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                         </div>
                     </div>
                 </div>
-                @empty
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                 <div class="p-4 text-center text-zinc-400">
                     <div class="flex flex-col items-center">
                         <svg class="h-12 w-12 text-zinc-300 mb-2" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24">
@@ -360,13 +455,13 @@
                         <p class="text-xs">Создайте первую отгрузку</p>
                     </div>
                 </div>
-                @endforelse
+                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
             </div>
         </div>
     </div>
 
     <!-- Модальное окно создания отгрузки -->
-    @if($isModal)
+    <!--[if BLOCK]><![endif]--><?php if($isModal): ?>
         <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
             <div class="bg-white dark:bg-zinc-800 rounded-lg shadow-xl w-full max-w-3xl p-6 relative">
                 <button type="button" wire:click="closeModal" class="absolute top-4 right-4 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200">
@@ -377,42 +472,43 @@
                     <div class="border-b border-zinc-200 dark:border-zinc-700 pb-4 mb-4">
                         <div class="flex items-center justify-between mb-2">
                             <h4 class="text-lg font-semibold text-gray-900 dark:text-white">Позиции отгрузки</h4>
-                            @if($editingItemIndex !== null)
+                            <!--[if BLOCK]><![endif]--><?php if($editingItemIndex !== null): ?>
                                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                                     <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                                    Редактирование позиции #{{ $editingItemIndex + 1 }}
+                                    Редактирование позиции #<?php echo e($editingItemIndex + 1); ?>
+
                                 </span>
-                            @endif
+                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-5 gap-2 mb-2">
                             <select wire:model.live="product_id" class="col-span-2 rounded-md border-zinc-300 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 focus:border-blue-500 focus:ring focus:ring-blue-200/50 dark:focus:border-blue-400 dark:focus:ring-blue-900/40">
                                 <option value="">Выберите металл</option>
-                                @foreach($products as $product)
-                                    <option value="{{ $product->id }}">
-                                        {{ $product->name }} (остаток: {{ $product->stock }} кг)
+                                <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $products; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $product): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($product->id); ?>">
+                                        <?php echo e($product->name); ?> (остаток: <?php echo e($product->stock); ?> кг)
                                     </option>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                             </select>
                             <div class="relative">
                                 <input type="number" step="0.01" min="0" wire:model.live="weight" placeholder="Вес, кг" class="w-full rounded-md border-zinc-300 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 focus:border-blue-500 focus:ring focus:ring-blue-200/50 dark:focus:border-blue-400 dark:focus:ring-blue-900/40">
-                                @if($product_id && $weight)
-                                    @php
+                                <?php if($product_id && $weight): ?>
+                                    <?php
                                         $selectedProduct = $products->find($product_id);
                                         $available = $selectedProduct ? $selectedProduct->stock : 0;
-                                    @endphp
-                                    @if($weight > $available)
+                                    ?>
+                                    <!--[if BLOCK]><![endif]--><?php if($weight > $available): ?>
                                         <div class="absolute -bottom-5 left-0 text-xs text-red-600">
-                                            Недостаточно на складе ({{ $available }} кг)
+                                            Недостаточно на складе (<?php echo e($available); ?> кг)
                                         </div>
-                                    @endif
-                                @endif
+                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                             </div>
                             <select wire:model.live="writeoff_type" class="rounded-md border-zinc-300 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 focus:border-blue-500 focus:ring focus:ring-blue-200/50 dark:focus:border-blue-400 dark:focus:ring-blue-900/40">
                                 <option value="partial">С остатком</option>
                                 <option value="full">В ноль</option>
                             </select>
                             <input type="number" step="0.01" min="0" wire:model.live="stock_after" placeholder="Остаток на складе" class="rounded-md border-zinc-300 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 focus:border-blue-500 focus:ring focus:ring-blue-200/50 dark:focus:border-blue-400 dark:focus:ring-blue-900/40">
-                            @if($editingItemIndex !== null)
+                            <!--[if BLOCK]><![endif]--><?php if($editingItemIndex !== null): ?>
                                 <div class="flex gap-2">
                                     <button type="button" wire:click="updateShipmentItem" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
                                         <svg class="-ml-0.5 mr-2 h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
@@ -423,12 +519,12 @@
                                         Отмена
                                     </button>
                                 </div>
-                            @else
+                            <?php else: ?>
                                 <button type="button" wire:click="addShipmentItem" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                     <svg class="-ml-0.5 mr-2 h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
                                     Добавить
                                 </button>
-                            @endif
+                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                         </div>
                         <div class="overflow-x-auto mt-4">
                             <table class="min-w-full table-auto rounded-lg overflow-hidden">
@@ -444,9 +540,9 @@
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-zinc-200 dark:divide-zinc-700">
-                                    @php $totalCost = 0; @endphp
-                                    @forelse($shipmentItems as $index => $item)
-                                        @php
+                                    <?php $totalCost = 0; ?>
+                                    <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $shipmentItems; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                                        <?php
                                             $product = $products->find($item['product_id']);
                                             $purchase = $product?->average_purchase_price ?? 0;
                                             $clogging = $product?->clogging ?? 0;
@@ -455,57 +551,58 @@
                                             $cleanWeightCost = $item['weight'] * (1 - ($clogging / 100));
                                             $cost = $cleanWeightCost * $purchase;
                                             $totalCost += $cost;
-                                        @endphp
-                                        <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800 {{ $editingItemIndex === $index ? 'bg-yellow-50 border-l-4 border-yellow-400' : '' }}">
+                                        ?>
+                                        <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800 <?php echo e($editingItemIndex === $index ? 'bg-yellow-50 border-l-4 border-yellow-400' : ''); ?>">
                                             <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">
-                                                <div class="font-medium">{{ $products->find($item['product_id'])->name ?? '' }}</div>
+                                                <div class="font-medium"><?php echo e($products->find($item['product_id'])->name ?? ''); ?></div>
                                                 <div class="text-xs text-gray-500">
-                                                    Ср. цена: {{ \App\Helpers\Settings::formatPrice($purchase) }}/кг
-                                                    @if($clogging > 0)
-                                                        | Засор: {{ $clogging }}%
-                                                    @endif
+                                                    Ср. цена: <?php echo e(\App\Helpers\Settings::formatPrice($purchase)); ?>/кг
+                                                    <!--[if BLOCK]><![endif]--><?php if($clogging > 0): ?>
+                                                        | Засор: <?php echo e($clogging); ?>%
+                                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                                 </div>
                                             </td>
-                                            <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">{{ $item['weight'] }}</td>
+                                            <td class="whitespace-nowrap px-3.5 py-2.5 text-sm"><?php echo e($item['weight']); ?></td>
                                             <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">
-                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $item['writeoff_type'] == 'full' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800' }}">
-                                                    {{ $item['writeoff_type'] == 'full' ? 'В ноль' : 'С остатком' }}
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium <?php echo e($item['writeoff_type'] == 'full' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'); ?>">
+                                                    <?php echo e($item['writeoff_type'] == 'full' ? 'В ноль' : 'С остатком'); ?>
+
                                                 </span>
                                             </td>
-                                            <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">{{ $item['stock_after'] ?? '—' }}</td>
+                                            <td class="whitespace-nowrap px-3.5 py-2.5 text-sm"><?php echo e($item['stock_after'] ?? '—'); ?></td>
                                             <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">
-                                                @if(isset($item['stock_discrepancy']) && $item['stock_discrepancy'] != 0)
-                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $item['stock_discrepancy'] > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                                        {{ $item['stock_discrepancy'] > 0 ? '+' : '' }}{{ $item['stock_discrepancy'] }} кг
+                                                <!--[if BLOCK]><![endif]--><?php if(isset($item['stock_discrepancy']) && $item['stock_discrepancy'] != 0): ?>
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium <?php echo e($item['stock_discrepancy'] > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'); ?>">
+                                                        <?php echo e($item['stock_discrepancy'] > 0 ? '+' : ''); ?><?php echo e($item['stock_discrepancy']); ?> кг
                                                     </span>
-                                                @else
+                                                <?php else: ?>
                                                     <span class="text-gray-400">—</span>
-                                                @endif
+                                                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                             </td>
-                                            <td class="whitespace-nowrap px-3.5 py-2.5 text-sm font-medium">{{ \App\Helpers\Settings::formatPrice($cost) }}</td>
+                                            <td class="whitespace-nowrap px-3.5 py-2.5 text-sm font-medium"><?php echo e(\App\Helpers\Settings::formatPrice($cost)); ?></td>
                                             <td class="whitespace-nowrap px-3.5 py-2.5 text-center">
                                                 <div class="flex items-center gap-1">
-                                                    <button type="button" wire:click="editShipmentItem({{ $index }})" class="inline-flex items-center justify-center w-7 h-7 rounded-full text-blue-600 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500" title="Редактировать позицию">
+                                                    <button type="button" wire:click="editShipmentItem(<?php echo e($index); ?>)" class="inline-flex items-center justify-center w-7 h-7 rounded-full text-blue-600 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500" title="Редактировать позицию">
                                                         <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                                                     </button>
-                                                    <button type="button" wire:click="removeShipmentItem({{ $index }})" class="inline-flex items-center justify-center w-7 h-7 rounded-full text-red-600 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-red-500" title="Удалить позицию">
+                                                    <button type="button" wire:click="removeShipmentItem(<?php echo e($index); ?>)" class="inline-flex items-center justify-center w-7 h-7 rounded-full text-red-600 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-red-500" title="Удалить позицию">
                                                         <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                                     </button>
                                                 </div>
                                             </td>
                                         </tr>
-                                    @empty
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                         <tr>
                                             <td colspan="7" class="py-8 text-center text-zinc-400 dark:text-zinc-500">Нет добавленных позиций</td>
                                         </tr>
-                                    @endforelse
-                                    @if(count($shipmentItems) > 0)
+                                    <?php endif; ?>
+                                    <!--[if BLOCK]><![endif]--><?php if(count($shipmentItems) > 0): ?>
                                         <tr class="bg-zinc-50 dark:bg-zinc-800 font-semibold">
                                             <td colspan="5" class="px-3.5 py-2.5 text-right">Общие предварительные затраты:</td>
-                                            <td class="px-3.5 py-2.5">{{ \App\Helpers\Settings::formatPrice($totalCost) }}</td>
+                                            <td class="px-3.5 py-2.5"><?php echo e(\App\Helpers\Settings::formatPrice($totalCost)); ?></td>
                                             <td></td>
                                         </tr>
-                                    @endif
+                                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                 </tbody>
                             </table>
                         </div>
@@ -534,12 +631,12 @@
                             <textarea wire:model="comment" rows="2" class="w-full rounded-md border-zinc-300 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 focus:border-blue-500 focus:ring focus:ring-blue-200/50 dark:focus:border-blue-400 dark:focus:ring-blue-900/40"></textarea>
                         </div>
                     </div>
-                    @can('comments.create')
+                    <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('comments.create')): ?>
                     <div class="mt-4">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Ваш комментарий</label>
                         <textarea wire:model="user_comment" rows="2" placeholder="Добавьте ваш комментарий к отгрузке..." class="w-full rounded-md border-zinc-300 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 focus:border-blue-500 focus:ring focus:ring-blue-200/50 dark:focus:border-blue-400 dark:focus:ring-blue-900/40"></textarea>
                     </div>
-                    @endcan
+                    <?php endif; ?>
                     <div class="pt-6 flex justify-end">
                         <button type="submit" class="inline-flex items-center px-6 py-2 border border-transparent text-base leading-6 font-semibold rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                             <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
@@ -549,9 +646,9 @@
                 </form>
             </div>
         </div>
-    @endif
+    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 
-    @if($isConfirmModal)
+    <!--[if BLOCK]><![endif]--><?php if($isConfirmModal): ?>
         <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
             <div class="bg-white dark:bg-zinc-800 rounded-lg shadow-xl w-full max-w-3xl p-6 relative">
                 <button type="button" wire:click="closeConfirmModal" class="absolute top-4 right-4 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200">
@@ -573,9 +670,9 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-zinc-200 dark:divide-zinc-700">
-                                @php $totalProfit = 0; @endphp
-                                @foreach($confirmItems as $index => $item)
-                                    @php
+                                <?php $totalProfit = 0; ?>
+                                <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $confirmItems; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <?php
                                         $product = $products->find($item['product_id']);
                                         $purchase = $product?->average_purchase_price ?? 0;
                                         $clogging = $product?->clogging ?? 0;
@@ -593,50 +690,52 @@
                                         $income = $cleanWeight * $actualPrice;
                                         $profit = $income - $cost;
                                         $totalProfit += $profit;
-                                    @endphp
+                                    ?>
                                     <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800">
-                                        <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">{{ $products->find($item['product_id'])->name ?? '' }}</td>
-                                        <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">{{ $item['weight'] }}</td>
+                                        <td class="whitespace-nowrap px-3.5 py-2.5 text-sm"><?php echo e($products->find($item['product_id'])->name ?? ''); ?></td>
+                                        <td class="whitespace-nowrap px-3.5 py-2.5 text-sm"><?php echo e($item['weight']); ?></td>
                                         <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">
-                                            <input type="number" step="0.01" min="0" wire:model.defer="confirmItems.{{ $index }}.actual_weight" class="w-24 rounded-md border-zinc-300 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 focus:border-blue-500 focus:ring focus:ring-blue-200/50 dark:focus:border-blue-400 dark:focus:ring-blue-900/40">
+                                            <input type="number" step="0.01" min="0" wire:model.defer="confirmItems.<?php echo e($index); ?>.actual_weight" class="w-24 rounded-md border-zinc-300 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 focus:border-blue-500 focus:ring focus:ring-blue-200/50 dark:focus:border-blue-400 dark:focus:ring-blue-900/40">
                                         </td>
                                         <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">
-                                            <input type="number" step="0.01" min="0" wire:model.defer="confirmItems.{{ $index }}.actual_price" class="w-24 rounded-md border-zinc-300 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 focus:border-blue-500 focus:ring focus:ring-blue-200/50 dark:focus:border-blue-400 dark:focus:ring-blue-900/40">
+                                            <input type="number" step="0.01" min="0" wire:model.defer="confirmItems.<?php echo e($index); ?>.actual_price" class="w-24 rounded-md border-zinc-300 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 focus:border-blue-500 focus:ring focus:ring-blue-200/50 dark:focus:border-blue-400 dark:focus:ring-blue-900/40">
                                         </td>
                                         <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">
-                                            <input type="number" step="0.01" min="0" wire:model.defer="confirmItems.{{ $index }}.actual_clogging" class="w-20 rounded-md border-zinc-300 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 focus:border-blue-500 focus:ring focus:ring-blue-200/50 dark:focus:border-blue-400 dark:focus:ring-blue-900/40">
+                                            <input type="number" step="0.01" min="0" wire:model.defer="confirmItems.<?php echo e($index); ?>.actual_clogging" class="w-20 rounded-md border-zinc-300 dark:border-zinc-600 bg-zinc-50 dark:bg-zinc-900 focus:border-blue-500 focus:ring focus:ring-blue-200/50 dark:focus:border-blue-400 dark:focus:ring-blue-900/40">
                                         </td>
                                         <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">
-                                            {{ \App\Helpers\Settings::formatPrice($cost) }}
+                                            <?php echo e(\App\Helpers\Settings::formatPrice($cost)); ?>
+
                                         </td>
                                         <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">
-                                            <span class="font-semibold {{ $profit >= 0 ? 'text-green-600' : 'text-red-600' }}">{{ \App\Helpers\Settings::formatPrice($profit) }}</span>
+                                            <span class="font-semibold <?php echo e($profit >= 0 ? 'text-green-600' : 'text-red-600'); ?>"><?php echo e(\App\Helpers\Settings::formatPrice($profit)); ?></span>
                                         </td>
                                     </tr>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                             </tbody>
                             <tfoot class="bg-zinc-50 dark:bg-zinc-800">
                                 <tr>
                                     <td colspan="6" class="px-3.5 py-2.5 text-right font-semibold">Общая прибыль (без затрат на отгрузку):</td>
                                     <td class="px-3.5 py-2.5 font-bold">
-                                        <span class="{{ $totalProfit >= 0 ? 'text-green-600' : 'text-red-600' }}">{{ \App\Helpers\Settings::formatPrice($totalProfit) }}</span>
+                                        <span class="<?php echo e($totalProfit >= 0 ? 'text-green-600' : 'text-red-600'); ?>"><?php echo e(\App\Helpers\Settings::formatPrice($totalProfit)); ?></span>
                                     </td>
                                 </tr>
-                                @if($confirmShipment && $confirmShipment->shipping_cost > 0)
+                                <!--[if BLOCK]><![endif]--><?php if($confirmShipment && $confirmShipment->shipping_cost > 0): ?>
                                 <tr>
                                     <td colspan="6" class="px-3.5 py-2.5 text-right font-semibold">Затраты на отгрузку:</td>
                                     <td class="px-3.5 py-2.5 font-bold text-red-600">
-                                        -{{ \App\Helpers\Settings::formatPrice($confirmShipment->shipping_cost) }}
+                                        -<?php echo e(\App\Helpers\Settings::formatPrice($confirmShipment->shipping_cost)); ?>
+
                                     </td>
                                 </tr>
                                 <tr class="border-t-2 border-gray-400">
                                     <td colspan="6" class="px-3.5 py-2.5 text-right font-bold">Чистая прибыль:</td>
                                     <td class="px-3.5 py-2.5 font-bold">
-                                        @php $netProfit = $totalProfit - ($confirmShipment->shipping_cost ?? 0); @endphp
-                                        <span class="{{ $netProfit >= 0 ? 'text-green-600' : 'text-red-600' }}">{{ \App\Helpers\Settings::formatPrice($netProfit) }}</span>
+                                        <?php $netProfit = $totalProfit - ($confirmShipment->shipping_cost ?? 0); ?>
+                                        <span class="<?php echo e($netProfit >= 0 ? 'text-green-600' : 'text-red-600'); ?>"><?php echo e(\App\Helpers\Settings::formatPrice($netProfit)); ?></span>
                                     </td>
                                 </tr>
-                                @endif
+                                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                             </tfoot>
                         </table>
                     </div>
@@ -649,26 +748,26 @@
                 </form>
             </div>
         </div>
-    @endif
+    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 
     <!-- Модальное окно подробностей -->
-    @if($isDetailsModal && $detailsShipment)
+    <!--[if BLOCK]><![endif]--><?php if($isDetailsModal && $detailsShipment): ?>
         <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
             <div class="bg-white dark:bg-zinc-800 rounded-lg shadow-xl w-full max-w-2xl p-6 relative">
                 <button type="button" wire:click="closeDetailsModal" class="absolute top-4 right-4 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200">
                     <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
-                <h3 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Подробности отгрузки #{{ $detailsShipment->id }}</h3>
+                <h3 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Подробности отгрузки #<?php echo e($detailsShipment->id); ?></h3>
                 <div class="mb-2 text-sm text-gray-700 dark:text-gray-200">
-                    <div><b>Дата:</b> {{ $detailsShipment->created_at->format('d.m.Y H:i') }}</div>
-                    <div><b>Статус:</b> {{ $detailsShipment->stage === 'draft' ? 'Черновик' : 'Подтверждено' }}</div>
-                    <div><b>Предприятие:</b> {{ $detailsShipment->company }}</div>
-                    <div><b>Номер авто:</b> {{ $detailsShipment->car_number }}</div>
-                    <div><b>Водитель:</b> {{ $detailsShipment->driver_name }}</div>
-                    <div><b>Комментарий:</b> {{ $detailsShipment->comment }}</div>
-                    <div><b>Затраты на отгрузку:</b> {{ \App\Helpers\Settings::formatPrice($detailsShipment->shipping_cost) }}</div>
-                    <div class="mt-2"><b>Валовая выручка:</b> <span class="font-semibold text-blue-600">{{ \App\Helpers\Settings::formatPrice($this->getShipmentRevenue($detailsShipment)) }}</span></div>
-                    <div><b>Чистая прибыль:</b> <span class="font-semibold {{ $this->getShipmentProfit($detailsShipment) >= 0 ? 'text-green-600' : 'text-red-600' }}">{{ \App\Helpers\Settings::formatPrice($this->getShipmentProfit($detailsShipment)) }}</span></div>
+                    <div><b>Дата:</b> <?php echo e($detailsShipment->created_at->format('d.m.Y H:i')); ?></div>
+                    <div><b>Статус:</b> <?php echo e($detailsShipment->stage === 'draft' ? 'Черновик' : 'Подтверждено'); ?></div>
+                    <div><b>Предприятие:</b> <?php echo e($detailsShipment->company); ?></div>
+                    <div><b>Номер авто:</b> <?php echo e($detailsShipment->car_number); ?></div>
+                    <div><b>Водитель:</b> <?php echo e($detailsShipment->driver_name); ?></div>
+                    <div><b>Комментарий:</b> <?php echo e($detailsShipment->comment); ?></div>
+                    <div><b>Затраты на отгрузку:</b> <?php echo e(\App\Helpers\Settings::formatPrice($detailsShipment->shipping_cost)); ?></div>
+                    <div class="mt-2"><b>Валовая выручка:</b> <span class="font-semibold text-blue-600"><?php echo e(\App\Helpers\Settings::formatPrice($this->getShipmentRevenue($detailsShipment))); ?></span></div>
+                    <div><b>Чистая прибыль:</b> <span class="font-semibold <?php echo e($this->getShipmentProfit($detailsShipment) >= 0 ? 'text-green-600' : 'text-red-600'); ?>"><?php echo e(\App\Helpers\Settings::formatPrice($this->getShipmentProfit($detailsShipment))); ?></span></div>
                 </div>
                 <div class="overflow-x-auto mt-4">
                     <table class="min-w-full table-auto rounded-lg overflow-hidden">
@@ -683,28 +782,29 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-zinc-200 dark:divide-zinc-700">
-                            @foreach($detailsShipment->items as $item)
+                            <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $detailsShipment->items; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <tr>
-                                    <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">{{ $products->find($item->product_id)->name ?? '' }}</td>
-                                    <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">{{ $item->weight }}</td>
-                                    <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">{{ $item->actual_weight }}</td>
-                                    <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">{{ $item->actual_price }}</td>
-                                    <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">{{ $item->actual_clogging }}</td>
+                                    <td class="whitespace-nowrap px-3.5 py-2.5 text-sm"><?php echo e($products->find($item->product_id)->name ?? ''); ?></td>
+                                    <td class="whitespace-nowrap px-3.5 py-2.5 text-sm"><?php echo e($item->weight); ?></td>
+                                    <td class="whitespace-nowrap px-3.5 py-2.5 text-sm"><?php echo e($item->actual_weight); ?></td>
+                                    <td class="whitespace-nowrap px-3.5 py-2.5 text-sm"><?php echo e($item->actual_price); ?></td>
+                                    <td class="whitespace-nowrap px-3.5 py-2.5 text-sm"><?php echo e($item->actual_clogging); ?></td>
                                     <td class="whitespace-nowrap px-3.5 py-2.5 text-sm">
-                                        @if($item->stock_discrepancy && $item->stock_discrepancy != 0)
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $item->stock_discrepancy > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                                {{ $item->stock_discrepancy > 0 ? '+' : '' }}{{ $item->stock_discrepancy }} кг
+                                        <!--[if BLOCK]><![endif]--><?php if($item->stock_discrepancy && $item->stock_discrepancy != 0): ?>
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium <?php echo e($item->stock_discrepancy > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'); ?>">
+                                                <?php echo e($item->stock_discrepancy > 0 ? '+' : ''); ?><?php echo e($item->stock_discrepancy); ?> кг
                                             </span>
-                                        @else
+                                        <?php else: ?>
                                             <span class="text-gray-400">—</span>
-                                        @endif
+                                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                                     </td>
                                 </tr>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
-    @endif
+    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 </div>
+<?php /**PATH H:\OSPanel\home\crm-starter.kit\resources\views/livewire/admin/shipments/shipment-manager.blade.php ENDPATH**/ ?>

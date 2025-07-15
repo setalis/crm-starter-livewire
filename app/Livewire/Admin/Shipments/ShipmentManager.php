@@ -804,10 +804,10 @@ class ShipmentManager extends Component
                 $itemCost = $cleanWeightCost * $purchase;
                 
                 // Вычисляем валовую выручку с учетом засора
-                $actualWeight = $item->actual_weight ?? 0;
+                $itemActualWeight = $item->actual_weight ?? 0;
                 $actualPrice = $item->actual_price ?? 0;
                 $actualClogging = $item->actual_clogging ?? 0;
-                $cleanWeight = $actualWeight * (1 - ($actualClogging / 100));
+                $cleanWeight = $itemActualWeight * (1 - ($actualClogging / 100));
                 $itemIncome = $cleanWeight * $actualPrice;
                 
                 $itemProfit = $itemIncome - $itemCost;
