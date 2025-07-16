@@ -13,7 +13,6 @@ class ShipmentManager extends Component
     public $driver_name;
     public $company;
     public $comment;
-    public $user_comment = '';
     public $shipmentItems = [];
     public $product_id;
     public $weight;
@@ -140,7 +139,6 @@ class ShipmentManager extends Component
             $this->driver_name = $shipment->driver_name;
             $this->company = $shipment->company;
             $this->comment = $shipment->comment;
-            $this->user_comment = '';
             $this->shipping_cost = $shipment->shipping_cost ?? 0;
             $this->shipmentItems = [];
             foreach ($shipment->items as $item) {
@@ -324,16 +322,6 @@ class ShipmentManager extends Component
                     ]
                 );
             }
-
-            // Добавляем пользовательский комментарий если есть
-            if (!empty($this->user_comment)) {
-                $shipment->addComment(
-                    $this->user_comment,
-                    'comment',
-                    false
-                );
-                $this->dispatch('comment-added');
-            }
         }
         session()->flash('message', $this->editMode ? 'Отгрузка успешно обновлена!' : 'Отгрузка успешно создана!');
         $this->closeModal();
@@ -346,7 +334,6 @@ class ShipmentManager extends Component
         $this->driver_name = null;
         $this->company = null;
         $this->comment = null;
-        $this->user_comment = '';
         $this->shipmentItems = [];
         $this->product_id = null;
         $this->weight = null;
