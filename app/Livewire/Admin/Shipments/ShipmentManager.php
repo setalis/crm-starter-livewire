@@ -38,6 +38,7 @@ class ShipmentManager extends Component
     {
         $this->products = Product::all();
         $this->shipments = Shipment::with('items')->orderByDesc('created_at')->get();
+        $this->product_id = '';
     }
 
     public function addShipmentItem()
@@ -46,7 +47,7 @@ class ShipmentManager extends Component
             'product_id' => 'required|exists:products,id',
             'weight' => 'required|numeric|min:0.01',
             'writeoff_type' => 'required|in:partial,full',
-            'stock_after' => 'nullable|numeric|min:0',
+            'stock_after' => 'nullable|numeric',
         ]);
         
         $this->shipmentItems[] = [
@@ -89,7 +90,7 @@ class ShipmentManager extends Component
             'product_id' => 'required|exists:products,id',
             'weight' => 'required|numeric|min:0.01',
             'writeoff_type' => 'required|in:partial,full',
-            'stock_after' => 'nullable|numeric|min:0',
+            'stock_after' => 'nullable|numeric',
         ]);
 
         if ($this->editingItemIndex !== null) {
@@ -110,7 +111,7 @@ class ShipmentManager extends Component
     public function cancelEditItem()
     {
         $this->editingItemIndex = null;
-        $this->product_id = null;
+        $this->product_id = '';
         $this->weight = null;
         $this->writeoff_type = 'partial';
         $this->stock_after = null;
@@ -166,16 +167,17 @@ class ShipmentManager extends Component
 
     public function saveShipment()
     {
-        // Проверяем права доступа
-        if ($this->editMode && !auth()->user()->can('shipments.edit')) {
-            session()->flash('error', 'У вас нет прав для редактирования отгрузок.');
-            return;
-        }
-        
-        if (!$this->editMode && !auth()->user()->can('shipments.create')) {
-            session()->flash('error', 'У вас нет прав для создания отгрузок.');
-            return;
-        }
+        try {
+            // Проверяем права доступа
+            if ($this->editMode && !auth()->user()->can('shipments.edit')) {
+                session()->flash('error', 'У вас нет прав для редактирования отгрузок.');
+                return;
+            }
+            
+            if (!$this->editMode && !auth()->user()->can('shipments.create')) {
+                session()->flash('error', 'У вас нет прав для создания отгрузок.');
+                return;
+            }
         
         $this->validate([
             'car_number' => 'nullable|string',
@@ -185,8 +187,8 @@ class ShipmentManager extends Component
             'shipmentItems.*.product_id' => 'required|exists:products,id',
             'shipmentItems.*.weight' => 'required|numeric|min:0.01',
             'shipmentItems.*.writeoff_type' => 'required|in:partial,full',
-            'shipmentItems.*.stock_after' => 'nullable|numeric|min:0',
-            'shipping_cost' => 'nullable|numeric|min:0',
+            'shipmentItems.*.stock_after' => 'nullable|numeric',
+            'shipping_cost' => 'nullable|numeric',
         ]);
 
         if ($this->editMode && $this->editShipmentId) {
@@ -196,28 +198,14 @@ class ShipmentManager extends Component
             foreach ($shipment->items as $oldItem) {
                 $product = Product::find($oldItem->product_id);
                 if ($product) {
-                    // Возвращаем вес товара обратно на склад
-                    $product->stock += $oldItem->weight;
                     // Восстанавливаем склад до того состояния, которое было до предыдущего списания
                     $expectedBefore = $oldItem->expected_stock_before ?? 0;
-                    $actualBefore = $oldItem->actual_stock_before ?? 0;
-                    $discrepancy = $oldItem->stock_discrepancy ?? 0;
-                    
-                    // Восстанавливаем к исходному состоянию
                     $product->stock = $expectedBefore;
                     $product->save();
                 }
             }
             
-            // Теперь проверяем остатки на складе для новых позиций
-            foreach ($this->shipmentItems as $item) {
-                $product = Product::find($item['product_id']);
-                if ($product && $product->stock < $item['weight']) {
-                    throw \Illuminate\Validation\ValidationException::withMessages([
-                        'shipmentItems' => "Недостаточно товара '{$product->name}' на складе. Доступно: {$product->stock} кг, запрошено: {$item['weight']} кг",
-                    ]);
-                }
-            }
+            // Убираем проверку остатков на складе - позволяем отгружать любое количество
             
             $shipment->update([
                 'car_number' => $this->car_number,
@@ -231,11 +219,15 @@ class ShipmentManager extends Component
             // Добавляем новые позиции с учетом остатков
             foreach ($this->shipmentItems as $item) {
                 $product = Product::find($item['product_id']);
-                $expectedStockBefore = $product->stock;
-                $actualStockBefore = $product->stock;
+                if (!$product) {
+                    continue; // Пропускаем, если продукт не найден
+                }
                 
-                // Списываем товар со склада
-                $product->stock -= $item['weight'];
+                $expectedStockBefore = $product->stock ?? 0;
+                $actualStockBefore = $product->stock ?? 0;
+                
+                // Списываем товар со склада (позволяем уйти в минус)
+                $product->stock = ($product->stock ?? 0) - $item['weight'];
                 
                 // Устанавливаем новый остаток в зависимости от типа списания
                 if ($item['writeoff_type'] === 'full') {
@@ -255,15 +247,7 @@ class ShipmentManager extends Component
                 $shipment->items()->create($item);
             }
         } else {
-            // Для новой отгрузки проверяем остатки на складе
-            foreach ($this->shipmentItems as $item) {
-                $product = Product::find($item['product_id']);
-                if ($product && $product->stock < $item['weight']) {
-                    throw \Illuminate\Validation\ValidationException::withMessages([
-                        'shipmentItems' => "Недостаточно товара '{$product->name}' на складе. Доступно: {$product->stock} кг, запрошено: {$item['weight']} кг",
-                    ]);
-                }
-            }
+            // Убираем проверку остатков на складе - позволяем отгружать любое количество
             
             $shipment = Shipment::create([
                 'user_id' => auth()->id(),
@@ -278,11 +262,15 @@ class ShipmentManager extends Component
             // Добавляем позиции с учетом остатков
             foreach ($this->shipmentItems as $item) {
                 $product = Product::find($item['product_id']);
-                $expectedStockBefore = $product->stock;
-                $actualStockBefore = $product->stock;
+                if (!$product) {
+                    continue; // Пропускаем, если продукт не найден
+                }
                 
-                // Списываем товар со склада
-                $product->stock -= $item['weight'];
+                $expectedStockBefore = $product->stock ?? 0;
+                $actualStockBefore = $product->stock ?? 0;
+                
+                // Списываем товар со склада (позволяем уйти в минус)
+                $product->stock = ($product->stock ?? 0) - $item['weight'];
                 
                 // Устанавливаем новый остаток в зависимости от типа списания
                 if ($item['writeoff_type'] === 'full') {
@@ -326,6 +314,9 @@ class ShipmentManager extends Component
         session()->flash('message', $this->editMode ? 'Отгрузка успешно обновлена!' : 'Отгрузка успешно создана!');
         $this->closeModal();
         $this->applyFilters();
+        } catch (\Exception $e) {
+            session()->flash('error', 'Ошибка при сохранении отгрузки: ' . $e->getMessage());
+        }
     }
 
     private function resetForm()
@@ -335,7 +326,7 @@ class ShipmentManager extends Component
         $this->company = null;
         $this->comment = null;
         $this->shipmentItems = [];
-        $this->product_id = null;
+        $this->product_id = '';
         $this->weight = null;
         $this->writeoff_type = 'partial';
         $this->stock_after = null;

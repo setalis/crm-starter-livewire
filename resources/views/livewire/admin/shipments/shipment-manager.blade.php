@@ -84,7 +84,7 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Позиции</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Валовая выручка</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Чистая прибыль</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Статус</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Статус</th>
                         <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
                 </tr>
             </thead>
@@ -131,8 +131,8 @@
                                 <span class="text-gray-400">—</span>
                             @endif
                         </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm">
-                            <div class="flex flex-col gap-1">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
+                            <div class="flex flex-col gap-1 items-center">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $shipment->stage === 'draft' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800' }}">
                                     {{ $shipment->stage === 'draft' ? 'Черновик' : 'Подтверждено' }}
                                 </span>
@@ -189,7 +189,7 @@
                 <div class="grid grid-cols-5 gap-4 text-xs font-medium text-gray-500 uppercase tracking-wider">
                     <div>Отгрузка</div>
                     <div>Предприятие</div>
-                    <div>Статус</div>
+                    <div class="text-center">Статус</div>
                     <div class="text-right">Финансы</div>
                     <div class="text-center">Действия</div>
                 </div>
@@ -209,7 +209,7 @@
                             @endif
                             <div class="text-xs text-blue-600 mt-1">{{ $shipment->items->count() }} поз.</div>
                         </div>
-                        <div>
+                        <div class="text-center">
                             <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $shipment->stage === 'draft' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800' }}">
                                 {{ $shipment->stage === 'draft' ? 'Черновик' : 'Подтверждено' }}
                             </span>
@@ -392,7 +392,8 @@
                             <div class="md:col-span-2">
                                 <flux:field>
                                     <flux:label>Металл</flux:label>
-                                    <flux:select wire:model.defer="product_id" placeholder="Выберите металл">
+                                    <flux:select wire:model.defer="product_id">
+                                        <option value="">Выберите металл</option>
                                         @foreach($products as $product)
                                             <option value="{{ $product->id }}">
                                                 {{ $product->name }} (остаток: {{ $product->stock }} кг)
@@ -417,7 +418,7 @@
                                             $available = $selectedProduct ? $selectedProduct->stock : 0;
                                         @endphp
                                         @if($weight > $available)
-                                            <flux:text class="text-red-600 text-sm">Недостаточно на складе ({{ $available }} кг)</flux:text>
+                                            <flux:text class="text-yellow-600 text-sm">На складе: {{ $available }} кг (можно отгрузить больше)</flux:text>
                                         @endif
                                     @endif
                                 </flux:field>

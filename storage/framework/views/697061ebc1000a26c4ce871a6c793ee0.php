@@ -261,7 +261,7 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Позиции</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Валовая выручка</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Чистая прибыль</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Статус</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Статус</th>
                         <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
                 </tr>
             </thead>
@@ -310,8 +310,8 @@
                                 <span class="text-gray-400">—</span>
                             <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                         </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm">
-                            <div class="flex flex-col gap-1">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
+                            <div class="flex flex-col gap-1 items-center">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <?php echo e($shipment->stage === 'draft' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'); ?>">
                                     <?php echo e($shipment->stage === 'draft' ? 'Черновик' : 'Подтверждено'); ?>
 
@@ -369,7 +369,7 @@
                 <div class="grid grid-cols-5 gap-4 text-xs font-medium text-gray-500 uppercase tracking-wider">
                     <div>Отгрузка</div>
                     <div>Предприятие</div>
-                    <div>Статус</div>
+                    <div class="text-center">Статус</div>
                     <div class="text-right">Финансы</div>
                     <div class="text-center">Действия</div>
                 </div>
@@ -389,7 +389,7 @@
                             <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                             <div class="text-xs text-blue-600 mt-1"><?php echo e($shipment->items->count()); ?> поз.</div>
                         </div>
-                        <div>
+                        <div class="text-center">
                             <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium <?php echo e($shipment->stage === 'draft' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'); ?>">
                                 <?php echo e($shipment->stage === 'draft' ? 'Черновик' : 'Подтверждено'); ?>
 
@@ -604,14 +604,15 @@
 <?php endif; ?>
                                     <?php if (isset($component)) { $__componentOriginala467913f9ff34913553be64599ec6e92 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginala467913f9ff34913553be64599ec6e92 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'e60dd9d2c3a62d619c9acb38f20d5aa5::select.index','data' => ['wire:model.defer' => 'product_id','placeholder' => 'Выберите металл']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'e60dd9d2c3a62d619c9acb38f20d5aa5::select.index','data' => ['wire:model.defer' => 'product_id']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('flux::select'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['wire:model.defer' => 'product_id','placeholder' => 'Выберите металл']); ?>
+<?php $component->withAttributes(['wire:model.defer' => 'product_id']); ?>
+                                        <option value="">Выберите металл</option>
                                         <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $products; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $product): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                             <option value="<?php echo e($product->id); ?>">
                                                 <?php echo e($product->name); ?> (остаток: <?php echo e($product->stock); ?> кг)
@@ -696,14 +697,14 @@
                                         <!--[if BLOCK]><![endif]--><?php if($weight > $available): ?>
                                             <?php if (isset($component)) { $__componentOriginal0638ebfbd490c7a414275d493e14cb4e = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal0638ebfbd490c7a414275d493e14cb4e = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'e60dd9d2c3a62d619c9acb38f20d5aa5::text','data' => ['class' => 'text-red-600 text-sm']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'e60dd9d2c3a62d619c9acb38f20d5aa5::text','data' => ['class' => 'text-yellow-600 text-sm']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('flux::text'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['class' => 'text-red-600 text-sm']); ?>Недостаточно на складе (<?php echo e($available); ?> кг) <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['class' => 'text-yellow-600 text-sm']); ?>На складе: <?php echo e($available); ?> кг (можно отгрузить больше) <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal0638ebfbd490c7a414275d493e14cb4e)): ?>
 <?php $attributes = $__attributesOriginal0638ebfbd490c7a414275d493e14cb4e; ?>
